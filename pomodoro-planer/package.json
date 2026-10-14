@@ -1,0 +1,11 @@
+{
+  "name": "pomodoro-planer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pomodoro-Timer mit Aufgaben, Projekt-Tracking, Auswertung und Kalender",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "icons": "node scripts/icons.mjs",
+    "start": "npx --yes http-server -c-1 -p 8080 ."
+  }
+}
