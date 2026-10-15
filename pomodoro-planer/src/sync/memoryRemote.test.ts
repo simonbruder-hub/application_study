@@ -75,6 +75,14 @@ describe('MemoryServer', () => {
     expect(server.row('projects', p.id)!.name).toBe('zz gewinnt');
   });
 
+  it('hält created_at bei Updates fest (wie der Trigger in schema.sql)', async () => {
+    const { a, server } = setup();
+    const p = remoteProject(T);
+    await a.push('projects', [p]);
+    await a.push('projects', [{ ...p, name: 'neu', created_at: T + 5_000, updated_at: T + 1 }]);
+    expect(server.row('projects', p.id)).toMatchObject({ name: 'neu', created_at: T, updated_at: T + 1 });
+  });
+
   it('prüft eindeutige Codes case-insensitive unter nicht gelöschten Zeilen', async () => {
     const { a } = setup();
     const p = remoteProject(T, { project_code: 'MATHE' });

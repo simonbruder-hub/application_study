@@ -225,6 +225,49 @@ describe('SyncEngine – Konflikte und Löschungen', () => {
     expect(renamed).toHaveLength(32);
   });
 
+  // IDs erzwingen die ungünstige Reihenfolge: die neue Zeile wird vor der freigebenden übertragen
+  const LOW_ID = '00000000-0000-4000-8000-000000000000';
+  const HIGH_ID = 'ffffffff-ffff-4fff-bfff-ffffffffffff';
+
+  it('benennt nicht um, wenn derselbe Push den Code freigibt (Löschen und neu Anlegen)', async () => {
+    const a = await device('A');
+    const old = await a.repo.create('projects', { id: HIGH_ID, ...projectInput({ project_code: 'MATHE' }) });
+    await a.engine.syncNow();
+
+    a.setOnline(false);
+    world.t += 1_000;
+    await a.repo.softDelete('projects', old.id);
+    const fresh = await a.repo.create('projects', { id: LOW_ID, ...projectInput({ project_code: 'MATHE', name: 'Mathe neu' }) });
+    a.setOnline(true);
+    const pushes = recordPushes(a);
+    await a.engine.syncNow();
+
+    // Löschung zuerst gesendet → kein Konflikt, kein zweiter Versuch
+    expect(pushes.filter((c) => c.table === 'projects')).toEqual([{ table: 'projects', ids: [HIGH_ID, LOW_ID] }]);
+    expect((await a.repo.get('projects', fresh.id))!.project_code).toBe('MATHE');
+    expect(server.row('projects', fresh.id)).toMatchObject({ project_code: 'MATHE', is_deleted: false });
+    expect(server.row('projects', old.id)!.is_deleted).toBe(true);
+    expect(a.engine.getStatus().notices).toEqual([]);
+    expect(await a.engine.pendingCount()).toBe(0);
+  });
+
+  it('benennt nicht um, wenn eine andere Zeile ihren Code im selben Push abgibt', async () => {
+    const a = await device('A');
+    const old = await a.repo.create('projects', { id: HIGH_ID, ...projectInput({ project_code: 'MATHE' }) });
+    await a.engine.syncNow();
+
+    world.t += 1_000;
+    await a.repo.update('projects', old.id, { project_code: 'MATHE-ALT' });
+    const fresh = await a.repo.create('projects', { id: LOW_ID, ...projectInput({ project_code: 'MATHE', name: 'Mathe neu' }) });
+    await a.engine.syncNow();
+
+    expect((await a.repo.get('projects', fresh.id))!.project_code).toBe('MATHE');
+    expect(server.row('projects', fresh.id)!.project_code).toBe('MATHE');
+    expect(server.row('projects', old.id)!.project_code).toBe('MATHE-ALT');
+    expect(a.engine.getStatus().notices).toEqual([]);
+    expect(await a.engine.pendingCount()).toBe(0);
+  });
+
   it('löst ms_code-Konflikte je Projekt auf', async () => {
     const a = await device('A');
     const b = await device('B');
@@ -510,6 +553,26 @@ describe('SyncEngine – Ereignisse und Wiederholung', () => {
     await a.repo.create('projects', projectInput({ project_code: 'NACH-STOP' }));
     await new Promise((r) => setTimeout(r, 30));
     expect(await a.engine.pendingCount()).toBe(1);
+  });
+
+  it('holt beim ersten Aufbau der Realtime-Verbindung nach, was seit dem ersten Pull geschah', async () => {
+    const a = await device('A');
+    const b = await device('B', { debounceMs: 1 });
+    // Realtime-Channel steht erst nach dem ersten Pull (wie bei Supabase: Join dauert)
+    let join: (() => void) | undefined;
+    const subscribe = b.remote.subscribe.bind(b.remote);
+    b.remote.subscribe = (handlers) => {
+      let off = () => {};
+      join = () => { off = subscribe(handlers); };
+      return () => off();
+    };
+    await b.engine.start(); // erster Pull: Server noch leer
+
+    const p = await a.repo.create('projects', projectInput());
+    await a.engine.syncNow(); // B ist noch nicht verbunden → erhält kein Ereignis
+    join!();
+    await vi.waitFor(async () => expect(await b.repo.get('projects', p.id)).toBeDefined());
+    b.engine.stop();
   });
 
   it('wiederholt nach Fehlern mit verdoppeltem Abstand bis 5 min', async () => {

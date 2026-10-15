@@ -137,6 +137,26 @@ describe('TimerSync', () => {
     expect(remainingMs(fast.timer.state, fast.timer.now())).toBe(20 * 60_000);
   });
 
+  it('gleicht beim ersten Aufbau der Realtime-Verbindung ab (Änderung zwischen Start und Join)', async () => {
+    const a = await device('A');
+    const b = await device('B');
+    let join: (() => void) | undefined;
+    const subscribe = b.remote.subscribe.bind(b.remote);
+    b.remote.subscribe = (handlers) => {
+      let off = () => {};
+      join = () => { off = subscribe(handlers); };
+      return () => off();
+    };
+    await a.timer.start();
+    await b.timer.start(); // Abgleich beim Start: Server noch leer
+
+    const started = await startPomodoro(a);
+    await a.timer.whenIdle(); // B noch nicht verbunden → kein onTimer
+    join!();
+    await vi.waitFor(() => expect(b.timer.state.session_id).toBe(started.session_id));
+    expect(b.timer.state.status).toBe('running');
+  });
+
   it('speichert nichts bei wirkungslosen Übergängen', async () => {
     const a = await device('A');
     await a.timer.start();

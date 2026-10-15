@@ -11,6 +11,7 @@
  * - LWW-Trigger: Schreibvorgänge mit (updated_at, updated_by) < gespeicherter Version werden
  *   still verworfen und trotzdem als ok gemeldet (wie ein BEFORE-Trigger mit RETURN NULL).
  *   Gleichstand gilt wie in supabase/schema.sql als Wiederholung und wird übernommen.
+ *   created_at bleibt bei Updates erhalten (vom Trigger festgehalten).
  * - Eindeutige Codes, case-insensitive unter nicht gelöschten Zeilen: project_code je Nutzer,
  *   ms_code und ap_code je Projekt → unique_violation mit column.
  * - Fremdschlüssel: referenzierte Elternzeile muss existieren (auch soft-gelöscht) → foreign_key.
@@ -149,6 +150,8 @@ export class MemoryServer {
     const rejection = this.checkRow(table, row);
     if (rejection) return { status: 'rejected', ...rejection };
 
+    // Wie der Trigger: created_at bleibt bei Updates erhalten
+    if (existing) row.created_at = existing.row.created_at;
     const m = micros ?? this.issueMicros();
     tbl.set(row.id, { row, micros: m, serverUpdatedAt: microsToIso(m) });
     return { status: 'applied' };

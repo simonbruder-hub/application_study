@@ -1,12 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { AuthRetryableFetchError, type SupabaseClient } from '@supabase/supabase-js';
 import type { ActiveTimerState, Project, Task, UserSettings } from '../data/types';
+import { MemoryServer } from './memoryRemote';
 import { RemoteError } from './remote';
+import type { Timers } from './runtime';
 import {
   SupabaseRemote, fromRemoteRow, keysetFilter, mapPostgrestError, settingsFromRemote, settingsToRemote,
   timerFromRemote, timerToRemote, toRemoteRow, type PostgrestErrorLike,
 } from './supabaseRemote';
-import { remoteProject } from './testing';
+import { SyncEngine } from './syncEngine';
+import { createTestDevice, projectInput, remoteProject } from './testing';
 
 const T = Date.UTC(2026, 9, 15, 8, 0, 0, 123);
 const ISO = '2026-10-15T08:00:00.123Z';
@@ -190,18 +193,36 @@ class FakeChannel {
   }
 }
 
+type FakeSession = { user: { id: string } } | null;
+type AuthCallback = (event: string, session: FakeSession) => void;
+
 function fakeClient(respond: (q: FakeQuery) => Response) {
   const queries: FakeQuery[] = [];
   const channels: FakeChannel[] = [];
   const removed: FakeChannel[] = [];
+  const authListeners = new Set<AuthCallback>();
+  /** Ergebnis von auth.getSession() – in Tests veränderbar */
+  const auth: { session: FakeSession; error: unknown } = { session: { user: { id: 'u1' } }, error: null };
   const client = {
     from: (table: string) => { const q = new FakeQuery(table, respond); queries.push(q); return q; },
     channel: (topic: string) => { const c = new FakeChannel(topic); channels.push(c); return c; },
     removeChannel: async (c: FakeChannel) => { removed.push(c); return 'ok'; },
     rpc: vi.fn(async () => ({ data: '2026-10-15T08:00:00.123456+00:00', error: null, status: 200 })),
-    auth: { getSession: async () => ({ data: { session: { user: { id: 'u1' } } }, error: null }) },
+    auth: {
+      getSession: async () => ({ data: { session: auth.session }, error: auth.error }),
+      onAuthStateChange: (cb: AuthCallback) => {
+        authListeners.add(cb);
+        return { data: { subscription: { unsubscribe: () => { authListeners.delete(cb); } } } };
+      },
+    },
   };
-  return { client: client as unknown as SupabaseClient, queries, channels, removed };
+  /** Auth-Ereignis wie supabase-js (TOKEN_REFRESHED, SIGNED_IN, SIGNED_OUT …) auslösen */
+  const emitAuth = (event: string, session: FakeSession) => {
+    auth.session = session;
+    auth.error = null;
+    authListeners.forEach((cb) => cb(event, session));
+  };
+  return { client: client as unknown as SupabaseClient, queries, channels, removed, auth, authListeners, emitAuth };
 }
 
 const ok = (data: unknown = []): Response => ({ data, error: null, status: 201 });
@@ -292,6 +313,66 @@ describe('SupabaseRemote', () => {
     expect(removed).toEqual([ch]);
     ch!.status!('CLOSED');
     expect(onStatus).toHaveBeenCalledTimes(1);
+  });
+
+  it('bleibt bei abgelaufenem Token ohne Netz angemeldet und meldet network statt signed_out', async () => {
+    // supabase-js: Token abgelaufen, Erneuerung scheitert am Netz → session null + AuthRetryableFetchError,
+    // die Sitzung bleibt aber gespeichert
+    const fake = fakeClient(() => ok());
+    fake.auth.session = null;
+    fake.auth.error = new AuthRetryableFetchError('Failed to fetch', 0);
+    const remote = new SupabaseRemote(fake.client);
+    expect(await remote.isSignedIn()).toBe(true);
+    await expect(remote.userId()).rejects.toMatchObject({ kind: 'network' });
+
+    const scheduled: number[] = [];
+    const timers: Timers = { setTimeout: (_fn, ms) => { scheduled.push(ms); return ms; }, clearTimeout: () => {} };
+    const dev = await createTestDevice(new MemoryServer(), { name: 'supabase', clock: () => T });
+    await dev.repo.create('projects', projectInput());
+    const engine = new SyncEngine({ repo: dev.repo, remote, env: null, isOnline: () => true, timers });
+    await engine.start();
+    expect(engine.getStatus()).toMatchObject({ state: 'offline', pending: 1 });
+    expect(scheduled).toContain(5_000); // Wiederholung geplant
+    engine.stop();
+
+    // Ohne gespeicherte Sitzung: wirklich abgemeldet
+    fake.auth.error = null;
+    expect(await remote.isSignedIn()).toBe(false);
+    expect(await remote.userId()).toBeNull();
+  });
+
+  it('abonniert Realtime, sobald nach einem Offline-Start eine Sitzung entsteht', async () => {
+    const fake = fakeClient(() => ok());
+    fake.auth.session = null;
+    fake.auth.error = new AuthRetryableFetchError('Failed to fetch', 0);
+    const remote = new SupabaseRemote(fake.client);
+    const onStatus = vi.fn();
+    const onChange = vi.fn();
+    const off = remote.subscribe({ onStatus, onChange });
+    await vi.waitFor(() => expect(onStatus).toHaveBeenCalledWith(false));
+    expect(fake.channels).toHaveLength(0);
+
+    // Wieder online: supabase-js erneuert das Token und meldet TOKEN_REFRESHED
+    fake.emitAuth('TOKEN_REFRESHED', { user: { id: 'u1' } });
+    expect(fake.channels).toHaveLength(1);
+    const ch = fake.channels[0]!;
+    expect(ch.bindings.every((b) => b.filter.filter === 'user_id=eq.u1')).toBe(true);
+    ch.status!('SUBSCRIBED');
+    expect(onStatus).toHaveBeenLastCalledWith(true);
+    fake.emitAuth('TOKEN_REFRESHED', { user: { id: 'u1' } }); // gleiche Sitzung → kein zweiter Channel
+    expect(fake.channels).toHaveLength(1);
+
+    // Abmelden räumt den Channel ab; neue Anmeldung baut ihn für das neue Konto auf
+    fake.emitAuth('SIGNED_OUT', null);
+    expect(fake.removed).toEqual([ch]);
+    expect(onStatus).toHaveBeenLastCalledWith(false);
+    fake.emitAuth('SIGNED_IN', { user: { id: 'u2' } });
+    expect(fake.channels).toHaveLength(2);
+    expect(fake.channels[1]!.bindings[0]!.filter.filter).toBe('user_id=eq.u2');
+
+    off();
+    expect(fake.removed).toEqual([ch, fake.channels[1]]);
+    expect(fake.authListeners.size).toBe(0);
   });
 
   it('liest Serverzeit, Timer und Einstellungen des angemeldeten Nutzers', async () => {

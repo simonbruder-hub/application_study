@@ -103,7 +103,9 @@ export class TimerSync {
       onTimer: (state) => { void this.receive(state); },
       onChange: (table) => { if (table === 'active_timer_state') void this.reconcile(); },
       onStatus: (connected) => {
-        if (connected && this.connected === false) void this.reconcile();
+        // Beim ersten Aufbau und nach Unterbrechungen abgleichen: Zustände, die vor dem Join des
+        // Channels geschrieben wurden, kommen nie als onTimer an
+        if (connected && this.connected !== true) void this.reconcile();
         this.connected = connected;
       },
     }));

@@ -4,8 +4,8 @@
  * Erwartetes Server-Schema (siehe Supabase-Migrationen):
  * - Je Entitätstabelle (Namen wie ENTITY_TABLES) dieselben Spalten wie lokal, dazu
  *   user_id (Default auth.uid(), RLS) und server_updated_at (vom Trigger gesetzt).
- * - LWW-Trigger: Upserts mit (updated_at, updated_by) <= gespeicherter Version werden still
- *   verworfen und erscheinen daher nicht im RETURNING.
+ * - LWW-Trigger: Upserts mit (updated_at, updated_by) < gespeicherter Version werden still
+ *   verworfen und erscheinen daher nicht im RETURNING (Gleichstand = Wiederholung, übernommen).
  * - user_settings und active_timer_state mit Primärschlüssel user_id.
  * - RPC server_now() liefert die Serverzeit.
  */
@@ -320,13 +320,24 @@ export class SupabaseRemote implements RemoteStore {
     this.chunkSize = Math.max(1, opts.chunkSize ?? 500);
   }
 
+  /**
+   * Gespeicherte Sitzung vorhanden? Ist das Zugriffstoken abgelaufen und scheitert die Erneuerung
+   * am Netz, liefert supabase-js session null mit AuthRetryableFetchError – die Sitzung bleibt
+   * aber gespeichert und wird erneuert, sobald der Server erreichbar ist. Das gilt als angemeldet.
+   */
   async isSignedIn(): Promise<boolean> {
-    return (await this.userId()) !== null;
+    const { data, error } = await this.client.auth.getSession();
+    return data.session !== null || isAuthRetryableFetchError(error);
   }
 
+  /** ID des angemeldeten Nutzers; RemoteError network, wenn die Sitzung nur offline nicht erneuerbar ist. */
   async userId(): Promise<string | null> {
-    const { data } = await this.client.auth.getSession();
-    return data.session?.user.id ?? null;
+    const { data, error } = await this.client.auth.getSession();
+    if (data.session) return data.session.user.id;
+    if (isAuthRetryableFetchError(error)) {
+      throw new RemoteError('network', 'Server nicht erreichbar – Anmeldung kann nicht erneuert werden.', { cause: error });
+    }
+    return null;
   }
 
   private async requireUserId(): Promise<string> {
@@ -421,47 +432,75 @@ export class SupabaseRemote implements RemoteStore {
     if (error) throw toRemoteError(error, status, 'active_timer_state');
   }
 
-  /** Ein Realtime-Channel mit postgres_changes je Tabelle, gefiltert auf den angemeldeten Nutzer. */
+  /**
+   * Ein Realtime-Channel mit postgres_changes je Tabelle, gefiltert auf den angemeldeten Nutzer.
+   * Der Channel folgt der Anmeldung: Fehlt beim Abonnieren eine (erneuerbare) Sitzung – z. B. beim
+   * Start ohne Netz mit abgelaufenem Token oder vor der Anmeldung –, entsteht er, sobald supabase-js
+   * eine Sitzung meldet (TOKEN_REFRESHED, SIGNED_IN); beim Abmelden wird er entfernt.
+   */
   subscribe(handlers: RemoteHandlers): () => void {
     let channel: RealtimeChannel | null = null;
+    let channelUid: string | null = null;
     let closed = false;
-    void this.requireUserId().then(
-      (uid) => {
-        if (closed) return;
-        const filter = `user_id=eq.${uid}`;
-        // Eigener Topic je Abo: client.channel() liefert sonst den bereits abonnierten Channel zurück
-        const ch = this.client.channel(`planner-sync:${uid}:${++subscriptionSeq}`);
-        for (const table of ENTITY_TABLES) {
-          ch.on('postgres_changes', { event: '*', schema: 'public', table, filter }, (payload) => {
-            handlers.onChange?.(table, writerOf(payload.new));
-          });
+
+    const disconnect = () => {
+      if (!channel) return;
+      void this.client.removeChannel(channel);
+      channel = null;
+      channelUid = null;
+      handlers.onStatus?.(false);
+    };
+
+    const connect = (uid: string) => {
+      if (closed || channelUid === uid) return;
+      disconnect();
+      const filter = `user_id=eq.${uid}`;
+      // Eigener Topic je Abo: client.channel() liefert sonst den bereits abonnierten Channel zurück
+      const ch = this.client.channel(`planner-sync:${uid}:${++subscriptionSeq}`);
+      for (const table of ENTITY_TABLES) {
+        ch.on('postgres_changes', { event: '*', schema: 'public', table, filter }, (payload) => {
+          handlers.onChange?.(table, writerOf(payload.new));
+        });
+      }
+      ch.on('postgres_changes', { event: '*', schema: 'public', table: 'user_settings', filter }, (payload) => {
+        handlers.onChange?.('user_settings', writerOf(payload.new));
+      });
+      ch.on('postgres_changes', { event: '*', schema: 'public', table: 'active_timer_state', filter }, (payload) => {
+        const row = payload.new as Record<string, unknown> | undefined;
+        if (payload.eventType === 'DELETE' || !row || !Object.keys(row).length) return;
+        let state: ActiveTimerState;
+        try {
+          state = timerFromRemote(row);
+        } catch {
+          handlers.onChange?.('active_timer_state'); // unlesbare Nutzlast → Zustand per getTimer() holen
+          return;
         }
-        ch.on('postgres_changes', { event: '*', schema: 'public', table: 'user_settings', filter }, (payload) => {
-          handlers.onChange?.('user_settings', writerOf(payload.new));
-        });
-        ch.on('postgres_changes', { event: '*', schema: 'public', table: 'active_timer_state', filter }, (payload) => {
-          const row = payload.new as Record<string, unknown> | undefined;
-          if (payload.eventType === 'DELETE' || !row || !Object.keys(row).length) return;
-          let state: ActiveTimerState;
-          try {
-            state = timerFromRemote(row);
-          } catch {
-            handlers.onChange?.('active_timer_state'); // unlesbare Nutzlast → Zustand per getTimer() holen
-            return;
-          }
-          handlers.onTimer?.(state);
-        });
-        ch.subscribe((status) => {
-          if (!closed) handlers.onStatus?.(status === 'SUBSCRIBED');
-        });
-        channel = ch;
+        handlers.onTimer?.(state);
+      });
+      channel = ch;
+      channelUid = uid;
+      ch.subscribe((status) => {
+        if (!closed && channel === ch) handlers.onStatus?.(status === 'SUBSCRIBED');
+      });
+    };
+
+    const { data: auth } = this.client.auth.onAuthStateChange((event, session) => {
+      if (session?.user?.id) connect(session.user.id);
+      else if (event === 'SIGNED_OUT') disconnect();
+    });
+    void this.userId().then(
+      (uid) => {
+        if (uid) connect(uid);
+        else if (!channel) handlers.onStatus?.(false);
       },
-      () => handlers.onStatus?.(false),
+      () => { if (!channel) handlers.onStatus?.(false); },
     );
     return () => {
       closed = true;
+      auth.subscription.unsubscribe();
       if (channel) void this.client.removeChannel(channel);
       channel = null;
+      channelUid = null;
     };
   }
 }

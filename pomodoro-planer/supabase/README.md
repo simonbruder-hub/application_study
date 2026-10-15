@@ -161,9 +161,31 @@ select * from public.user_settings;
 ```
 
 Hinweis: Im SQL-Editor arbeitest du als Administrator, RLS gilt dort nicht. Willst du dort Daten
-korrigieren, setze `updated_at = now()` mit, sonst verwirft der Last-Writer-Wins-Schutz die Änderung
-(eine Änderung mit älterem Zeitstempel gilt als veraltet). Lösche Zeilen nicht physisch, sondern
-setze `is_deleted = true` – nur so erfahren die anderen Geräte von der Löschung.
+korrigieren, erhöhe bei jeder Änderung `updated_at` so:
+
+```sql
+update public.tasks
+   set title = 'Neuer Titel',
+       updated_at = greatest(now(), updated_at + interval '1 millisecond')
+ where id = '…';
+```
+
+Warum genau so:
+
+- Die Geräte übernehmen eine Zeile vom Server nur, wenn ihr `updated_at` (bei Gleichstand
+  `updated_by`) grösser ist als das ihrer eigenen Fassung. Ohne Erhöhung speichert der Server die
+  Änderung zwar, die Geräte ignorieren sie aber und überschreiben sie bei der nächsten eigenen
+  Änderung wieder.
+- `updated_at = now()` allein reicht nicht immer: Ging die Uhr eines Geräts vor, liegen die
+  Zeitstempel der App vor der Serverzeit. Dann gilt `now()` als älter, und der
+  Last-Writer-Wins-Schutz verwirft die Änderung still.
+- `+ 1 millisecond` statt einer kleineren Stufe, weil die App Zeitstempel auf Millisekunden genau
+  vergleicht.
+
+Lösche Zeilen nicht physisch, sondern setze `is_deleted = true` (mit derselben Erhöhung von
+`updated_at`) – nur so erfahren die anderen Geräte von der Löschung. Zugehörige Einträge
+(z. B. die Aufgaben eines Projekts) werden dabei nicht mitgelöscht; ganze Projekte löschst du
+deshalb besser in der App.
 
 ## 8. Free Tier – was du wissen solltest
 
@@ -227,4 +249,4 @@ Abschnitt 3) und sieht dann nur seine eigenen, leeren Tabellen. Geheim bleiben m
 | Es kommt eine Mail mit Link, aber ohne Code | Vorlage enthält kein `{{ .Token }}` – Abschnitt 3.2, **beide** Vorlagen. |
 | Kein Code kommt an | Spam-Ordner, Mail-Limit des Free Tiers (Abschnitt 8), Adresse vertippt. |
 | App meldet dauerhaft «Offline», obwohl Internet da ist | Projekt pausiert → Dashboard → **Restore project**. |
-| Änderung im SQL-Editor «verschwindet» | `updated_at` wurde nicht erhöht (Abschnitt 7). |
+| Änderung im SQL-Editor «verschwindet» | `updated_at` wurde nicht oder nicht genug erhöht – `greatest(now(), updated_at + interval '1 millisecond')` verwenden (Abschnitt 7). |

@@ -149,8 +149,11 @@ export class SyncEngine {
 
   /** Fehlversuche je Zeile (table:id) und Version */
   private readonly failures = new Map<string, FailureRecord>();
-  /** Umbenennungen im laufenden Push (Ausgangscode und bereits abgelehnte Codes je Zeile) */
-  private renames = new Map<string, { base: string; tried: Set<string> }>();
+  /**
+   * Umbenennungen im laufenden Push je Zeile: Ausgangscode, bereits abgelehnte Codes und ob der
+   * Code nach dem Pull schon einmal unverändert erneut gesendet wurde
+   */
+  private renames = new Map<string, { base: string; tried: Set<string>; retried: boolean }>();
 
   constructor(opts: SyncEngineOptions) {
     this.repo = opts.repo;
@@ -259,8 +262,10 @@ export class SyncEngine {
           if (table !== 'active_timer_state' && by !== this.repo.deviceId) this.requestSync();
         },
         onStatus: (connected) => {
-          // Nach einem Verbindungsabbruch verpasste Realtime-Ereignisse per Pull nachholen
-          if (connected && this.realtimeConnected === false) this.requestSync();
+          // Verpasste Realtime-Ereignisse per Pull nachholen: nach einem Verbindungsabbruch und beim
+          // ersten Aufbau (der Channel steht oft erst nach dem ersten Pull – Änderungen dazwischen
+          // kämen sonst erst beim nächsten Anlass an)
+          if (connected && this.realtimeConnected !== true) this.requestSync();
           this.realtimeConnected = connected;
         },
       }));
@@ -430,7 +435,11 @@ export class SyncEngine {
     let only: Set<string> | null = null; // ab Runde 2 nur umbenannte Zeilen
     for (let round = 0; round < MAX_RENAME_ROUNDS; round++) {
       const dirty = (await this.repo.dirtyRows(table)) as AnyEntity[];
-      const rows = dirty.filter((r) => (only ? only.has(r.id) : this.mayPush(table, r, parentsPushed)));
+      const rows = dirty
+        .filter((r) => (only ? only.has(r.id) : this.mayPush(table, r, parentsPushed)))
+        // Löschungen zuerst: Sie geben eindeutige Codes frei, bevor neue Zeilen sie beanspruchen
+        // (der Unique-Index prüft im Upsert Zeile für Zeile)
+        .sort((a, b) => Number(b.is_deleted) - Number(a.is_deleted));
       if (!rows.length) break;
       const renamed = new Set<string>();
       for (let i = 0; i < rows.length; i += this.pageSize) {
@@ -494,7 +503,7 @@ export class SyncEngine {
     if (currentCode.toLowerCase() !== pushedCode.toLowerCase()) return cur._dirty === 1;
 
     const key = failureKey(table, cur.id);
-    const state = this.renames.get(key) ?? { base: currentCode, tried: new Set<string>() };
+    const state = this.renames.get(key) ?? { base: currentCode, tried: new Set<string>(), retried: false };
     state.tried.add(currentCode.toLowerCase());
     this.renames.set(key, state);
 
@@ -504,6 +513,11 @@ export class SyncEngine {
         .filter((r) => r.id !== cur.id && (!field.scope || r[field.scope] === cur[field.scope]))
         .map((r) => String(r[field.column] ?? '').toLowerCase()),
     );
+    // Nach dem Pull frei (z. B. im selben Push gelöscht oder umbenannt) → einmal unverändert senden
+    if (!state.retried && !taken.has(currentCode.toLowerCase())) {
+      state.retried = true;
+      return true;
+    }
     const withSuffix = (n: number) => `${state.base.slice(0, MAX_CODE_LENGTH - String(n).length - 1)}-${n}`;
     let n = 2;
     let candidate = withSuffix(n);

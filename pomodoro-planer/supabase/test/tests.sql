@@ -852,6 +852,57 @@ $$;
 
 
 -- -----------------------------------------------------------------------------
+-- 13. Korrekturen im SQL-Editor (Admin, README Abschnitt 7)
+-- -----------------------------------------------------------------------------
+select test.section('13. Korrekturen im SQL-Editor (Empfehlung aus README Abschnitt 7)');
+
+:als_admin
+-- Die Uhr eines Geräts ging 10 Minuten vor: Seine HLC-Zeitstempel (updated_at) liegen
+-- dann vor der Serverzeit, und alle Geräte übernehmen diesen Vorsprung.
+insert into public.projects (id, user_id, project_code, name, mode, updated_at, updated_by)
+values ('a1000000-0000-4000-8000-000000000021', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'ADMIN1', 'Vorher', 'study',
+        clock_timestamp() + interval '10 minutes', 'dev-schnell');
+create temp table admin_mark as
+select updated_at from public.projects where id = 'a1000000-0000-4000-8000-000000000021';
+
+-- Ohne neues updated_at speichert der Server die Änderung (Gleichstand), die Geräte
+-- übernehmen sie aber nicht: applyRemote() übernimmt nur echt neuere Zeilen.
+select test.eq(test.affected($$update public.projects set name = 'ohne updated_at'
+                                where id = 'a1000000-0000-4000-8000-000000000021'$$),
+               1::bigint, 'Admin-UPDATE ohne updated_at wird gespeichert …');
+select test.ok((select p.updated_at = m.updated_at from public.projects p, admin_mark m
+                 where p.id = 'a1000000-0000-4000-8000-000000000021'),
+               '… gilt für die Geräte aber nicht als neuer (updated_at unverändert)');
+
+-- updated_at = now() allein reicht nicht: Es liegt hinter dem Vorsprung der Geräteuhr
+select test.eq(test.affected($$update public.projects set name = 'nur now()', updated_at = now()
+                                where id = 'a1000000-0000-4000-8000-000000000021'$$),
+               0::bigint, 'updated_at = now() wird still verworfen, wenn die Geräteuhr vorging');
+
+-- Die dokumentierte Korrektur muss auch bei vorgehender Geräteuhr greifen
+select test.eq(test.affected($$update public.projects set name = 'korrigiert',
+                                       updated_at = greatest(now(), updated_at + interval '1 millisecond')
+                                where id = 'a1000000-0000-4000-8000-000000000021'$$),
+               1::bigint, 'empfohlene Korrektur wird übernommen, auch wenn die Geräteuhr vorging');
+select test.ok((select date_trunc('milliseconds', p.updated_at) > date_trunc('milliseconds', m.updated_at)
+                  from public.projects p, admin_mark m
+                 where p.id = 'a1000000-0000-4000-8000-000000000021'),
+               '… und ist in Millisekunden (wie in der App) neuer als der bisherige Stand');
+
+-- Normalfall (Zeitstempel in der Vergangenheit): greatest() wählt die Serverzeit
+insert into public.projects (id, user_id, project_code, name, mode, updated_at, updated_by)
+values ('a1000000-0000-4000-8000-000000000022', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'ADMIN2', 'Vorher', 'study',
+        '2000-01-01 00:00:00+00', 'dev-a');
+select test.eq(test.affected($$update public.projects set name = 'korrigiert',
+                                       updated_at = greatest(now(), updated_at + interval '1 millisecond')
+                                where id = 'a1000000-0000-4000-8000-000000000022'$$),
+               1::bigint, 'empfohlene Korrektur greift auch im Normalfall');
+select test.ok((select updated_at between now() - interval '1 hour' and now()
+                  from public.projects where id = 'a1000000-0000-4000-8000-000000000022'),
+               '… mit updated_at = Serverzeit');
+
+
+-- -----------------------------------------------------------------------------
 -- Zusammenfassung
 -- -----------------------------------------------------------------------------
 do $$

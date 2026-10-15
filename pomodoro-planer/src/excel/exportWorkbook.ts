@@ -87,6 +87,9 @@ function sortBy<T>(rows: T[], key: (row: T) => SortKey[]): T[] {
 
 const alive = <T extends { is_deleted: boolean }>(rows: readonly T[]): T[] => rows.filter((r) => !r.is_deleted);
 
+/** Berechnete Stunden: 2 Nachkommastellen genügen (Anzeige 0.0#) */
+const infoHours = (h: number | undefined): number | null => (h === undefined ? null : roundTo(h, 2));
+
 /* ---------- Zeilen aufbauen ---------- */
 
 function collectRows(
@@ -139,7 +142,7 @@ function collectRows(
         status: p.status,
         color: p.color,
         planned_hours: p.planned_hours,
-        actual_hours: projectInfo.get(p.id)?.actualHours ?? null,
+        actual_hours: infoHours(projectInfo.get(p.id)?.actualHours),
         delete: false,
       },
     })),
@@ -166,7 +169,7 @@ function collectRows(
           start_date: w.start_date,
           end_date: w.end_date,
           planned_hours: w.planned_hours,
-          actual_hours: metrics?.actualHours ?? null,
+          actual_hours: infoHours(metrics?.actualHours),
           progress: metrics?.progressRatio ?? null,
           plan_status: metrics?.status ?? null,
           delete: false,
@@ -185,7 +188,7 @@ function collectRows(
         due_date: t.due_date,
         estimated_hours: t.estimated_hours,
         estimated_pomodoros: t.estimated_pomodoros,
-        actual_hours: taskHours.get(t.id) ?? 0,
+        actual_hours: infoHours(taskHours.get(t.id) ?? 0),
         notes: t.notes || null,
         delete: false,
       },
@@ -308,8 +311,9 @@ export function buildWorkbook(snapshot: PlannerSnapshot, opts: ExportOptions = {
 
 /** Exportiert den Datenbestand als .xlsx-Datei (Inhalt als ArrayBuffer, z. B. für einen Download-Blob). */
 export async function exportXlsx(snapshot: PlannerSnapshot, opts: ExportOptions = {}): Promise<ArrayBuffer> {
-  const data: ArrayBuffer | ArrayBufferView = await buildWorkbook(snapshot, opts).xlsx.writeBuffer();
-  if (data instanceof ArrayBuffer) return data;
-  // Node liefert einen Buffer (Ausschnitt eines grösseren Speicherbereichs) → genau diesen Ausschnitt kopieren
-  return new Uint8Array(data.buffer, data.byteOffset, data.byteLength).slice().buffer;
+  // ExcelJS typisiert das Ergebnis als ArrayBuffer, liefert in Node aber einen Buffer (Uint8Array-Ausschnitt
+  // eines grösseren Speicherbereichs) → genau diesen Ausschnitt kopieren
+  const data = (await buildWorkbook(snapshot, opts).xlsx.writeBuffer()) as unknown as ArrayBuffer | Uint8Array;
+  if (data instanceof Uint8Array) return data.slice().buffer as ArrayBuffer;
+  return data;
 }

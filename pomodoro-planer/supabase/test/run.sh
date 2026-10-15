@@ -39,6 +39,15 @@ else
 fi
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/supabase-schematest.XXXXXX")"
+if [[ "$(id -u)" -eq 0 ]]; then
+  chown postgres:postgres "$WORK"
+  # Liegt TMPDIR unter einem Verzeichnis, das postgres nicht betreten darf (z. B. Modus
+  # 700 von root), könnte initdb dort nichts anlegen → Arbeitsverzeichnis unter /tmp.
+  if ! as_pg test -w "$WORK"; then
+    rm -rf "$WORK"
+    WORK="$(mktemp -d /tmp/supabase-schematest.XXXXXX)"
+  fi
+fi
 DATA="$WORK/data"
 SOCK="$WORK/socket"
 LOG="$WORK/postgres.log"

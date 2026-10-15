@@ -374,6 +374,29 @@ export function codeKey(code: string): string {
   return code.trim().toLowerCase();
 }
 
+/** Gleicher Code ohne Beachtung der Gross-/Kleinschreibung */
+export function sameCode(a: string | null | undefined, b: string | null | undefined): boolean {
+  return typeof a === 'string' && typeof b === 'string' && a.trim() !== '' && codeKey(a) === codeKey(b);
+}
+
+/**
+ * Lesbarer Code aus einem Namen, z. B. "Mathematik Übungen" → "MATHEMATIK-U" (höchstens 12 Zeichen
+ * plus Zähler). `taken` enthält bereits vergebene Codes als codeKey; bei Kollision wird "-2", "-3" … angehängt.
+ */
+export function codeFromName(name: string, taken: ReadonlySet<string>): string {
+  const base = name
+    .toUpperCase()
+    .replace(/Ä/g, 'AE').replace(/Ö/g, 'OE').replace(/Ü/g, 'UE')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 12)
+    .replace(/-+$/, '') || 'PROJEKT';
+  let code = base;
+  for (let n = 2; taken.has(codeKey(code)); n++) code = `${base}-${n}`;
+  return code;
+}
+
 /** Text-Vergleichsschlüssel für Titel-Referenzen (getrimmt, klein, Leerraum vereinheitlicht) */
 export function titleKey(title: string): string {
   return title.trim().replace(/\s+/g, ' ').toLowerCase();

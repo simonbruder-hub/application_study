@@ -51,8 +51,12 @@
 --     "return=representation"). updated_by wird bytweise verglichen
 --     (Collation "C"), genau wie der String-Vergleich in JavaScript.
 --     Gleichstand in beiden Feldern gilt als Wiederholung und wird übernommen.
---     Wer Daten direkt im SQL-Editor korrigiert, muss updated_at erhöhen
---     (z. B. updated_at = now()), sonst wird die Änderung verworfen.
+--     Wer Daten direkt im SQL-Editor korrigiert, muss updated_at erhöhen:
+--       updated_at = greatest(now(), updated_at + interval '1 millisecond')
+--     Ohne Erhöhung speichert der Server die Änderung zwar, die Geräte übernehmen
+--     sie aber nicht (sie übernehmen nur echt neuere Zeilen, auf ms genau). Nur
+--     now() genügt nicht: Ging eine Geräteuhr vor, liegt updated_at (HLC) vor der
+--     Serverzeit, und der Trigger verwirft die Änderung still.
 --
 --   PULL (Keyset-Paginierung je Tabelle):
 --       select * from public.<tabelle>
