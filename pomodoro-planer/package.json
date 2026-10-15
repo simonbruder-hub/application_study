@@ -6,6 +6,23 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "icons": "node scripts/icons.mjs",
-    "start": "npx --yes http-server -c-1 -p 8080 ."
+    "start": "npx --yes http-server -c-1 -p 8080 .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "db:test": "bash supabase/test/run.sh"
+  },
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "dexie": "4.4.6",
+    "exceljs": "4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "fake-indexeddb": "6.2.5",
+    "typescript": "6.0.3",
+    "vite": "^8.3.3",
+    "vitest": "5.0.3"
   }
 }
