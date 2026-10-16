@@ -85,9 +85,15 @@ export class RemoteError extends Error {
 
 export interface RemoteStore {
   readonly kind: 'supabase' | 'memory';
-  /** Lokale Prüfung (gespeicherte Sitzung), funktioniert auch offline. */
+  /**
+   * Lokale Prüfung (gespeicherte Sitzung), funktioniert auch offline – auch dann true, wenn ein
+   * abgelaufenes Token mangels Netz gerade nicht erneuert werden kann.
+   */
   isSignedIn(): Promise<boolean>;
-  /** ID des angemeldeten Nutzers (null wenn abgemeldet) – bindet die lokale DB an ein Konto. */
+  /**
+   * ID des angemeldeten Nutzers (null wenn abgemeldet) – bindet die lokale DB an ein Konto.
+   * RemoteError 'network', wenn die gespeicherte Sitzung mangels Netz nicht erneuert werden kann.
+   */
   userId(): Promise<string | null>;
   /** Aktuelle Serverzeit (ISO) – dient dem Abgleich nachgehender Geräteuhren. */
   serverNow(): Promise<string>;

@@ -106,7 +106,12 @@ function readWorkbook(wb: ExcelJS.Workbook): ParsedWorkbook {
   for (const table of SHEET_TABLES) {
     const def = SHEETS[table];
     const target = normalizeSheetName(def.name);
-    const match = available.find((a) => a.full === target.full) ?? available.find((a) => a.bare === target.bare);
+    // Exakter Name vor toleranter Zuordnung: Eine Kopie wie «1_Projekte (2)» (die Excel vor das Original
+    // stellt) ergibt normalisiert denselben Namen und darf das Original nicht verdrängen.
+    const exact = def.name.toLowerCase();
+    const match = available.find((a) => a.ws.name.trim().toLowerCase() === exact)
+      ?? available.find((a) => a.full === target.full)
+      ?? available.find((a) => a.bare === target.bare);
     if (!match) {
       issues.push({ sheet: def.name, row: 0, severity: 'error', message: `Blatt «${def.name}» fehlt` });
       sheets[table] = emptySheet(def);

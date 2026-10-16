@@ -570,9 +570,15 @@ class ImportPlanner {
     if (ctx.failed || !projectId || !apCode) return null;
     if (!this.checkSameProject(ctx, existing, projectId, 'Arbeitspakete')) return null;
 
-    if (startDate && endDate && startDate > endDate
-      && (!existing || existing.start_date !== startDate || existing.end_date !== endDate)) {
-      ctx.warn('start_date', `Startdatum ${startDate} liegt nach der Deadline ${endDate}`);
+    // Deadline vor dem Startdatum lehnt der Server ab (CHECK work_packages_end_date_check) → Fehler.
+    // Fehlt eine der Spalten, gilt der bisherige Wert; unveränderte Altdaten werden nicht bemängelt.
+    const start = startDate !== undefined ? startDate : existing?.start_date ?? null;
+    const end = endDate !== undefined ? endDate : existing?.end_date ?? null;
+    const datesChanged = !existing || existing.is_deleted
+      || start !== (existing.start_date ?? null) || end !== (existing.end_date ?? null);
+    if (start && end && start > end && datesChanged) {
+      ctx.error(ctx.has('start_date') ? 'start_date' : 'end_date', `Startdatum ${start} liegt nach der Deadline ${end}`);
+      return null;
     }
     const values: Values = { project_id: projectId, ap_code: apCode };
     assign(values, 'milestone_id', milestoneId, true);
@@ -580,9 +586,9 @@ class ImportPlanner {
     assign(values, 'start_date', startDate, true);
     assign(values, 'end_date', endDate, true);
     assign(values, 'planned_hours', planned, true);
-    const parents: Parent[] = [{ table: 'projects', id: projectId }];
-    if (milestoneId) parents.push({ table: 'milestones', id: milestoneId });
-    return { values, parents, scope: projectId, code: apCode };
+    // Nur das Projekt ist ein Elternteil im Sinn der Lösch-Kaskade: Wird der Meilenstein gelöscht,
+    // entfernt das Repository lediglich die Zuordnung (unlink) – die Zeile bleibt gültig.
+    return { values, parents: [{ table: 'projects', id: projectId }], scope: projectId, code: apCode };
   }
 
   private buildTask(ctx: RowCtx, existing: Task | undefined): DraftBody | null {
@@ -653,10 +659,14 @@ class ImportPlanner {
       if (!projectId) {
         if (!ctx.failed) ctx.error('task_title', 'Task_Titel_Referenz ohne Projekt_Code');
       } else {
-        const found = this.taskByTitle(ctx, projectId, wpId ?? null, taskTitle);
+        const found = this.currentTask(existing, projectId, projectChanged, taskTitle)
+          ?? this.taskByTitle(ctx, projectId, wpId ?? null, taskTitle);
         if (found) taskId = found;
         else pendingTitle = taskTitle;
       }
+    } else if (taskIdText === undefined && taskTitle === null && !projectChanged && this.dangling('tasks', existing?.task_id)) {
+      // Ohne Spalte Task_ID: Verweis auf einen Task, der im Datenbestand fehlt (Export zeigt keinen Titel), beibehalten
+      taskId = existing!.task_id;
     }
 
     const mode = readWith(ctx, 'log_mode', (v) => parseEnum(v, 'timeLogMode'));
@@ -681,13 +691,18 @@ class ImportPlanner {
       // Endzeit vor der Startzeit = über Mitternacht
       const endCandidate = localTimestamp(date, endSec, endSec < startSec ? 1 : 0);
       end = existing && sameMinute(existing.end_time, endCandidate) ? existing.end_time : endCandidate;
-      duration = minutes !== null && minutes !== undefined
-        ? this.durationSeconds(minutes, existing)
-        : Math.round((end - start) / 1000);
+      if (minutes !== null && minutes !== undefined) duration = this.durationSeconds(minutes, existing);
+      // Spalte Dauer_Minuten fehlt: bisherige Dauer (z. B. mit Pause) bleibt, solange die Zeitspanne gleich ist
+      else if (existing && !ctx.has('duration_minutes') && start === existing.start_time && end === existing.end_time) {
+        duration = existing.duration_seconds;
+      } else duration = Math.round((end - start) / 1000);
     } else {
       duration = this.durationSeconds(minutes!, existing);
       const endCandidate = start + duration * 1000;
-      end = existing && sameMinute(existing.end_time, endCandidate) ? existing.end_time : endCandidate;
+      // Spalte Endzeit fehlt: bisherige Endzeit bleibt, solange Startzeit und Dauer gleich sind
+      if (existing && !ctx.has('end_time') && start === existing.start_time && duration === existing.duration_seconds) {
+        end = existing.end_time;
+      } else end = existing && sameMinute(existing.end_time, endCandidate) ? existing.end_time : endCandidate;
     }
 
     const timesChanged = !existing || start !== existing.start_time || end !== existing.end_time
@@ -820,6 +835,17 @@ class ImportPlanner {
         + `nicht zu «${projectCode ?? ''}»`);
     }
     return task.id;
+  }
+
+  /**
+   * Bisher verknüpfter Task, solange die Titel-Referenz zu ihm passt – wie bei Codes behält eine bestehende
+   * Zeile ihren Verweis (auch auf gelöschte Tasks, Zeiteinträge sind Historie). Bei einem Projektwechsel
+   * nur, wenn der Task zum neuen Projekt gehört.
+   */
+  private currentTask(existing: TimeLog | undefined, projectId: string, projectChanged: boolean, title: string): string | null {
+    const task = this.state.tasks.get(existing?.task_id) as Task | undefined;
+    if (!task || titleKey(task.title) !== titleKey(title)) return null;
+    return !projectChanged || task.project_id === projectId ? task.id : null;
   }
 
   /** Task über den Titel im Projekt (bzw. im Arbeitspaket); null = nicht gefunden */

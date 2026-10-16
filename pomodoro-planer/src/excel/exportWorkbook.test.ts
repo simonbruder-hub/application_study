@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { buildWorkbook, exportFileName, exportXlsx } from './exportWorkbook';
 import { SHEETS, SHEET_TABLES, STYLE } from './schema';
 import { ID, fakeInfo, getCell, reload, rowWhere, sampleSnapshot, sheet } from './testing';
@@ -31,6 +31,25 @@ describe('Excel-Export – Struktur und Formatierung', () => {
     expect(buffer).toBeInstanceOf(ArrayBuffer);
     expect(buffer.byteLength).toBeGreaterThan(1000);
     expect(exportFileName(TODAY)).toBe('Pomodoro-Planer_2026-10-15.xlsx');
+  });
+
+  it('liefert genau die Bytes der Datei, auch wenn ExcelJS einen Ausschnitt eines grösseren Puffers liefert', async () => {
+    const real = new Uint8Array(await buildWorkbook(sampleSnapshot(), { today: TODAY, info: fakeInfo }).xlsx.writeBuffer());
+    // Node-Buffer als Ausschnitt eines grösseren Speichers (wie aus dem Buffer-Pool); Buffer.slice() kopiert nicht
+    const NodeBuffer = (globalThis as unknown as { Buffer: { from(b: ArrayBuffer, offset: number, length: number): Uint8Array } }).Buffer;
+    const memory = new Uint8Array(real.byteLength + 64).fill(0xee);
+    memory.set(real, 16);
+    const view = NodeBuffer.from(memory.buffer, 16, real.byteLength);
+    const xlsxProto = Object.getPrototypeOf(new ExcelJS.Workbook().xlsx) as { writeBuffer: () => Promise<unknown> };
+    const spy = vi.spyOn(xlsxProto, 'writeBuffer').mockResolvedValueOnce(view);
+    try {
+      const buffer = await exportXlsx(sampleSnapshot(), { today: TODAY, info: fakeInfo });
+      expect(buffer.byteLength).toBe(real.byteLength);
+      expect(new Uint8Array(buffer)).toEqual(real);
+      await new ExcelJS.Workbook().xlsx.load(buffer);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('enthält exakt die 5 Blätter mit den Spalten in vorgegebener Reihenfolge', async () => {

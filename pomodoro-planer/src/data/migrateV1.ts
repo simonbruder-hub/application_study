@@ -10,12 +10,14 @@
  *   estimated_hours = estimate × Fokusdauer / 60; date → due_date. Aufgaben ohne Projekt landen im
  *   Ersatzprojekt «Allgemein» (Code ALLGEMEIN, Lernmodus), das nur bei Bedarf angelegt wird.
  * - Sessions → time_logs: manual → 'manual' sonst 'pomodoro', full → counts_as_pomodoro, Modus aus dem
- *   Projekt bzw. der Kategorie der Session, sec → duration_seconds, note → comment.
+ *   zugeordneten Projekt (auch «Allgemein») bzw. ohne Projekt aus der Kategorie der Session,
+ *   sec → duration_seconds, note → comment.
  * - Einstellungen → Partial<UserSettings> im Bericht (der Aufrufer übernimmt sie).
  *
  * Idempotenz
  * - Neue IDs werden deterministisch aus den alten abgeleitet (SHA-1 über "pp-v1:" + alte ID,
- *   UUID-Layout Version 5). Ein erneuter Lauf erzeugt daher keine Duplikate.
+ *   UUID-Layout Version 5). Ein erneuter Lauf erzeugt daher keine Duplikate. Das Ersatzprojekt
+ *   «Allgemein» hat keine alte ID; seine ID hängt von den zugeordneten Aufgaben ab (fallbackProjectKey).
  * - Bereits vorhandene Zeilen werden nur überschrieben, wenn der v1-Eintrag nachweislich später
  *   geändert wurde (v1 updatedAt > v2 updated_at) – in v2 bearbeitete Daten gewinnen sonst.
  *   Dabei werden nur Felder geschrieben, die v1 kennt (keine Arbeitspakete, Prioritäten o. Ä.).
@@ -139,6 +141,19 @@ export async function v1Uuid(oldId: string): Promise<string> {
   return uuidFromHash(await sha1(new TextEncoder().encode(ID_PREFIX + oldId)));
 }
 
+/**
+ * Schlüssel, aus dem die ID des Ersatzprojekts abgeleitet wird. Ein fester Schlüssel ergäbe für
+ * alle Nutzer dieselbe UUID – auf dem Server ist projects.id aber ein globaler Primärschlüssel,
+ * der Push jedes weiteren Kontos würde scheitern. Deshalb fliesst die kleinste alte ID der
+ * zugeordneten Aufgaben ein (v1-IDs enthalten Zeitstempel und Zufall, sind also je Nutzer
+ * verschieden): Derselbe v1-Bestand ergibt auf jedem Gerät dieselbe ID, ein anderer eine andere.
+ */
+export function fallbackProjectKey(orphanTaskIds: readonly string[]): string {
+  let seed = '';
+  for (const id of orphanTaskIds) if (!seed || id < seed) seed = id;
+  return `${FALLBACK_PROJECT.v1Key}:${seed}`;
+}
+
 /* ---------- Robuste Feldwerte ---------- */
 
 type V1Row = Record<string, unknown> & { id: string };
@@ -242,9 +257,10 @@ function collect(list: unknown, table: MigratedTable, skipped: MigrationSkip[]):
 function mapSettings(raw: unknown): Partial<UserSettings> {
   const s = isObject(raw) ? raw : {};
   const out: Partial<UserSettings> = {};
+  // Die Minuten-Spalten sind integer: runden; was dabei unter 1 fällt, gilt als nicht gesetzt
   const minutes = (key: string, target: 'focus_minutes' | 'short_break_minutes' | 'long_break_minutes') => {
-    const v = positive(s[key]);
-    if (v !== null) out[target] = v;
+    const v = num(s[key]);
+    if (v !== null && Math.round(v) >= 1) out[target] = Math.round(v);
   };
   minutes('focus', 'focus_minutes');
   minutes('short', 'short_break_minutes');
@@ -254,7 +270,7 @@ function mapSettings(raw: unknown): Partial<UserSettings> {
   if (typeof s.autoBreak === 'boolean') out.auto_start_breaks = s.autoBreak;
   if (typeof s.autoFocus === 'boolean') out.auto_start_focus = s.autoFocus;
   const goal = num(s.dailyGoalMin);
-  if (goal !== null && goal >= 0) out.daily_goal_minutes = goal;
+  if (goal !== null && goal >= 0) out.daily_goal_minutes = Math.round(goal);
   return out;
 }
 
@@ -325,12 +341,19 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
   /* 3. IDs ableiten und Bestand in v2 lesen */
   const projectById = new Map(projects.map((p) => [p.id, p]));
   const taskById = new Map(tasks.map((t) => [t.id, t]));
+  const projectNeedsFallback = (t: V1Row) => {
+    const pid = ref(t.projectId);
+    return !pid || !projectById.has(pid);
+  };
+  const orphanTasks = tasks.filter(projectNeedsFallback);
+  const fallbackKey = fallbackProjectKey(orphanTasks.map((t) => t.id));
+
   const newIds = new Map<string, string>();
   const derive = async (key: string) => { newIds.set(key, await v1Uuid(key)); };
-  await Promise.all([...projects, ...tasks, ...sessions].map((r) => derive(r.id)).concat(derive(FALLBACK_PROJECT.v1Key)));
+  await Promise.all([...projects, ...tasks, ...sessions].map((r) => derive(r.id)).concat(derive(fallbackKey)));
   const idOf = (oldId: string): string => newIds.get(oldId)!;
 
-  const fallbackId = idOf(FALLBACK_PROJECT.v1Key);
+  const fallbackId = idOf(fallbackKey);
   const [exProjects, exTasks, exLogs, liveProjects] = await Promise.all([
     existingRows(repo, 'projects', [...projects.map((p) => idOf(p.id)), fallbackId]),
     existingRows(repo, 'tasks', tasks.map((t) => idOf(t.id))),
@@ -373,11 +396,10 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
 
   /* 4. Projekte (alphabetisch wie in v1 angezeigt) */
   const sortedProjects = projects.slice().sort((a, b) => text(a.name).localeCompare(text(b.name), 'de'));
-  const projectNeedsFallback = (t: V1Row) => {
-    const pid = ref(t.projectId);
-    return !pid || !projectById.has(pid);
-  };
-  const orphanTasks = tasks.filter(projectNeedsFallback);
+  /** Modus jedes Projekts nach der Migration (neue ID → Modus); Zeiteinträge übernehmen ihn */
+  const projectModes = new Map<string, Workspace>();
+  const modeAfter = (decision: Decision, ex: AnyEntity | undefined, v1Mode: Workspace): Workspace =>
+    (decision === 'create' || decision === 'upsert' ? v1Mode : (ex as Project).mode);
   const unknownProjectRefs = orphanTasks.filter((t) => ref(t.projectId)).length;
   if (unknownProjectRefs) {
     warnings.push(`${unknownProjectRefs} ${unknownProjectRefs === 1 ? 'Aufgabe verweist' : 'Aufgaben verweisen'} auf ein unbekanntes Projekt.`);
@@ -386,7 +408,8 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
   if (orphanTasks.length) {
     // Ersatzprojekt zuerst, damit es den Code ALLGEMEIN erhält
     const decision = decide(exProjects.get(fallbackId), null);
-    plan('projects', FALLBACK_PROJECT.v1Key, decision, () => ({
+    projectModes.set(fallbackId, modeAfter(decision, exProjects.get(fallbackId), FALLBACK_PROJECT.mode));
+    plan('projects', fallbackKey, decision, () => ({
       project_code: allocateCode(FALLBACK_PROJECT.code, takenCodes),
       name: FALLBACK_PROJECT.name,
       mode: FALLBACK_PROJECT.mode,
@@ -426,7 +449,9 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
       end_date: deadline,
       notes: text(p.notes),
     };
-    plan('projects', p.id, decide(ex, v1Stamp(p)),
+    const decision = decide(ex, v1Stamp(p));
+    projectModes.set(id, modeAfter(decision, ex, fields.mode));
+    plan('projects', p.id, decision,
       () => ({
         ...fields,
         project_code: newCodes.get(p.id)!,
@@ -485,10 +510,12 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
     const task = taskById.get(ref(s.taskId) ?? '');
     const taskId = task && present.has(idOf(task.id)) ? idOf(task.id) : null;
     if ((ref(s.projectId) && !ownProject) || (ref(s.taskId) && !task)) unknownRefs++;
-    // Echtes v1-Projekt (direkt oder über die Aufgabe) bestimmt den Modus, sonst die Kategorie der Session
     const v1Project = ownProject ?? (task && !projectNeedsFallback(task) ? projectById.get(ref(task.projectId)!) : undefined);
-    if (!v1Project && text(s.category) !== 'lernen' && text(s.category) !== 'arbeit') otherCategory++;
     const projectId = ownProject ? idOf(ownProject.id) : taskId && task ? taskProjectId(task) : null;
+    // Der Modus folgt dem zugeordneten Projekt (auch dem Ersatzprojekt), wie beim Excel-Import;
+    // nur Zeit ohne Projekt nimmt die Kategorie der Session
+    const projectMode = projectId ? projectModes.get(projectId) : undefined;
+    if (!projectMode && text(s.category) !== 'lernen' && text(s.category) !== 'arbeit') otherCategory++;
     const start = Math.round(num(s.start)!);
     const sec = Math.max(0, Math.round(num(s.sec)!));
     const end = num(s.end);
@@ -500,7 +527,7 @@ export async function migrateV1(oldJson: unknown, repo: Repository, opts: Migrat
       project_id: projectId,
       work_package_id: null,
       task_id: taskId,
-      workspace: v1Project ? modeOf(v1Project.category) : modeOf(s.category),
+      workspace: projectMode ?? modeOf(s.category),
       mode: s.manual ? 'manual' : 'pomodoro',
       start_time: start,
       end_time: end !== null && end >= start ? Math.round(end) : start + sec * 1000,

@@ -135,6 +135,23 @@ describe('applyImport', () => {
     expect((await repo.get('time_logs', ID.l1))!.is_deleted).toBe(false);
   });
 
+  it('ändert Arbeitspakete eines im selben Import gelöschten Meilensteins und entfernt nur die Zuordnung', async () => {
+    const wb = await reload(buildWorkbook(await loadSnapshot(repo), { today: TODAY, info: fakeInfo }));
+    const m = sheet(wb, '2_Meilensteine');
+    setCell(m, rowWhere(m, 'ID', ID.m1), 'Loeschen', true);
+    const wps = sheet(wb, '3_Arbeitspakete');
+    setCell(wps, rowWhere(wps, 'ID', ID.w1), 'Soll_Stunden', 25);
+    appendRow(wps, { Projekt_Code: 'MATHE1', MS_Code: 'MS-1', AP_Code: 'AP-1.3', Titel: 'Statistik' });
+    const plan = await planFrom(wb);
+    expect(plan.issues).toEqual([]);
+
+    await applyImport(plan, repo);
+    expect((await repo.get('milestones', ID.m1))!.is_deleted).toBe(true);
+    expect(await repo.get('work_packages', ID.w1)).toMatchObject({ planned_hours: 25, milestone_id: null, is_deleted: false });
+    const added = (await repo.list('work_packages')).find((w) => w.ap_code === 'AP-1.3')!;
+    expect(added).toMatchObject({ title: 'Statistik', milestone_id: null, is_deleted: false });
+  });
+
   it('schreibt nichts, wenn der Plan leer ist', async () => {
     const result = await applyImport({ ops: [], hasErrors: false, issues: [] }, repo);
     expect(result).toEqual({ created: 0, updated: 0, deleted: 0, unchanged: 0, ids: [] });

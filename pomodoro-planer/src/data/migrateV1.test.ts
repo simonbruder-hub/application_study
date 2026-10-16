@@ -74,7 +74,10 @@ async function row<K extends EntityTable>(table: K, oldId: string) {
   return repo.get(table, await v1Uuid(oldId));
 }
 
-const ALLGEMEIN = '#allgemein';
+/** Ersatzprojekt «Allgemein» (seine ID hängt von den Aufgaben ohne Projekt ab) */
+async function fallbackProject(r: Repository = repo) {
+  return (await r.list('projects', { includeDeleted: true })).find((p) => p.name === 'Allgemein');
+}
 
 describe('migrateV1 – Abbildung', () => {
   it('übernimmt Projekte mit Modus, Code, Farbe, Status, Soll und Termin', async () => {
@@ -100,15 +103,36 @@ describe('migrateV1 – Abbildung', () => {
     expect(new Set([await order('p_mathe'), await order('p_mathe_b')])).toEqual(new Set([0, 1]));
     expect(await order('p_umzug')).toBe(2);
     expect(await order('p_job')).toBe(3);
-    expect(await order(ALLGEMEIN)).toBe(4);
+    expect((await fallbackProject())!.sort_order).toBe(4);
   });
 
   it('legt das Ersatzprojekt «Allgemein» für Aufgaben ohne Projekt an', async () => {
     const report = await migrateV1(v1State(), repo);
-    const general = await row('projects', ALLGEMEIN);
+    const general = await fallbackProject();
     expect(general).toMatchObject({ project_code: 'ALLGEMEIN', name: 'Allgemein', mode: 'study', status: 'active' });
     expect((await row('tasks', 't_frei'))!.project_id).toBe(general!.id);
     expect(report.warnings).toContain('1 Aufgabe ohne Projekt dem Projekt «Allgemein» zugeordnet.');
+  });
+
+  it('Ersatzprojekt hat je Nutzer eine eigene ID, auf mehreren Geräten desselben Nutzers dieselbe', async () => {
+    // projects.id ist auf dem Server ein globaler Primärschlüssel: eine feste ID für «Allgemein»
+    // liesse den Push jedes weiteren Nutzers scheitern (Konflikt mit der Zeile eines anderen Kontos).
+    await migrateV1(v1State(), repo);
+    const mine = (await fallbackProject())!;
+
+    const other = await Repository.open(new PlannerDB(`migrate-other-${Math.random()}`), () => NOW);
+    const otherUser = v1State();
+    otherUser.tasks = [{ ...otherUser.tasks[2]!, id: 't_fremd' }];
+    otherUser.sessions = [];
+    await migrateV1(otherUser, other);
+    const theirs = (await fallbackProject(other))!;
+    expect(theirs.project_code).toBe('ALLGEMEIN');
+    expect(theirs.id).not.toBe(mine.id);
+
+    // Dieselben v1-Daten auf einem zweiten Gerät → dieselbe ID (die Sync führt die Zeilen zusammen)
+    const secondDevice = await Repository.open(new PlannerDB(`migrate-device2-${Math.random()}`), () => NOW);
+    await migrateV1(v1State(), secondDevice);
+    expect((await fallbackProject(secondDevice))!.id).toBe(mine.id);
   });
 
   it('legt «Allgemein» nur bei Bedarf an (Zeiteinträge ohne Projekt brauchen es nicht)', async () => {
@@ -117,7 +141,7 @@ describe('migrateV1 – Abbildung', () => {
     state.sessions = state.sessions.filter((s) => s.id !== 's_frei');
     const report = await migrateV1(state, repo);
     expect(report.counts.projects.created).toBe(4);
-    expect(await row('projects', ALLGEMEIN)).toBeUndefined();
+    expect(await fallbackProject()).toBeUndefined();
     expect((await row('time_logs', 's_ohne'))!.project_id).toBeNull();
   });
 
@@ -156,9 +180,9 @@ describe('migrateV1 – Abbildung', () => {
       counts_as_pomodoro: false, duration_seconds: 3600, comment: 'Teammeeting',
     });
     expect(await row('time_logs', 's_ohne')).toMatchObject({ project_id: null, task_id: null, workspace: 'work', comment: 'Mails' });
-    // Aufgabe ohne Projekt → Ersatzprojekt; Modus aus der Kategorie der Session («Sonstiges» → Arbeit)
+    // Aufgabe ohne Projekt → Ersatzprojekt; der Modus folgt dem Projekt (Allgemein = Lernen), nicht der Kategorie
     expect(await row('time_logs', 's_frei')).toMatchObject({
-      project_id: await id('projects', ALLGEMEIN), task_id: await id('tasks', 't_frei'), workspace: 'work',
+      project_id: (await fallbackProject())!.id, task_id: await id('tasks', 't_frei'), workspace: 'study',
     });
     // Titel einer in v1 gelöschten Aufgabe bleibt im Kommentar erhalten
     expect(await row('time_logs', 's_alt')).toMatchObject({ task_id: null, workspace: 'study', comment: 'Altprüfung 2024 – Teil 1' });
@@ -179,6 +203,12 @@ describe('migrateV1 – Abbildung', () => {
     });
   });
 
+  it('Minuten-Einstellungen werden ganzzahlig übernommen (Spalten sind integer)', async () => {
+    const state = { ...v1State(), settings: { focus: 25.5, short: 0.4, long: 14.6, longEvery: 4, dailyGoalMin: 90.4 } };
+    const report = await migrateV1(state, repo);
+    expect(report.settings).toEqual({ focus_minutes: 26, long_break_minutes: 15, long_break_every: 4, daily_goal_minutes: 90 });
+  });
+
   it('meldet übersprungene Einträge und Hinweise', async () => {
     const report = await migrateV1(v1State(), repo);
     expect(report.skipped).toEqual(expect.arrayContaining([
@@ -191,7 +221,7 @@ describe('migrateV1 – Abbildung', () => {
     expect(report.skipped).toHaveLength(5);
     expect(report.warnings).toEqual(expect.arrayContaining([
       'Uhrzeit bei 1 Aufgabe nicht übernommen (v2 plant Zeiten über Kalenderblöcke).',
-      'Kategorie «Sonstiges» dem Arbeitsmodus zugeordnet (2 Einträge).',
+      'Kategorie «Sonstiges» dem Arbeitsmodus zugeordnet (1 Eintrag).',
     ]));
   });
 
@@ -329,6 +359,17 @@ describe('migrateV1 – Idempotenz', () => {
     expect(again.counts.projects.created).toBe(0);
     // Zeiteinträge bleiben als Historie mit Verweis erhalten
     expect((await row('time_logs', 's_pomo'))!.project_id).toBe(mathe);
+  });
+
+  it('neue Zeiteinträge übernehmen den aktuellen Modus des Projekts in v2', async () => {
+    await migrateV1(v1State(), repo);
+    wall = NOW + 1000;
+    await repo.update('projects', await v1Uuid('p_job'), { mode: 'study' });
+    const state = v1State();
+    state.sessions.push({ id: 's_neu', start: T0 + 600 * MIN, end: T0 + 625 * MIN, sec: 1500, full: true, taskId: 't_bericht', projectId: 'p_job', category: 'arbeit', title: 'Bericht', note: '', manual: false });
+
+    await migrateV1(state, repo);
+    expect(await row('time_logs', 's_neu')).toMatchObject({ project_id: await v1Uuid('p_job'), workspace: 'study' });
   });
 
   it('weicht vorhandenen v2-Codes aus', async () => {

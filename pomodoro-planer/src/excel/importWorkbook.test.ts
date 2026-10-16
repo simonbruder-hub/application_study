@@ -615,3 +615,150 @@ describe('getCell-Hilfe', () => {
     expect(getCell(sheet(wb, '1_Projekte'), 2, 'Projekt_Code').value).toBe('MATHE1');
   });
 });
+
+describe('Regressionen (Review)', () => {
+  it('übernimmt Arbeitspakete, deren Meilenstein im selben Import gelöscht wird (Kaskade entfernt nur die Zuordnung)', async () => {
+    const wb = await exportedWorkbook();
+    const m = sheet(wb, '2_Meilensteine');
+    setCell(m, rowWhere(m, 'ID', ID.m1), 'Loeschen', true);
+    const wp = sheet(wb, '3_Arbeitspakete');
+    setCell(wp, rowWhere(wp, 'ID', ID.w1), 'Titel', 'Analysis (überarbeitet)');
+    appendRow(wp, { Projekt_Code: 'MATHE1', MS_Code: 'MS-1', AP_Code: 'AP-1.3', Titel: 'Statistik' });
+    const result = await plan(wb);
+    expect(result.issues).toEqual([]);
+    expect(result.skippedRows).toBe(0);
+    expect(result.ops).toEqual([
+      { op: 'update', table: 'work_packages', id: ID.w1, patch: { title: 'Analysis (überarbeitet)' } },
+      { op: 'create', table: 'work_packages', row: expect.objectContaining({ id: NEW1, ap_code: 'AP-1.3', milestone_id: ID.m1 }) },
+      { op: 'delete', table: 'milestones', id: ID.m1 },
+    ]);
+    expect(result.summaryLines()).toContain('2 Arbeitspakete verlieren die Zuordnung zum gelöschten Meilenstein');
+  });
+
+  it('weist ein Startdatum nach der Deadline als Fehler zurück (Server-CHECK end_date >= start_date)', async () => {
+    const wb = await exportedWorkbook();
+    const wp = sheet(wb, '3_Arbeitspakete');
+    const changed = rowWhere(wp, 'ID', ID.w1); // Deadline 2026-11-30
+    setCell(wp, changed, 'Startdatum', '2026-12-31');
+    const added = appendRow(wp, {
+      Projekt_Code: 'MATHE1', AP_Code: 'AP-1.3', Titel: 'Statistik', Startdatum: '2026-12-02', Deadline: '1.12.2026',
+    });
+    const result = await plan(wb);
+    expect(errors(result)).toEqual([
+      {
+        sheet: '3_Arbeitspakete', row: changed, column: 'Startdatum', severity: 'error',
+        message: 'Startdatum 2026-12-31 liegt nach der Deadline 2026-11-30',
+      },
+      {
+        sheet: '3_Arbeitspakete', row: added, column: 'Startdatum', severity: 'error',
+        message: 'Startdatum 2026-12-02 liegt nach der Deadline 2026-12-01',
+      },
+    ]);
+    expect(result.ops).toEqual([]);
+    expect(result.skippedRows).toBe(2);
+  });
+
+  it('prüft Startdatum und Deadline auch gegen den bisherigen Wert, wenn eine der Spalten fehlt', async () => {
+    const wb = await exportedWorkbook();
+    const wp = sheet(wb, '3_Arbeitspakete');
+    wp.spliceColumns(col(wp, 'Deadline'), 1);
+    const r = rowWhere(wp, 'ID', ID.w1); // bisherige Deadline 2026-11-30
+    setCell(wp, r, 'Startdatum', '2026-12-01');
+    const result = await plan(wb);
+    expect(errors(result)).toEqual([{
+      sheet: '3_Arbeitspakete', row: r, column: 'Startdatum', severity: 'error',
+      message: 'Startdatum 2026-12-01 liegt nach der Deadline 2026-11-30',
+    }]);
+    expect(result.ops).toEqual([]);
+  });
+
+  it('meldet unveränderte Altdaten mit Startdatum nach der Deadline nicht bei jedem Roundtrip', async () => {
+    const s = sampleSnapshot();
+    const w2 = s.work_packages.find((w) => w.id === ID.w2)!;
+    w2.start_date = '2026-12-01';
+    w2.end_date = '2026-11-01';
+    const result = await plan(await exportedWorkbook(s), s);
+    expect(result.ops).toEqual([]);
+    expect(result.issues).toEqual([]);
+  });
+
+  it('lässt die Dauer bestehender Zeiteinträge unverändert, wenn die Spalte Dauer_Minuten fehlt', async () => {
+    const wb = await exportedWorkbook();
+    const l = sheet(wb, '5_Zeiteintraege');
+    l.spliceColumns(col(l, 'Dauer_Minuten'), 1);
+    const unchanged = await plan(wb);
+    // l2 hat eine Pause: Dauer 100 Min. bei 105 Min. Zeitspanne
+    expect(unchanged.ops).toEqual([]);
+    expect(errors(unchanged)).toEqual([]);
+
+    // Geänderte Endzeit: Dauer folgt der neuen Zeitspanne
+    setCell(l, rowWhere(l, 'ID', ID.l1), 'Endzeit', '09:40');
+    const result = await plan(wb);
+    expect(result.ops).toEqual([{
+      op: 'update', table: 'time_logs', id: ID.l1, patch: { end_time: at(2026, 10, 5, 9, 40), duration_seconds: 2400 },
+    }]);
+  });
+
+  it('lässt die Endzeit bestehender Zeiteinträge unverändert, wenn die Spalte Endzeit fehlt', async () => {
+    const wb = await exportedWorkbook();
+    const l = sheet(wb, '5_Zeiteintraege');
+    l.spliceColumns(col(l, 'Endzeit'), 1);
+    const unchanged = await plan(wb);
+    expect(unchanged.ops).toEqual([]);
+    expect(errors(unchanged)).toEqual([]);
+
+    // Geänderte Dauer: Endzeit = Startzeit + Dauer
+    setCell(l, rowWhere(l, 'ID', ID.l2), 'Dauer_Minuten', 110);
+    const result = await plan(wb);
+    expect(result.ops).toEqual([{
+      op: 'update', table: 'time_logs', id: ID.l2, patch: { end_time: at(2026, 10, 7, 0, 20), duration_seconds: 6600 },
+    }]);
+  });
+
+  it('behält ohne Spalte Task_ID die bisherige Task-Verknüpfung, solange der Titel passt', async () => {
+    const s = sampleSnapshot();
+    const l1 = s.time_logs.find((l) => l.id === ID.l1)!;
+    // Historie: Zeiteintrag eines gelöschten Tasks
+    s.time_logs.push({
+      ...l1, id: uuid('5', 7), work_package_id: ID.w2, task_id: ID.t5, mode: 'manual', counts_as_pomodoro: false,
+      start_time: at(2026, 10, 8, 9), end_time: at(2026, 10, 8, 9, 25),
+    });
+    // Verweis auf einen Task, der im Datenbestand fehlt (Export ohne Titel)
+    s.time_logs.push({ ...l1, id: uuid('5', 8), task_id: uuid('4', 99), start_time: at(2026, 10, 9, 9), end_time: at(2026, 10, 9, 9, 25) });
+    // Neuerer, nicht erledigter Task mit gleichem Titel wie t1 – darf l1 nicht an sich ziehen
+    const t1 = s.tasks.find((t) => t.id === ID.t1)!;
+    s.tasks.push({ ...t1, id: uuid('4', 6), status: 'todo', completed_at: null, created_at: at(2026, 10, 2) });
+
+    const wb = await exportedWorkbook(s);
+    const l = sheet(wb, '5_Zeiteintraege');
+    l.spliceColumns(col(l, 'Task_ID'), 1);
+    const unchanged = await plan(wb, s);
+    expect(unchanged.ops).toEqual([]);
+    expect(unchanged.issues).toEqual([{
+      sheet: '5_Zeiteintraege', row: 1, column: 'Task_ID', severity: 'warning',
+      message: 'Spalte «Task_ID» fehlt – bestehende Werte bleiben unverändert',
+    }]);
+
+    // Geänderte Titel-Referenz: neu verknüpfen
+    setCell(l, rowWhere(l, 'ID', ID.l1), 'Task_Titel_Referenz', 'Übungsblatt 2');
+    const relinked = await plan(wb, s);
+    expect(relinked.ops).toEqual([{ op: 'update', table: 'time_logs', id: ID.l1, patch: { task_id: ID.t2 } }]);
+  });
+
+  it('bevorzugt das Blatt mit exakt passendem Namen vor Kopien wie «1_Projekte (2)»', async () => {
+    const wb = await exportedWorkbook();
+    const copy = wb.addWorksheet('1_Projekte (2)');
+    copy.addRow(['ID', 'Projekt_Code', 'Name', 'Modus']);
+    copy.addRow([null, 'KOPIE', 'Kopie', 'study']);
+    // Wie «Blatt kopieren» in Excel: die Kopie steht vor dem Original
+    (copy as unknown as { orderNo: number }).orderNo = -1;
+    const reloaded = await reload(wb);
+    expect(reloaded.worksheets[0]!.name).toBe('1_Projekte (2)');
+
+    const parsed = await parseWorkbook(reloaded);
+    expect(parsed.sheets.projects.name).toBe('1_Projekte');
+    expect(parsed.sheets.projects.rows).toHaveLength(2);
+    const result = planImport(parsed, sampleSnapshot(), { today: TODAY, now: NOW, newId: idSequence() });
+    expect(result.ops).toEqual([]);
+  });
+});

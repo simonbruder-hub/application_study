@@ -311,9 +311,10 @@ export function buildWorkbook(snapshot: PlannerSnapshot, opts: ExportOptions = {
 
 /** Exportiert den Datenbestand als .xlsx-Datei (Inhalt als ArrayBuffer, z. B. für einen Download-Blob). */
 export async function exportXlsx(snapshot: PlannerSnapshot, opts: ExportOptions = {}): Promise<ArrayBuffer> {
-  // ExcelJS typisiert das Ergebnis als ArrayBuffer, liefert in Node aber einen Buffer (Uint8Array-Ausschnitt
-  // eines grösseren Speicherbereichs) → genau diesen Ausschnitt kopieren
+  // ExcelJS typisiert das Ergebnis als ArrayBuffer, liefert in Node aber einen Buffer – möglicherweise als
+  // Ausschnitt eines grösseren Speicherbereichs. Buffer.slice() kopiert nicht (Ansicht auf denselben Speicher),
+  // daher über den Uint8Array-Konstruktor in einen eigenen, exakt passenden ArrayBuffer kopieren.
   const data = (await buildWorkbook(snapshot, opts).xlsx.writeBuffer()) as unknown as ArrayBuffer | Uint8Array;
-  if (data instanceof Uint8Array) return data.slice().buffer as ArrayBuffer;
+  if (data instanceof Uint8Array) return new Uint8Array(data).buffer;
   return data;
 }
