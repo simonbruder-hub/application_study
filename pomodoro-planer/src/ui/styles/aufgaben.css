@@ -1,0 +1,20 @@
+/* ---------- Ansicht «Aufgaben» ---------- */
+.aufg-new kbd {
+  margin-left: 2px; background: transparent; color: inherit; opacity: 0.75;
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+.aufg-add { margin: 0 0 16px; padding: 12px; }
+.aufg-add-note { align-items: center; justify-content: space-between; }
+.aufg-filters select { flex: 1 1 150px; max-width: 240px; }
+.group-hint { font: 400 13px var(--font-body); color: var(--muted); }
+.aufg-done { margin-bottom: 20px; }
+.aufg-done > .task-list { margin-top: 6px; }
+.aufg-done > .empty-line { margin-bottom: 0; }
+.aufg-more { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; margin: -4px 0 20px; }
+
+@media (max-width: 520px) {
+  .aufg-filters select { max-width: none; }
+}
+@media (pointer: coarse) {
+  .aufg-new kbd { display: none; }
+}

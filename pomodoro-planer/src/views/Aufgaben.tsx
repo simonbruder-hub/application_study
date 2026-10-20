@@ -148,7 +148,9 @@ function QuickAdd({ filterProject }: { filterProject: Project | undefined }) {
   const [est, setEst] = useState('1');
   const [busy, setBusy] = useState(false);
   const usable = (id: string | undefined): id is string => !!id && projects.some((p) => p.id === id);
-  const pid = usable(projectId) ? projectId : usable(filterProject?.id) ? filterProject!.id : usable(last) ? last : projects[0]?.id ?? '';
+  const fid = filterProject?.id;
+  // Eigene Wahl vor Projektfilter vor zuletzt verwendetem Projekt
+  const pid = usable(projectId) ? projectId : usable(fid) ? fid : usable(last) ? last : projects[0]?.id ?? '';
 
   if (!projects.length) {
     return (
