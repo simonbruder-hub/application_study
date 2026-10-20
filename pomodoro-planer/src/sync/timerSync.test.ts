@@ -165,4 +165,32 @@ describe('TimerSync', () => {
     expect(after).toBe(before);
     expect(await a.db.getMeta(META.activeTimer)).toBeUndefined();
   });
+
+  it('gleicht Tabs desselben Geräts ohne Server über den lokalen Kanal ab', async () => {
+    const a = await device('A');
+    // Zwei Tabs: dieselbe Datenbank, je eine TimerSync-Instanz, verbunden über einen Kanal
+    const listeners: { owner: string; fn: (e: MessageEvent) => void }[] = [];
+    const channelFor = (owner: string) => ({
+      postMessage: (message: unknown) => {
+        for (const l of listeners) if (l.owner !== owner) l.fn({ data: structuredClone(message) } as MessageEvent);
+      },
+      addEventListener: (_: 'message', fn: (e: MessageEvent) => void) => { listeners.push({ owner, fn }); },
+      removeEventListener: (_: 'message', fn: (e: MessageEvent) => void) => {
+        const i = listeners.findIndex((l) => l.fn === fn);
+        if (i >= 0) listeners.splice(i, 1);
+      },
+    });
+    const tab1 = new TimerSync({ repo: a.repo, remote: null, env: null, now: () => world.t, channel: channelFor('1') });
+    const tab2 = new TimerSync({ repo: a.repo, remote: null, env: null, now: () => world.t, channel: channelFor('2') });
+    await tab1.start();
+    await tab2.start();
+    const started = await tab1.transition((s, now) => startTimer(s, now, { kind: 'pomodoro', planned_seconds: 1500 }));
+    await vi.waitFor(() => expect(tab2.state.session_id).toBe(started.session_id));
+    world.t += 30_000;
+    await tab2.transition(pauseTimer);
+    await vi.waitFor(() => expect(tab1.state.status).toBe('paused'));
+    expect(remainingMs(tab1.state, world.t)).toBe(1_470_000);
+    tab2.stop();
+    expect(listeners).toHaveLength(1);
+  });
 });

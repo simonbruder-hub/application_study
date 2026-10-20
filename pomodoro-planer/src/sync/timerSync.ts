@@ -10,6 +10,8 @@
  *   Realtime-Wiederaufbau bzw. beim nächsten Start nachgeholt.
  * - now() liefert die um den Serveruhr-Versatz korrigierte Zeit; damit zeigen zwei Geräte mit
  *   falsch gehenden Uhren dieselbe Restzeit (alle Zeitstempel im Zustand in "Serverzeit").
+ * - Mehrere Tabs/Fenster desselben Geräts gleichen sich über einen BroadcastChannel ab – auch
+ *   ohne Server-Verbindung.
  */
 import { META } from '../data/db';
 import type { Repository } from '../data/repository';
@@ -21,6 +23,20 @@ import { defaultEnv, defaultIsOnline, listen, type SyncEnv } from './runtime';
 
 export type TimerPatch = Partial<Omit<ActiveTimerState, 'id' | 'updated_at' | 'updated_by'>>;
 
+/** Kanal zu anderen Tabs desselben Geräts (BroadcastChannel-Ausschnitt) */
+export interface LocalChannel {
+  postMessage(message: unknown): void;
+  addEventListener(type: 'message', fn: (e: MessageEvent) => void): void;
+  removeEventListener(type: 'message', fn: (e: MessageEvent) => void): void;
+}
+
+const CHANNEL_NAME = 'pomodoro-planer.timer';
+
+/** Im Browser ein BroadcastChannel; ausserhalb (Tests, Node) keiner, damit Instanzen sich nicht stören */
+function defaultChannel(): LocalChannel | null {
+  return typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
+}
+
 export interface TimerSyncOptions {
   repo: Repository;
   /** null = nur lokal */
@@ -31,6 +47,8 @@ export interface TimerSyncOptions {
   isOnline?: () => boolean;
   /** Geräteuhr (Epoch-ms); Standard Date.now */
   now?: () => number;
+  /** Andere Tabs desselben Geräts; Standard BroadcastChannel im Browser, null = keiner */
+  channel?: LocalChannel | null;
 }
 
 /** Abweichungen unter dieser Schwelle gelten als Messrauschen (Netzwerklaufzeit) */
@@ -42,6 +60,7 @@ export class TimerSync {
   private readonly env: SyncEnv | null;
   private readonly isOnline: () => boolean;
   private readonly wall: () => number;
+  private readonly channel: LocalChannel | null;
 
   private current: ActiveTimerState = idleTimerState();
   private loaded = false;
@@ -60,6 +79,7 @@ export class TimerSync {
     this.env = opts.env === undefined ? defaultEnv() : opts.env;
     this.isOnline = opts.isOnline ?? defaultIsOnline;
     this.wall = opts.now ?? Date.now;
+    this.channel = opts.channel !== undefined ? opts.channel : defaultChannel();
   }
 
   /** Aktueller Zustand (nach load()/start() inkl. gespeichertem Stand) */
@@ -97,6 +117,15 @@ export class TimerSync {
     this.started = true;
     await this.load();
     if (this.env) this.cleanups.push(listen(this.env, 'online', () => { void this.reconcile(); }));
+    const channel = this.channel;
+    if (channel) {
+      const onMessage = (e: MessageEvent) => {
+        const state = (e.data as { timer?: ActiveTimerState } | null)?.timer;
+        if (state && typeof state.updated_at === 'number') void this.receive(state);
+      };
+      channel.addEventListener('message', onMessage);
+      this.cleanups.push(() => channel.removeEventListener('message', onMessage));
+    }
     const remote = this.remote;
     if (!remote) return;
     this.cleanups.push(remote.subscribe({
@@ -142,6 +171,7 @@ export class TimerSync {
     this.current = next;
     this.notify();
     await this.saveLocal(next);
+    try { this.channel?.postMessage({ timer: next }); } catch { /* Kanal geschlossen */ }
     this.schedulePush();
     return next;
   }
@@ -213,6 +243,7 @@ export class TimerSync {
     this.repo.clock.observe(state.updated_at);
     const local: ActiveTimerState = { ...state, id: LOCAL_TIMER_ID };
     this.current = local;
+    // Ein neuerer Stand ersetzt eine noch ausstehende eigene Übertragung (der Absender überträgt selbst)
     this.pushPending = false;
     this.notify();
     await this.saveLocal(local);
