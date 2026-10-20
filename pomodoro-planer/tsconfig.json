@@ -12,7 +12,9 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vitest/globals"]
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": ["vitest/globals", "vite/client", "vite-plugin-pwa/client"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"]
 }
