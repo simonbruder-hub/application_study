@@ -439,7 +439,8 @@ export class SyncEngine {
         .filter((r) => (only ? only.has(r.id) : this.mayPush(table, r, parentsPushed)))
         // Löschungen zuerst: Sie geben eindeutige Codes frei, bevor neue Zeilen sie beanspruchen
         // (der Unique-Index prüft im Upsert Zeile für Zeile)
-        .sort((a, b) => Number(b.is_deleted) - Number(a.is_deleted));
+        // Danach in Schreibreihenfolge: Bei Code-Konflikten behält die ältere Zeile ihren Code
+        .sort((a, b) => Number(b.is_deleted) - Number(a.is_deleted) || a.updated_at - b.updated_at);
       if (!rows.length) break;
       const renamed = new Set<string>();
       for (let i = 0; i < rows.length; i += this.pageSize) {

@@ -24,15 +24,32 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Einzeldatei bauen
-        run: node pomodoro-planer/scripts/build.mjs
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pomodoro-planer/package-lock.json
+      - name: Abhängigkeiten installieren
+        working-directory: pomodoro-planer
+        run: npm ci
+      - name: v1-Einzeldatei bauen
+        working-directory: pomodoro-planer
+        run: npm run build
+      - name: v2 bauen (PWA und Einzeldatei)
+        working-directory: pomodoro-planer
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          npm run build:v2
+          npm run build:single
       - name: Seite zusammenstellen
         run: |
-          mkdir _site
+          mkdir -p _site/pomodoro-planer
           cp index.html _site/
-          cp -r pomodoro-planer _site/pomodoro-planer
-          rm -rf _site/pomodoro-planer/dist _site/pomodoro-planer/scripts _site/pomodoro-planer/package.json
+          rsync -a \
+            --exclude node_modules --exclude src --exclude dist --exclude scripts --exclude supabase --exclude v2 \
+            --exclude tests --exclude 'package*.json' --exclude '*.config.ts' --exclude 'tsconfig.json' --exclude '.npmrc' \
+            pomodoro-planer/ _site/pomodoro-planer/
+          cp -r pomodoro-planer/dist/v2 _site/pomodoro-planer/v2
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

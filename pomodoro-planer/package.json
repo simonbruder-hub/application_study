@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "db:test": "bash supabase/test/run.sh"
+    "db:test": "bash supabase/test/run.sh",
+    "test:e2e": "playwright test"
   },
   "type": "module",
   "dependencies": {

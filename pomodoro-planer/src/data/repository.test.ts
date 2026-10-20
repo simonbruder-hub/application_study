@@ -50,6 +50,18 @@ describe('Repository', () => {
     expect(changed!._dirty).toBe(1);
   });
 
+  it('passt Zahlen an die Spaltentypen des Servers an (integer, numeric(10,2))', async () => {
+    const p = await repo.create('projects', project({ planned_hours: 12.3456, sort_order: 2.6 }));
+    expect(p.planned_hours).toBe(12.35);
+    expect(p.sort_order).toBe(3);
+    const k = await repo.create('tasks', task(p.id, { estimated_pomodoros: 2.4, estimated_hours: 0.333 }));
+    expect(k.estimated_pomodoros).toBe(2);
+    expect(k.estimated_hours).toBe(0.33);
+    const u = await repo.update('tasks', k.id, { estimated_pomodoros: 3.5, estimated_hours: null });
+    expect(u!.estimated_pomodoros).toBe(4);
+    expect(u!.estimated_hours).toBeNull();
+  });
+
   it('setzt completed_at beim Erledigen und entfernt es beim Zurücksetzen', async () => {
     const p = await repo.create('projects', project());
     const k = await repo.create('tasks', task(p.id));

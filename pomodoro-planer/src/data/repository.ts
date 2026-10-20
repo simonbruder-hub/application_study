@@ -55,6 +55,25 @@ function sameValue(a: unknown, b: unknown): boolean {
   return false;
 }
 
+/** integer-Spalten im Server-Schema */
+const INTEGER_COLUMNS: Record<EntityTable, readonly string[]> = {
+  projects: ['sort_order'],
+  milestones: ['sort_order'],
+  work_packages: ['sort_order'],
+  tasks: ['sort_order', 'estimated_pomodoros'],
+  time_logs: ['duration_seconds'],
+  planned_blocks: [],
+};
+/** numeric(10,2)-Spalten im Server-Schema */
+const DECIMAL_COLUMNS: Record<EntityTable, readonly string[]> = {
+  projects: ['planned_hours'],
+  milestones: [],
+  work_packages: ['planned_hours'],
+  tasks: ['estimated_hours'],
+  time_logs: [],
+  planned_blocks: [],
+};
+
 export function newId(): string {
   const c = globalThis.crypto;
   if (typeof c.randomUUID === 'function') return c.randomUUID();
@@ -105,6 +124,16 @@ export class Repository {
 
   /** Fachliche Regeln, die bei jedem Schreiben gelten */
   private applyRules(table: EntityTable, row: Record<string, unknown>, prev?: Record<string, unknown>): void {
+    // Spaltentypen des Servers: integer-Spalten ganzzahlig, numeric(10,2) auf zwei Stellen –
+    // sonst lehnt Postgres den Push ab (z. B. 2.5 für integer)
+    for (const col of INTEGER_COLUMNS[table]) {
+      const v = row[col];
+      if (typeof v === 'number' && Number.isFinite(v) && !Number.isInteger(v)) row[col] = Math.round(v);
+    }
+    for (const col of DECIMAL_COLUMNS[table]) {
+      const v = row[col];
+      if (typeof v === 'number' && Number.isFinite(v)) row[col] = Math.round(v * 100) / 100;
+    }
     if (table === 'tasks') {
       if (row.status === 'done' && !row.completed_at) row.completed_at = (prev?.completed_at as number) || Date.now();
       if (row.status !== 'done') row.completed_at = null;

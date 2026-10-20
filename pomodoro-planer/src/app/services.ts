@@ -3,7 +3,7 @@
  * Sync-Engine und Live-Timer starten. Ohne Supabase-Verbindung läuft alles rein lokal.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { PlannerDB } from '../data/db';
+import { META, PlannerDB } from '../data/db';
 import { Repository } from '../data/repository';
 import { migrateV1Once, type MigrationReport } from '../data/migrateV1';
 import { SyncEngine, saveLocalSettings } from '../sync/syncEngine';
@@ -44,6 +44,7 @@ export async function bootstrap(): Promise<AppServices> {
 
   let migration: MigrationReport | null = null;
   try {
+    if (consumeSkipV1Flag()) await db.setMeta(META.migratedV1, { at: Date.now(), found: false, counts: null, skipped: true });
     migration = await migrateV1Once(repo);
     if (migration && Object.keys(migration.settings).length) await saveLocalSettings(repo, migration.settings);
   } catch (err) {
@@ -89,8 +90,25 @@ export async function bootstrap(): Promise<AppServices> {
   return current;
 }
 
+/**
+ * Nach «Lokale Daten zurücksetzen» sollen die alten v1-Daten (localStorage) nicht erneut übernommen
+ * werden – sonst kämen gelöschte Daten beim Neustart zurück.
+ */
+const SKIP_V1_KEY = 'pomodoro-planer.v2.skipV1Migration';
+
+function consumeSkipV1Flag(): boolean {
+  try {
+    if (localStorage.getItem(SKIP_V1_KEY) !== '1') return false;
+    localStorage.removeItem(SKIP_V1_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Lokale Daten vollständig löschen (z. B. bei Kontowechsel) und neu laden */
 export async function resetLocalData(): Promise<void> {
+  try { localStorage.setItem(SKIP_V1_KEY, '1'); } catch { /* Speicher blockiert */ }
   const s = current;
   s?.sync.stop();
   s?.timerSync.stop();
