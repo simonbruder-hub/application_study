@@ -50,9 +50,11 @@ export function Fokus() {
 }
 
 function FocusGrid() {
-  const v = readTimer();
+  // Nur die Phase lesen (nicht readTimer): sonst zeichnet die ganze Ansicht im Viertelsekundentakt neu
+  const s = timerState.value;
+  const phase = s.status === 'idle' && app().timer.kindFor(prefs.value.workspace) === 'stopwatch' ? 'focus' : s.phase;
   return (
-    <section class="focus-grid" data-phase={PHASE_ATTR[v.phase]}>
+    <section class="focus-grid" data-phase={PHASE_ATTR[phase]}>
       <TimerCard />
       <div class="focus-side">
         <TargetCard />

@@ -13,11 +13,16 @@ import { syncMediaSession } from './timer/signals';
 import { flashMood, readTimer } from './timer/view';
 
 export function initBackground(): () => void {
+  let lastKey = '';
   const disposeTitle = effect(() => {
     const v = readTimer();
     const title = targetTitle(timerState.value);
-    document.title = v.active ? `${v.clock} · ${v.paused ? 'Pausiert' : v.phaseLabel} – ${title}` : 'Pomodoro-Planer';
     const p = prefs.value;
+    // Der Anzeigetakt ist 250 ms – Titel und Medien-Steuerung nur bei sichtbarer Änderung aktualisieren
+    const key = [v.clock, v.running, v.active, v.phaseLabel, title, p.background].join('|');
+    if (key === lastKey) return;
+    lastKey = key;
+    document.title = v.active ? `${v.clock} · ${v.paused ? 'Pausiert' : v.phaseLabel} – ${title}` : 'Pomodoro-Planer';
     syncMediaSession({
       enabled: p.background && v.active,
       running: v.running,

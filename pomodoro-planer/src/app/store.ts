@@ -27,7 +27,7 @@ export const loaded = signal(false);
 export const settings = signal<UserSettings>(defaultSettings());
 export const syncStatus = signal<SyncStatus>({ state: 'signed_out', lastSyncedAt: null, pending: 0, notices: [] });
 export const timerState = signal<ActiveTimerState>(idleTimerState());
-/** Aktuelle Zeit, sekundengenau aktualisiert (für Anzeigen; die Zeitmessung selbst nutzt Zeitstempel) */
+/** Aktuelle Zeit für Anzeigen, alle 250 ms aktualisiert (die Zeitmessung selbst nutzt Zeitstempel) */
 export const now = signal(Date.now());
 
 /** Gefiltert auf den aktuellen Modus (Lernen/Arbeit) */
@@ -76,13 +76,11 @@ export function watchDatabase(db: PlannerDB): () => void {
   return () => subs.forEach((s) => s.unsubscribe());
 }
 
-/** Sekundentakt für Anzeigen */
+/**
+ * Takt für Anzeigen. Viertelsekunden statt Sekundengrenzen der Uhr: Phasen beginnen zu beliebigen
+ * Millisekunden, die Restzeit springt daher nicht synchron zur Systemuhr um.
+ */
 export function startClock(): () => void {
-  let last = Math.floor(Date.now() / 1000);
-  const id = setInterval(() => {
-    const t = Date.now();
-    const sec = Math.floor(t / 1000);
-    if (sec !== last) { last = sec; now.value = t; }
-  }, 200);
+  const id = setInterval(() => { now.value = Date.now(); }, 250);
   return () => clearInterval(id);
 }

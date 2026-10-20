@@ -1,0 +1,38 @@
+/** Einstieg der v2-App: Darstellung setzen, Dienste starten, Oberfläche zeichnen, Service Worker registrieren */
+import { render } from 'preact';
+import './ui/styles/app.css';
+import './ui/styles/v2.css';
+import { App } from './App';
+import { initBackground } from './app/background';
+import { initKeyboard } from './app/keyboard';
+import { bootstrap } from './app/services';
+import { initTheme } from './ui/theme';
+
+declare const __PP_BUILD__: 'web' | 'standalone';
+
+async function main(): Promise<void> {
+  initTheme();
+  const root = document.getElementById('root')!;
+  try {
+    await bootstrap();
+  } catch (err) {
+    console.error(err);
+    root.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'boot';
+    p.textContent = 'Die lokale Datenbank konnte nicht geöffnet werden. Im privaten Fenster oder bei blockiertem Speicher funktioniert die App nicht.';
+    root.append(p);
+    return;
+  }
+  root.innerHTML = '';
+  render(<App />, root);
+  initKeyboard();
+  initBackground();
+
+  if (__PP_BUILD__ === 'web' && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !import.meta.env.DEV) {
+    const { registerSW } = await import('virtual:pwa-register');
+    registerSW({ immediate: true });
+  }
+}
+
+void main();
