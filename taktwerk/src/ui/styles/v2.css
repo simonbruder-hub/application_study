@@ -124,7 +124,7 @@ a.brand:hover span { color: var(--tomato); }
 .dial-handle:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--phase) 35%, transparent); }
 .dial-handle:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 .dial-handle.is-dragging { cursor: grabbing; box-shadow: 0 0 0 6px color-mix(in srgb, var(--phase) 28%, transparent); }
-.dial-wrap.is-dragging .dial-arc, .dial-wrap.is-dragging .dial-knob { transition: none; }
+.dial-wrap.is-dragging .dial *, .timer-card:has(.is-dragging) :is(.j-done, .j-vehicle) { transition: none !important; }
 .dial-wrap.is-dragging .clock { color: var(--phase); }
 .dial-wrap.is-dragging .clock .ch { animation: none; }
 

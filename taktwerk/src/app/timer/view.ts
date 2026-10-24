@@ -39,9 +39,34 @@ export interface TimerView {
   frac: number;
   elapsedSec: number;
   plannedSec: number | null;
+  /** Pomodoro: Massstab des Kreises in Sekunden (frac = Restzeit / spanSec), bleibt beim Ziehen des Zeigers fest */
+  spanSec: number | null;
   phaseLabel: string;
   statusLabel: string;
   mood: Mood;
+}
+
+/**
+ * Massstab des Zifferblatts: zu Beginn einer Phase die geplante Dauer. Wird die Restzeit geändert (Zeiger ziehen,
+ * −5/+5), bleibt der Massstab gleich, damit der Zeiger dort weiterläuft, wo er losgelassen wurde. Er wächst nur,
+ * wenn die Restzeit grösser wird als der Kreis, und beginnt neu bei einem Phasenwechsel oder nach dem Zurücksetzen.
+ * Gemerkt pro Sitzung im Browser, damit der Zeiger auch nach dem Neuladen an der gleichen Stelle steht.
+ */
+const SPAN_KEY = 'taktwerk.dial-span';
+let span: { phase: TimerPhase; session: string | null; active: boolean; sec: number } | null = (() => {
+  try { return JSON.parse(localStorage.getItem(SPAN_KEY) ?? 'null'); } catch { return null; }
+})();
+function spanFor(phase: TimerPhase, session: string | null, active: boolean, custom: boolean, planned: number, restSec: number): number {
+  const prev = span;
+  // im Ruhezustand ohne eigene Dauer (frisch gewählte Phase, Vorlage) gilt einfach die geplante Dauer
+  const keep = custom && prev && prev.phase === phase && (prev.session === session || (!prev.active && active)) && !(prev.active && !active);
+  let sec = keep ? prev.sec : planned;
+  if (restSec > sec + 0.5) sec = restSec;
+  if (!prev || prev.sec !== sec || prev.phase !== phase || prev.session !== session || prev.active !== active) {
+    span = { phase, session, active, sec };
+    try { localStorage.setItem(SPAN_KEY, JSON.stringify(span)); } catch { /* nur im Speicher */ }
+  }
+  return sec;
 }
 
 export function readTimer(): TimerView {
@@ -58,6 +83,7 @@ export function readTimer(): TimerView {
   let clock: string;
   let frac: number;
   let plannedSec: number | null = null;
+  let spanSec: number | null = null;
   if (kind === 'stopwatch') {
     clock = fmtClock(elapsed / 1000, 'down');
     frac = (elapsed % 3_600_000) / 3_600_000;
@@ -65,13 +91,14 @@ export function readTimer(): TimerView {
     plannedSec = s.planned_seconds ?? timer.phaseSeconds(phase);
     const rem = idle ? plannedSec * 1000 : (remainingMs(s, t) ?? 0);
     clock = fmtClock(rem / 1000);
-    frac = plannedSec > 0 ? rem / (plannedSec * 1000) : 0;
+    spanSec = spanFor(phase, idle ? null : s.session_id, !idle, !idle || s.planned_seconds != null, plannedSec, rem / 1000);
+    frac = spanSec > 0 ? Math.min(1, rem / (spanSec * 1000)) : 0;
   }
   const phaseLabel = kind === 'stopwatch' ? 'Stechuhr' : PHASE_LABEL[phase];
   const statusLabel = running ? phaseLabel : paused ? 'Pausiert' : 'Bereit';
   const mood: Mood = running ? (phase === 'focus' ? 'focus' : 'break') : paused ? 'paused' : (flashMood.value ?? 'idle');
   return {
-    kind, phase, running, paused, active: !idle, clock, frac, elapsedSec: elapsed / 1000, plannedSec,
+    kind, phase, running, paused, active: !idle, clock, frac, elapsedSec: elapsed / 1000, plannedSec, spanSec,
     phaseLabel, statusLabel, mood,
   };
 }

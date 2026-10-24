@@ -82,13 +82,25 @@ function TimerCard() {
     // Läuft gerade die Feier (Pomodoro geschafft), kommt die Einblendung erst danach
     setCut((c) => ({ phase: v.phase, n: (c?.n ?? 0) + 1, late: flashMood.peek() === 'yay' }));
   }, [v.phase]);
-  // Zeiger ziehen (nur Pomodoro): Vorschau während des Ziehens, beim Loslassen auf die Sekunde genau
+  // Zeiger ziehen (nur Pomodoro): Vorschau während des Ziehens, beim Loslassen auf die Sekunde genau.
+  // Der Kreis behält seinen Massstab (spanSec); bis der neue Stand gespeichert ist, bleibt der Zeiger, wo er losgelassen wurde.
   const [dragFrac, setDragFrac] = useState<number | null>(null);
+  const [hold, setHold] = useState<{ frac: number; rest: number } | null>(null);
   const planned = v.plannedSec ?? 0;
-  const restSec = v.frac * planned;
+  const span = v.spanSec ?? planned;
+  const restSec = v.frac * span;
   /** Neue Restzeit für einen Zeiger-Anteil: ganze Sekunden, mindestens 5 s, höchstens 3 Stunden */
-  const restFor = (f: number) => Math.min(180 * 60, Math.max(5, Math.round(f * planned)));
-  const dragRest = dragFrac !== null ? restFor(dragFrac) : null;
+  const restFor = (f: number) => Math.min(180 * 60, Math.max(5, Math.round(f * span)));
+  const dragRest = dragFrac !== null ? restFor(dragFrac) : hold?.rest ?? null;
+  const shownFrac = dragFrac ?? hold?.frac ?? v.frac;
+  const dragging = dragFrac !== null || hold !== null;
+  const commitFrac = (f: number) => {
+    const target = restFor(f);
+    if (Math.abs(target - restSec) < 1) return;
+    setHold({ frac: Math.min(1, target / span), rest: target });
+    void timer.setRest(target).finally(() => setHold(null));
+  };
+  const seek = v.kind === 'pomodoro' && planned > 0 ? { onDrag: setDragFrac, onCommit: commitFrac } : undefined;
   const shownClock = dragRest !== null ? fmtClock(dragRest) : v.clock;
   const every = Math.max(1, set.long_break_every);
   const inRound = s.cycle % every;
@@ -132,15 +144,15 @@ function TimerCard() {
           })}
         </div>
       )}
-      <div class={`dial-wrap${v.running ? ' is-running' : ''}${prefs.value.showClock && dragFrac === null ? '' : dragFrac !== null ? ' is-dragging' : ' no-clock'}`}>
+      <div class={`dial-wrap${v.running ? ' is-running' : ''}${dragging ? ' is-dragging' : prefs.value.showClock ? '' : ' no-clock'}`}>
         <SkinDialFx skin={skin} />
-        <Dial frac={dragFrac !== null ? Math.min(1, dragFrac) : v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
+        <Dial frac={Math.min(1, shownFrac)} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
         {v.kind === 'pomodoro' && planned > 0 && (
           <DialHandle
-            frac={dragFrac ?? v.frac} seconds={Math.round(restSec)}
+            frac={shownFrac} seconds={Math.round(restSec)}
             label="Restzeit: Zeiger ziehen, Pfeiltasten ändern um 1 Minute, mit Umschalt um 10 Sekunden" valueText={fmtClock(restSec)}
             onDrag={setDragFrac}
-            onCommit={(f) => { const target = restFor(f); if (Math.abs(target - restSec) >= 1) void timer.setRest(target); }}
+            onCommit={commitFrac}
             onStep={(m) => void timer.adjust(m)}
           />
         )}
@@ -151,7 +163,7 @@ function TimerCard() {
         </div>
         {cut && <div key={cut.n} class="phase-wave" aria-hidden="true" />}
       </div>
-      <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} cycle={s.cycle} every={every} />
+      <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} cycle={s.cycle} every={every} frac={shownFrac} seek={seek} />
       {otherWs && <p class="ws-note">Dieser Timer läuft im Modus {WORKSPACE_LABEL[s.workspace]}.</p>}
       {v.kind === 'pomodoro'
         ? (

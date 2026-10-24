@@ -10,6 +10,8 @@
 /* Reise von A nach B */
 .journey { width: min(100%, 320px); }
 .journey svg { display: block; width: 100%; height: auto; overflow: visible; }
+.journey.is-seekable svg { cursor: grab; touch-action: none; }
+.journey.is-seekable svg:active { cursor: grabbing; }
 .j-route { stroke: var(--line-strong); stroke-width: 3; stroke-dasharray: 2 7; stroke-linecap: round; }
 .j-done { stroke: var(--phase); stroke-width: 4; stroke-linecap: round; transition: x2 0.4s linear; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--phase) 50%, transparent)); }
 .j-end { fill: var(--phase); }

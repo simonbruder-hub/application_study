@@ -112,33 +112,67 @@ test.describe('Timer', () => {
     await expect(clock(page)).toHaveText('22:00');
   });
 
-  test('Zeiger ziehen ändert die Restzeit auf die Sekunde, auch unter 1 Minute', async ({ page }) => {
+  test('Zeiger ziehen ändert die Restzeit auf die Sekunde und bleibt, wo er losgelassen wird', async ({ page }) => {
     await openApp(page);
-    const wrap = await page.locator('.dial-wrap').boundingBox();
-    const handle = await page.locator('.dial-handle').boundingBox();
-    if (!wrap || !handle) throw new Error('Zifferblatt fehlt');
+    const wrap = (await page.locator('.dial-wrap').boundingBox())!;
     const cx = wrap.x + wrap.width / 2;
     const cy = wrap.y + wrap.height / 2;
     const r = wrap.width * 0.39;
-    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-    await page.mouse.down();
-    const to = async (angles: number[]) => {
+    /** Winkel des Zeigers in Grad (0 = 12 Uhr, im Uhrzeigersinn) */
+    const angle = async () => {
+      const w = (await page.locator('.dial-wrap').boundingBox())!;
+      const h = (await page.locator('.dial-handle').boundingBox())!;
+      return ((Math.atan2(h.x + h.width / 2 - (w.x + w.width / 2), w.y + w.height / 2 - (h.y + h.height / 2)) * 180) / Math.PI + 360) % 360;
+    };
+    const drag = async (angles: number[]) => {
+      const h = (await page.locator('.dial-handle').boundingBox())!;
+      await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+      await page.mouse.down();
       for (const a of angles) {
         const rad = (a * Math.PI) / 180;
         await page.mouse.move(cx + r * Math.sin(rad), cy - r * Math.cos(rad));
       }
     };
     // gegen den Uhrzeigersinn von 12 Uhr nach 9 Uhr: drei Viertel von 25 Minuten = 18:45
-    await to([350, 330, 310, 290, 270]);
+    await drag([350, 330, 310, 290, 270]);
     await expect(clock(page)).toHaveText(/^18:4\d$/);
-    // weiter bis kurz vor 12 Uhr: wenige Sekunden
-    await to([200, 120, 40, 4]);
+    await page.mouse.up();
+    await expect(clock(page)).toHaveText(/^18:4\d$/);
+    await page.waitForTimeout(400);
+    expect(Math.abs((await angle()) - 270)).toBeLessThan(5);
+    // von dort weiter bis kurz vor 12 Uhr: wenige Sekunden
+    await drag([200, 120, 40, 4]);
     await expect(clock(page)).toHaveText(/^00:[12]\d$/);
     await page.mouse.up();
     await expect(clock(page)).toHaveText(/^00:[12]\d$/);
+    await page.waitForTimeout(400);
+    expect(await angle()).toBeLessThan(8);
     await page.locator('.dial-handle').press('ArrowUp');
     await expect(clock(page)).toHaveText(/^01:[12]\d$/);
     await page.locator('.dial-handle').press('Shift+ArrowDown');
     await expect(clock(page)).toHaveText(/^01:[01]\d$/);
+    // Start: der Zeiger springt nicht an den Anfang zurück
+    const before = await angle();
+    await page.locator('.btn-start').click();
+    await page.waitForTimeout(400);
+    expect(Math.abs((await angle()) - before)).toBeLessThan(3);
   });
+
+  test('Reise-Leiste ziehen ändert die Restzeit (Stil Rennen)', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'rennen', notifyAsked: true })));
+    await openApp(page);
+    const bar = (await page.locator('.journey svg').boundingBox())!;
+    const xAt = (p: number) => bar.x + ((22 + p * 236) / 280) * bar.width;
+    await page.mouse.move(xAt(0), bar.y + bar.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(xAt(0.3), bar.y + bar.height / 2);
+    await page.mouse.move(xAt(0.6), bar.y + bar.height / 2);
+    await expect(clock(page)).toHaveText(/^(09:5\d|10:0\d)$/);
+    await page.mouse.up();
+    await expect(clock(page)).toHaveText(/^(09:5\d|10:0\d)$/);
+    const x2 = Number(await page.locator('.j-done').getAttribute('x2'));
+    expect(x2).toBeGreaterThan(150);
+    expect(x2).toBeLessThan(176);
+  });
+
 });

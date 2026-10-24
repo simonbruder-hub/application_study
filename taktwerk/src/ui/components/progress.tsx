@@ -1,8 +1,10 @@
 /**
  * Fortschritts-Begleiter unter dem Zifferblatt: zeigen den Fortschritt der laufenden Phase (0..1) als
- * Bild, das wächst oder sich füllt (Tomate, Sanduhr, Reise, Baum, Blumen, Tauchtiefe …). Rein dekorativ.
+ * Bild, das wächst oder sich füllt (Tomate, Sanduhr, Reise, Baum, Blumen, Tauchtiefe …). Die Reise lässt sich
+ * wie der Zeiger ziehen (seek); alle anderen sind rein dekorativ.
  */
 import type { ComponentChildren } from 'preact';
+import { useRef } from 'preact/hooks';
 import { KNOB_PATH, type DialKnob } from './Dial';
 
 const clamp01 = (p: number) => Math.min(1, Math.max(0, p));
@@ -10,13 +12,42 @@ const pctText = (p: number) => `${Math.round(clamp01(p) * 100)} %`;
 
 /* ---------- Reise von A nach B (Rennen, Flug, Zug, Sci-Fi) ---------- */
 
-export function Journey({ p, from, to, vehicle, stops = 0, detail }: {
-  p: number; from: string; to: string; vehicle: Exclude<DialKnob, 'dot'>; stops?: number; detail?: ComponentChildren;
+/** Fortschritt ziehen: liefert den Zeiger-Anteil (Restzeit / Kreis), wie DialHandle */
+export interface Seek { onDrag: (frac: number | null) => void; onCommit: (frac: number) => void }
+
+export function Journey({ p, from, to, vehicle, stops = 0, detail, seek }: {
+  p: number; from: string; to: string; vehicle: Exclude<DialKnob, 'dot'>; stops?: number; detail?: ComponentChildren; seek?: Seek;
 }) {
   const x = 22 + clamp01(p) * 236;
+  const last = useRef(0);
+  // Position auf der Strecke → Anteil der Restzeit (am Ziel 0, am Start 1)
+  const fracAt = (e: PointerEvent) => {
+    const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * 280;
+    return 1 - clamp01((px - 22) / 236);
+  };
   return (
-    <div class="journey" aria-hidden="true">
-      <svg viewBox="0 0 280 40">
+    <div class={`journey${seek ? ' is-seekable' : ''}`} aria-hidden="true">
+      <svg
+        viewBox="0 0 280 40"
+        onPointerDown={seek && ((e) => {
+          e.preventDefault();
+          (e.currentTarget as SVGSVGElement).setPointerCapture(e.pointerId);
+          last.current = fracAt(e);
+          seek.onDrag(last.current);
+        })}
+        onPointerMove={seek && ((e) => {
+          if (!(e.currentTarget as SVGSVGElement).hasPointerCapture(e.pointerId)) return;
+          last.current = fracAt(e);
+          seek.onDrag(last.current);
+        })}
+        onPointerUp={seek && ((e) => {
+          if (!(e.currentTarget as SVGSVGElement).hasPointerCapture(e.pointerId)) return;
+          seek.onDrag(null);
+          seek.onCommit(last.current);
+        })}
+        onPointerCancel={seek && (() => seek.onDrag(null))}
+      >
         <line class="j-route" x1="22" y1="18" x2="258" y2="18" />
         <line class="j-done" x1="22" y1="18" x2={x.toFixed(1)} y2="18" />
         {Array.from({ length: stops }, (_, i) => {

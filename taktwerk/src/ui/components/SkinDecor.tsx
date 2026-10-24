@@ -8,7 +8,7 @@ import type { Skin } from '../skins';
 import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../app/timer/view';
 import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
-import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, TomatoFill, Tree, TREE_KINDS } from './progress';
+import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
 import { spaceRiderOpen } from '../game/SpaceRider';
 
@@ -298,11 +298,16 @@ function todaysPomodoros(): number {
   return entities.value.time_logs.filter((l) => l.counts_as_pomodoro && l.start_time >= start.getTime()).length;
 }
 
-export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
+export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.frac, seek }: {
   skin: Skin; v: TimerView; say: string; set: UserSettings; yay: boolean; cycle: number; every: number;
+  /** angezeigter Zeiger-Anteil (beim Ziehen die Vorschau) */
+  frac?: number;
+  /** Reise-Leiste ziehen wie den Zeiger (nur Pomodoro) */
+  seek?: Seek;
 }) {
-  // Fortschritt der laufenden Phase: 0 am Anfang, 1 am Ende (Stechuhr: Anteil der laufenden Stunde)
-  const p = yay ? 1 : !v.active ? 0 : v.kind === 'stopwatch' ? v.frac : 1 - v.frac;
+  // Fortschritt der laufenden Phase: 0 am Anfang, 1 am Ende (Stechuhr: Anteil der laufenden Stunde).
+  // Steht der Zeiger schon vor dem Start nicht mehr ganz oben, zeigt der Fortschritt das ebenfalls.
+  const p = yay ? 1 : v.kind === 'stopwatch' ? (v.active ? frac : 0) : !v.active && frac >= 1 ? 0 : 1 - Math.min(1, frac);
   const lap = `Runde ${(cycle % Math.max(1, every)) + 1} von ${Math.max(1, every)}`;
   switch (skin) {
     case 'klassisch':
@@ -350,9 +355,9 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
         </div>
       );
     case 'rennen':
-      return <Journey p={p} from="Start" to="Ziel" vehicle="car" detail={lap} />;
+      return <Journey p={p} from="Start" to="Ziel" vehicle="car" detail={lap} seek={seek} />;
     case 'flug':
-      return <Journey p={p} from="ZRH" to={pick(['CDG', 'FCO', 'LHR', 'BCN', 'JFK', 'NRT'], cycle)} vehicle="plane" detail={`FL ${Math.round(p * 350)}`} />;
+      return <Journey p={p} from="ZRH" to={pick(['CDG', 'FCO', 'LHR', 'BCN', 'JFK', 'NRT'], cycle)} vehicle="plane" detail={`FL ${Math.round(p * 350)}`} seek={seek} />;
     case 'meer':
       return <DepthGauge p={p} />;
     case 'flora':
@@ -360,7 +365,7 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
     case 'scifi':
       return (
         <div class="companion-stack">
-          <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} />
+          <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} seek={seek} />
           {v.kind === 'pomodoro' && v.phase !== 'focus' && (
             <button type="button" class="btn sr-open" onClick={() => (spaceRiderOpen.value = true)}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 L15 9 L21 13 L15 14 L13 20 H11 L9 14 L3 13 L9 9 Z" /></svg>
@@ -372,7 +377,7 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
     case 'elemente':
       return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
     case 'zug':
-      return <Journey p={p} from="Zürich HB" to={pick(ZUG_STOPS, cycle)} vehicle="train" stops={3} />;
+      return <Journey p={p} from="Zürich HB" to={pick(ZUG_STOPS, cycle)} vehicle="train" stops={3} seek={seek} />;
   }
 }
 

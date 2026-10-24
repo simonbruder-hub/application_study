@@ -34,7 +34,7 @@ export function initBackground(): () => void {
       title: `${v.clock} · ${v.phaseLabel}`,
       artist: title,
       durationSec: v.plannedSec,
-      positionSec: v.plannedSec !== null ? v.plannedSec * (1 - v.frac) : null,
+      positionSec: v.plannedSec !== null ? Math.max(0, v.plannedSec - v.frac * (v.spanSec ?? v.plannedSec)) : null,
     }, {
       play: () => { void app().timer.resume(); },
       pause: () => { void app().timer.pause(); },
