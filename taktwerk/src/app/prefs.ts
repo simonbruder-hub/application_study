@@ -6,6 +6,7 @@
 import { signal, effect } from '@preact/signals';
 import type { TimerKind, Workspace } from '../data/types';
 import { SKINS, type Skin } from '../ui/skins';
+import type { SoundId } from './timer/sounds';
 
 export interface TimerPreset {
   id: string;
@@ -25,6 +26,10 @@ export interface DevicePrefs {
   skin: Skin;
   /** Animationen der Stile: aus, dezent (nur ruhige Effekte) oder lebendig (alle Szenen) */
   motion: 'aus' | 'dezent' | 'lebendig';
+  /** Restzeit als Ziffern anzeigen (aus: nur Zifferblatt, lenkt weniger ab) */
+  showClock: boolean;
+  /** Signalton je Ereignis: Ende Fokus, Ende kurze Pause, Ende lange Pause */
+  sounds: Record<'focus' | 'short' | 'long', SoundId>;
   /** Timer-Art je Modus (Lernmodus standardmässig Pomodoro) */
   timerKind: Record<Workspace, TimerKind>;
   sound: boolean;
@@ -57,6 +62,8 @@ const DEFAULTS: DevicePrefs = {
   mode: 'auto',
   skin: 'klassisch',
   motion: 'lebendig',
+  showClock: true,
+  sounds: { focus: 'glocke', short: 'marimba', long: 'gong' },
   timerKind: { study: 'pomodoro', work: 'pomodoro' },
   sound: true,
   volume: 0.7,
@@ -80,6 +87,7 @@ function load(): DevicePrefs {
       ...structuredClone(DEFAULTS),
       ...saved,
       timerKind: { ...DEFAULTS.timerKind, ...(saved.timerKind ?? {}) },
+      sounds: { ...DEFAULTS.sounds, ...(saved.sounds ?? {}) },
       presets: Array.isArray(saved.presets) && saved.presets.length ? saved.presets : structuredClone(DEFAULT_PRESETS),
       lastProject: { ...(saved.lastProject ?? {}) },
       skin: SKINS.some((k) => k.id === saved.skin) ? saved.skin! : DEFAULTS.skin,

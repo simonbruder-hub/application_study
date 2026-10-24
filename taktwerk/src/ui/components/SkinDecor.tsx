@@ -14,6 +14,8 @@ const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 export const DIAL_STYLE: Partial<Record<Skin, { numerals?: boolean; knob?: DialKnob }>> = {
   barock: { numerals: true, knob: 'gem' },
   natur: { knob: 'leaf' },
+  rennen: { knob: 'car' },
+  flug: { knob: 'plane' },
 };
 
 /* ---------- Hintergrund ---------- */
@@ -77,6 +79,22 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
           <div class="petals leaves">{many(6)}</div>
           <div class="butterflies">{[0, 1, 2].map((i) => <span key={i}><i /><i /></span>)}</div>
           <div class="fireflies">{many(7)}</div>
+        </div>
+      );
+    case 'rennen':
+      return (
+        <div class="deco" aria-hidden="true">
+          <div class="checker" />
+          <div class="lights">{many(5)}</div>
+          <div class="streaks">{many(8)}</div>
+        </div>
+      );
+    case 'flug':
+      return (
+        <div class="deco" aria-hidden="true">
+          <div class="sky-f" />
+          <div class="clouds-f">{many(5)}</div>
+          <div class="stars-f" />
         </div>
       );
     case 'amtlich':
@@ -148,6 +166,8 @@ const CUT_IN: Record<Skin, Record<TimerView['phase'], [string, string]>> = {
   barock: { focus: ['Allegro', 'Fokus'], short_break: ['Intermezzo', 'Kurze Pause'], long_break: ['Adagio', 'Lange Pause'] },
   natur: { focus: ['Wachsen', 'Fokus'], short_break: ['Durchatmen', 'Kurze Pause'], long_break: ['Abendruhe', 'Lange Pause'] },
   amtlich: { focus: ['Antrag: Fokus', 'In Bearbeitung'], short_break: ['Bewilligt', 'Kaffeepause'], long_break: ['Bewilligt', 'Mittagspause'] },
+  rennen: { focus: ['Lights out!', 'Fokus'], short_break: ['Boxenstopp', 'Kurze Pause'], long_break: ['Safety Car', 'Lange Pause'] },
+  flug: { focus: ['Take-off', 'Fokus'], short_break: ['Reiseflughöhe', 'Kurze Pause'], long_break: ['Landeanflug', 'Lange Pause'] },
 };
 
 /** Welle durchs Zifferblatt und Banner im Stil; wird über key bei jedem Wechsel neu abgespielt */
@@ -210,6 +230,10 @@ export function SkinBadge({ skin, v }: { skin: Skin; v: TimerView }) {
       return <span class="scope-ch" aria-hidden="true">{stop ? 'Δt · 1 h/Umlauf' : PHASE_CHANNEL[v.phase]}</span>;
     case 'barock':
       return <span class="baroque-badge" aria-hidden="true">{stop ? 'Chronometrum' : PHASE_LATIN[v.phase]}</span>;
+    case 'rennen':
+      return <span class="race-badge" aria-hidden="true">{stop ? 'Zeitfahren' : v.phase === 'focus' ? 'Rennen' : v.phase === 'short_break' ? 'Box' : 'Safety Car'}</span>;
+    case 'flug':
+      return <span class="flight-badge" aria-hidden="true">{stop ? 'Flugzeit' : v.phase === 'focus' ? 'Steigflug' : v.phase === 'short_break' ? 'Reiseflug' : 'Sinkflug'}</span>;
     case 'amtlich':
       return <span class="form-label" aria-hidden="true">{stop ? 'Feld 1 · Laufzeit' : 'Feld 1 · Restzeit'}</span>;
     default:

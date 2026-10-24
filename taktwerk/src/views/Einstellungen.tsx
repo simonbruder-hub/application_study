@@ -7,6 +7,7 @@ import { viewParam } from '../app/router';
 import { app, resetLocalData } from '../app/services';
 import { now, settings, snapshot, syncStatus, timerState } from '../app/store';
 import { chimeNow, ensureAudio, requestNotifyPermission } from '../app/timer/signals';
+import { SOUNDS, type SoundId } from '../app/timer/sounds';
 import { sendLoginCode, signOut, verifyLoginCode } from '../sync/supabaseRemote';
 import { Seg, Stepper, Switch, WORKSPACE_LABEL } from '../ui/components/bits';
 import { confirmDialog } from '../ui/dialog';
@@ -101,6 +102,10 @@ function LookCard() {
         <Seg label="Darstellung" value={p.mode} wide onChange={(mode) => setPrefs({ mode })}
           options={[{ value: 'auto', label: 'Automatisch', icon: 'auto' }, { value: 'tag', label: 'Tag', icon: 'sun' }, { value: 'nacht', label: 'Nacht', icon: 'moon' }]} />
       </div>
+      <div style={{ marginTop: '12px' }}>
+        <Switch checked={p.showClock} onChange={(showClock) => setPrefs({ showClock })} label="Restzeit als Ziffern anzeigen"
+          hint="Aus: nur Zifferblatt und Phase, die Zeit lenkt nicht ab" />
+      </div>
       <div class="field" style={{ marginTop: '12px' }}><span class="field-label">Bewegung</span>
         <Seg label="Bewegung" value={p.motion} wide onChange={(motion) => setPrefs({ motion })}
           options={[{ value: 'aus', label: 'Aus' }, { value: 'dezent', label: 'Dezent' }, { value: 'lebendig', label: 'Lebendig' }]} />
@@ -143,6 +148,25 @@ function SignalCard() {
         <input id="vol" type="range" min={0} max={1} step={0.05} value={p.volume} onChange={(e) => setPrefs({ volume: Number(e.currentTarget.value) })} />
         <button type="button" class="btn btn-ghost btn-sm" onClick={() => { ensureAudio(); chimeNow('test', prefs.value.volume); }}><Icon name="bell" />Testen</button>
       </div>
+      {p.sound && (
+        <div class="sound-grid">
+          {([['focus', 'Ende Fokus', 'focusEnd'], ['short', 'Ende kurze Pause', 'shortEnd'], ['long', 'Ende lange Pause', 'longEnd']] as const).map(([key, label, kind]) => (
+            <div class="field" key={key}>
+              <label for={`snd-${key}`}>{label}</label>
+              <div class="row-gap">
+                <select id={`snd-${key}`} value={p.sounds[key]} onChange={(e) => {
+                  const id = e.currentTarget.value as SoundId;
+                  setPrefs({ sounds: { ...prefs.value.sounds, [key]: id } });
+                  chimeNow(kind, prefs.value.volume, id);
+                }}>
+                  {SOUNDS.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+                </select>
+                <button type="button" class="icon-btn" aria-label={`${label} anhören`} onClick={() => chimeNow(kind, prefs.value.volume)}><Icon name="play" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       <Switch checked={p.notify} onChange={(v) => void toggleNotify(v)} label="Benachrichtigungen" hint="Meldung, wenn eine Phase endet und die App im Hintergrund ist" />
       <Switch checked={p.wakeLock} onChange={(wakeLock) => setPrefs({ wakeLock })} label="Bildschirm wach halten" hint="Solange der Timer läuft" />
       <Switch checked={p.background} onChange={(background) => setPrefs({ background })} label="Hintergrund-Modus (Android)"

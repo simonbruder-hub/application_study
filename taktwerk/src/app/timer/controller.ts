@@ -10,8 +10,10 @@ import {
   adjustPlannedSeconds, elapsedMs, finishesAt, isFinished, pauseTimer, remainingMs, resumeTimer,
   sessionToTimeLog, startTimer, stopTimer,
 } from '../../domain/timerMath';
-import { cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, scheduleChime } from './signals';
+import { cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, scheduleChime, type ChimeKind } from './signals';
 import type { DevicePrefs } from '../prefs';
+
+const chimeFor = (phase: TimerPhase): ChimeKind => (phase === 'focus' ? 'focusEnd' : phase === 'short_break' ? 'shortEnd' : 'longEnd');
 
 export const PHASE_LABEL: Record<TimerPhase, string> = {
   focus: 'Fokus',
@@ -249,7 +251,7 @@ export class TimerController {
       const end = finishesAt(s) ?? now;
       const rang = chimeWasScheduledFor(end);
       const p = this.o.getPrefs();
-      if (!rang && p.sound) chimeNow(s.phase === 'focus' ? 'focusEnd' : 'breakEnd', p.volume);
+      if (!rang && p.sound) chimeNow(chimeFor(s.phase), p.volume);
       const seconds = s.phase === 'focus' ? await this.writeLog(s, end) : null;
       const next = await this.advance(s, end, true);
       const message = s.phase === 'focus'
@@ -312,7 +314,7 @@ export class TimerController {
     const p = this.o.getPrefs();
     const running = s.status === 'running';
     if (running && s.kind === 'pomodoro' && p.sound) {
-      scheduleChime(finishesAt(s), s.phase === 'focus' ? 'focusEnd' : 'breakEnd', p.volume);
+      scheduleChime(finishesAt(s), chimeFor(s.phase), p.volume);
     } else cancelChime();
     void holdWakeLock(running && p.wakeLock);
   }

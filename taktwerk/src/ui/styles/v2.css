@@ -108,3 +108,10 @@ a.brand:hover span { color: var(--tomato); }
 @media (max-width: 599px) { .install-btn span { display: none; } .install-btn { padding-inline: 8px; } }
 .install-steps { margin: 0 0 12px; padding-left: 22px; display: grid; gap: 8px; }
 .install-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+/* Signaltöne je Ereignis */
+.sound-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 6px 0 14px; }
+.sound-grid select { flex: 1; min-width: 0; }
+/* Ohne Ziffern: Zeit unsichtbar (für Screenreader weiterhin vorhanden), Phase gross */
+.dial-wrap.no-clock .clock { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.dial-wrap.no-clock .dial-sub { font-size: 17px; letter-spacing: 0.22em; color: var(--phase); }

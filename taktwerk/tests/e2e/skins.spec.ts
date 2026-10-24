@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { openApp, trackErrors } from './helpers';
 
-const SKINS = ['klassisch', 'anime', 'technik', 'barock', 'natur', 'amtlich'] as const;
+const SKINS = ['klassisch', 'anime', 'technik', 'barock', 'natur', 'amtlich', 'rennen', 'flug'] as const;
 
 test.describe('Stile', () => {
   for (const skin of SKINS) {

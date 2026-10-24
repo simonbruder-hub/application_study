@@ -4,10 +4,13 @@
  * Medien-Steuerung (Android-Benachrichtigung / Sperrbildschirm, hält die App im Hintergrund aktiv).
  */
 
+import { prefs } from '../prefs';
+import { playSound, type SoundId } from './sounds';
+
 let audio: AudioContext | null = null;
 let scheduled: { at: number; nodes: OscillatorNode[] } | null = null;
 
-export type ChimeKind = 'focusEnd' | 'breakEnd' | 'test';
+export type ChimeKind = 'focusEnd' | 'shortEnd' | 'longEnd' | 'test';
 
 /** Muss in einer Nutzeraktion (Klick, Taste) aufgerufen werden, sonst blockiert der Browser den Ton. */
 export function ensureAudio(): AudioContext | null {
@@ -24,31 +27,12 @@ export function ensureAudio(): AudioContext | null {
   return audio;
 }
 
-function playChime(kind: ChimeKind, volume: number, when?: number): OscillatorNode[] {
+/** Klang je Ereignis aus den Geräte-Einstellungen; «test» spielt einen bestimmten Klang zur Vorschau */
+function playChime(kind: ChimeKind, volume: number, when?: number, sound?: SoundId): OscillatorNode[] {
   const ctx = audio;
   if (!ctx) return [];
-  const at = when ?? ctx.currentTime + 0.02;
-  const vol = Math.min(1, Math.max(0, volume));
-  const notes = kind === 'focusEnd' ? [987.8, 784, 659.3] : kind === 'breakEnd' ? [659.3, 784, 987.8] : [784, 987.8];
-  const nodes: OscillatorNode[] = [];
-  notes.forEach((f, i) => {
-    const t0 = at + i * 0.24;
-    [1, 2.76].forEach((mult, k) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = 'sine';
-      o.frequency.value = f * mult;
-      const peak = (k === 0 ? 0.32 : 0.07) * vol + 0.0001;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(peak, t0 + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + (k === 0 ? 1.3 : 0.5));
-      o.connect(g).connect(ctx.destination);
-      o.start(t0);
-      o.stop(t0 + 1.4);
-      nodes.push(o);
-    });
-  });
-  return nodes;
+  const key = kind === 'focusEnd' ? 'focus' : kind === 'shortEnd' ? 'short' : 'long';
+  return playSound(ctx, sound ?? prefs.value.sounds[key], when ?? ctx.currentTime + 0.02, Math.min(1, Math.max(0, volume)));
 }
 
 /** Ton auf den Zeitpunkt endsAt (Epoch-ms) planen; ersetzt eine frühere Planung. */
@@ -72,9 +56,9 @@ export function chimeWasScheduledFor(endsAt: number): boolean {
   return hit;
 }
 
-export function chimeNow(kind: ChimeKind, volume: number): void {
+export function chimeNow(kind: ChimeKind, volume: number, sound?: SoundId): void {
   ensureAudio();
-  playChime(kind, volume);
+  playChime(kind, volume, undefined, sound);
 }
 
 /* ---------- Benachrichtigung ---------- */

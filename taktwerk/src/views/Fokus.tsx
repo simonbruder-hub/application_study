@@ -124,7 +124,7 @@ function TimerCard() {
           })}
         </div>
       )}
-      <div class={`dial-wrap${v.running ? ' is-running' : ''}`}>
+      <div class={`dial-wrap${v.running ? ' is-running' : ''}${prefs.value.showClock ? '' : ' no-clock'}`}>
         <SkinDialFx skin={skin} />
         <Dial frac={v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
         <div class="dial-center">

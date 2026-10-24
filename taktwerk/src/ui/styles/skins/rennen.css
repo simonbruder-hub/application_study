@@ -1,0 +1,61 @@
+/* Rennen: Asphalt, Randsteine rot-weiss, Rennwagen als Zeiger. Fokus = Rennen, Pause = Box, lange Pause = Safety Car. */
+:root[data-skin="rennen"] {
+  --bg: #eceef0;
+  --bg-layers: repeating-conic-gradient(#11111110 0 25%, transparent 0 50%) 0 0 / 28px 28px, linear-gradient(180deg, #f3f4f6, #e2e5e9);
+  --surface: #ffffff; --surface-2: #f2f3f5; --surface-3: #e3e6ea;
+  --ink: #111316; --ink-2: #33373d; --muted: #5e646c; --line: #d8dbe0; --line-strong: #9aa0a8; --outline: #111316;
+  --tomato: #e10600; --on-tomato: #ffffff; --sage: #00a651; --on-sage: #ffffff; --indigo: #f2a900; --on-indigo: #111316;
+  --link: #c00500; --focus-ring: #e10600; --dial-track: #3a3f46; --tick: #e10600; --tick-major: #ffffff;
+  --radius: 8px; --card-border: 1px solid var(--line); --card-shadow: 0 10px 26px -18px rgb(0 0 0 / 0.5);
+  --font-display: "Russo One", "Arial Black", system-ui, sans-serif;
+  --scene-short: linear-gradient(180deg, color-mix(in srgb, var(--sage) 14%, transparent), transparent 60%);
+  --scene-long: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--indigo) 12%, transparent) 0 26px, transparent 26px 52px);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="rennen"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --bg: #101215; --bg-layers: repeating-conic-gradient(#ffffff08 0 25%, transparent 0 50%) 0 0 / 28px 28px, radial-gradient(ellipse at 50% 0%, rgb(225 6 0 / 0.18), transparent 60%);
+    --surface: #181b20; --surface-2: #1f2329; --surface-3: #2a2f37; --ink: #f2f3f5; --ink-2: #c6cad1; --muted: #8d949e; --line: #2c3139; --line-strong: #4a515b; --outline: #f2f3f5;
+    --tomato: #ff2a1f; --on-tomato: #1a0302; --sage: #2fd47a; --on-sage: #06180d; --indigo: #ffc21a; --on-indigo: #1a1300; --link: #ff6a60; --dial-track: #2b3038;
+  }
+}
+:root[data-skin="rennen"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="rennen"][data-mode="nacht"] {
+  color-scheme: dark; --bg: #101215; --bg-layers: repeating-conic-gradient(#ffffff08 0 25%, transparent 0 50%) 0 0 / 28px 28px, radial-gradient(ellipse at 50% 0%, rgb(225 6 0 / 0.18), transparent 60%);
+  --surface: #181b20; --surface-2: #1f2329; --surface-3: #2a2f37; --ink: #f2f3f5; --ink-2: #c6cad1; --muted: #8d949e; --line: #2c3139; --line-strong: #4a515b; --outline: #f2f3f5;
+  --tomato: #ff2a1f; --on-tomato: #1a0302; --sage: #2fd47a; --on-sage: #06180d; --indigo: #ffc21a; --on-indigo: #1a1300; --link: #ff6a60; --dial-track: #2b3038;
+}
+[data-skin="rennen"] .view-head h1 { font-weight: 400; font-style: italic; letter-spacing: 0; }
+[data-skin="rennen"] .clock { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em; font-style: italic; }
+/* Strecke: Asphaltring, Randsteine aus den Strichen, Ideallinie in der Phasenfarbe */
+[data-skin="rennen"] .dial-track { stroke-width: 26; }
+[data-skin="rennen"] .dial-arc { stroke-width: 5; stroke-linecap: butt; stroke-dasharray: none; filter: drop-shadow(0 0 3px var(--phase)); }
+[data-skin="rennen"] .dial .tk { stroke-width: 6; stroke-linecap: butt; }
+[data-skin="rennen"] .dial .tk:nth-child(even) { stroke: #ffffff; }
+[data-skin="rennen"] .dial .tk-major { stroke: #ffffff; }
+[data-skin="rennen"] .dial-knob { fill: var(--phase); stroke: #111316; stroke-width: 1.2; filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.5)); }
+.race-badge { font: 400 12px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: #ffffff; background: var(--phase); padding: 4px 9px; transform: skewX(-12deg); }
+/* Zielflaggen-Streifen oben, Startampel, Fahrtwind */
+.checker { left: 0; right: 0; top: 0; height: 10px; background: repeating-conic-gradient(var(--ink) 0 25%, var(--surface) 0 50%) 0 0 / 10px 10px; }
+.lights { top: 18px; right: 16px; display: flex; gap: 4px; }
+.lights i { width: 10px; height: 10px; border-radius: 50%; background: #3a0000; box-shadow: inset 0 0 0 1px #000; }
+:root[data-run="0"] .lights i { background: #ff2a1f; box-shadow: 0 0 6px #ff2a1f; }
+:root[data-run="1"] .lights i { background: #1b5e20; animation: none; }
+.streaks { inset: 0; opacity: 0; transition: opacity 0.6s; }
+:root[data-phase="focus"][data-run="1"] .streaks { opacity: 1; }
+.streaks i { position: absolute; left: 0; height: 2px; width: 90px; border-radius: 2px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 30%, transparent)); animation: across 1.4s linear infinite; }
+.streaks i:nth-child(1) { top: 18%; } .streaks i:nth-child(2) { top: 31%; animation-delay: -0.4s; } .streaks i:nth-child(3) { top: 47%; animation-delay: -0.9s; animation-duration: 1.1s; }
+.streaks i:nth-child(4) { top: 62%; animation-delay: -0.2s; } .streaks i:nth-child(5) { top: 74%; animation-delay: -1.1s; animation-duration: 1.7s; }
+.streaks i:nth-child(6) { top: 86%; animation-delay: -0.6s; } .streaks i:nth-child(7) { top: 24%; animation-delay: -1.3s; width: 50px; } .streaks i:nth-child(8) { top: 55%; animation-delay: -0.7s; width: 60px; }
+.cutin-rennen .cutin-band { transform: skewX(-12deg); border-radius: 4px; background: var(--phase); }
+.cutin-rennen .cutin-band b, .cutin-rennen .cutin-band small { color: #ffffff; font-style: italic; }
+/* Feier: schwenkende Zielflagge */
+.cel-rennen .cel-flash { display: none; }
+.cel-rennen .p i { width: 12px; height: 12px; background: var(--c); border: 1px solid #00000033; }
+.cel-flag {
+  position: absolute; left: 50%; top: 18%; width: 220px; height: 140px; margin-left: -110px; transform-origin: 0 50%;
+  background: repeating-conic-gradient(#111111 0 25%, #ffffff 0 50%) 0 0 / 28px 28px; border: 3px solid #111111;
+  animation: flag-wave 0.5s ease-in-out infinite alternate, cel-flag 4s ease both;
+}
+@keyframes flag-wave { from { transform: perspective(500px) rotateY(-18deg) skewY(-4deg); } to { transform: perspective(500px) rotateY(18deg) skewY(4deg); } }
+@keyframes cel-flag { 0% { opacity: 0; } 10%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.cel-rennen .cel-text { top: 62%; }
+.cel-rennen .cel-text b { font-style: italic; color: var(--tomato); }

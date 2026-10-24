@@ -18,11 +18,13 @@ const TICKS = Array.from({ length: 60 }, (_, i) => {
 
 const ROMAN = ['XII', 'III', 'VI', 'IX'];
 
-export type DialKnob = 'dot' | 'leaf' | 'gem';
+export type DialKnob = 'dot' | 'leaf' | 'gem' | 'car' | 'plane';
 
 const KNOB_PATH: Record<Exclude<DialKnob, 'dot'>, string> = {
   leaf: 'M0 -13 C9 -7 9 7 0 13 C-9 7 -9 -7 0 -13 Z M0 -10 V10',
   gem: 'M0 -12 L8 0 L0 12 L-8 0 Z',
+  car: 'M-12 -6 H6 Q13 -6 14 0 Q13 6 6 6 H-12 Q-14 6 -14 4 V-4 Q-14 -6 -12 -6 Z M1 -4 H5 V4 H1 Z M-13 -9 H-9 V9 H-13 Z M-8 -9 H-4 V-7 H-8 Z M-8 7 H-4 V9 H-8 Z M4 -9 H8 V-7 H4 Z M4 7 H8 V9 H4 Z',
+  plane: 'M15 0 Q14 -2 8 -2 L-9 -1.6 L-13 -6 L-15.5 -6 L-13.5 0 L-15.5 6 L-13 6 L-9 1.6 L8 2 Q14 2 15 0 Z M5 -1.5 L-2 -14 L-5.5 -14 L-2.5 -1.5 Z M5 1.5 L-2 14 L-5.5 14 L-2.5 1.5 Z',
 };
 
 /** Kometenschweif: kurze Bogenstücke hinter dem Zeiger, nach aussen blasser */
@@ -68,7 +70,7 @@ export function Dial({ frac, numerals = false, knob = 'dot', trail = 1 }: { frac
       <g class="sec-orbit" style={{ animationDelay: secDelay }}><circle cx="160" cy="14" r="3.6" /></g>
       {knob === 'dot'
         ? <circle class="dial-knob" cx={kx} cy={ky} r="8" />
-        : <path class={`dial-knob dial-knob-${knob}`} d={KNOB_PATH[knob]} transform={`translate(${kx} ${ky}) rotate(${(f * 360).toFixed(1)})`} />}
+        : <path class={`dial-knob dial-knob-${knob}`} d={KNOB_PATH[knob]} fill-rule="evenodd" transform={`translate(${kx} ${ky}) rotate(${(f * 360 + (trail > 0 ? 180 : 0)).toFixed(1)})`} />}
     </svg>
   );
 }

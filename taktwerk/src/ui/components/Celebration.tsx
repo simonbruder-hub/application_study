@@ -36,6 +36,8 @@ const TEXT: Record<Skin, [string, string]> = {
   barock: ['Bravissimo!', 'Opus vollendet'],
   natur: ['Aufgeblüht!', 'Session geschafft'],
   amtlich: ['Erledigt', 'Akte geschlossen'],
+  rennen: ['Sieg!', 'Zielflagge'],
+  flug: ['Gelandet!', 'Session geschafft'],
 };
 
 export function CelebrationLayer() {
@@ -116,6 +118,22 @@ function build(skin: Skin) {
         <div key="bloom" class="cel-bloom">{Array.from({ length: 8 }, (_, i) => <i key={i} style={{ '--a': `${i * 45}deg` }} />)}</div>,
         ...petals.map((b, i) => <span key={i} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class={i % 5 === 4 ? 'leaf' : 'petal'} /></span>),
         ...flyers.map((f, i) => <span key={`f${i}`} class="p fly" style={f}><b><i /><i /></b></span>),
+      ];
+    }
+    case 'rennen': {
+      // Zielflagge: schwarz-weisse Karos und Champagner-Gold aus beiden Ecken
+      const bits = thrown(64, (i) => (i % 2 ? [102, 100] : [-2, 100]), (i) => ({
+        '--dx': `${((i % 2 ? -1 : 1) * rand(15, 60)).toFixed(1)}vw`, '--up': `${-rand(45, 90).toFixed(0)}vh`, '--fall': `${rand(-5, 25).toFixed(0)}vh`,
+        '--rot': `${rand(-720, 720).toFixed(0)}deg`, '--t': `${rand(2.6, 3.6).toFixed(2)}s`,
+      }), ['#111111', '#ffffff', '#ffd60a', '#e10600']);
+      return [<div key="flag" class="cel-flag" />, ...bits.map((b, i) => <span key={i} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i /></span>)];
+    }
+    case 'flug': {
+      // Kunstflug: Flugzeug zieht eine Schleife, dazu Wolkenpuffs und Konfetti
+      const puffs = rays(24, [140, 380], ['#ffffff', '#d6ecff', 'var(--tomato)', '#ffd60a']);
+      return [
+        <div key="loop" class="cel-loop"><svg viewBox="-16 -16 32 32"><path d="M15 0 Q14 -2 8 -2 L-9 -1.6 L-13 -6 L-15.5 -6 L-13.5 0 L-15.5 6 L-13 6 L-9 1.6 L8 2 Q14 2 15 0 Z M5 -1.5 L-2 -14 L-5.5 -14 L-2.5 -1.5 Z M5 1.5 L-2 14 L-5.5 14 L-2.5 1.5 Z" /></svg></div>,
+        ...puffs.map((r, i) => <span key={i} class="p ray" style={r.style}><i /></span>),
       ];
     }
     case 'amtlich': {

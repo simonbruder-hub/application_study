@@ -3,7 +3,7 @@
  * data-skin auf <html>); hier stehen Name, Vorschaufarben, Browser-Farbe und nachzuladende Schriften.
  */
 
-export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich';
+export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug';
 
 export interface SkinInfo {
   id: Skin;
@@ -46,6 +46,16 @@ export const SKINS: readonly SkinInfo[] = [
     id: 'amtlich', label: 'Amtlich', hint: 'Formular, Kaffeepause und Stempel',
     swatch: ['#ffffff', '#d52b1e', '#111111'], bar: ['#f2f2f0', '#0f141a'],
     fonts: 'Inter:wght@400;600;800&family=IBM+Plex+Mono:wght@500',
+  },
+  {
+    id: 'rennen', label: 'Rennen', hint: 'Rennwagen dreht Runden, Zielflagge',
+    swatch: ['#16181c', '#e10600', '#ffd60a'], bar: ['#eceef0', '#101215'],
+    fonts: 'Russo+One',
+  },
+  {
+    id: 'flug', label: 'Flug', hint: 'Flugzeug umrundet die Uhr, Wolken ziehen',
+    swatch: ['#d6ecff', '#1e6fd9', '#ffffff'], bar: ['#e3f1ff', '#0a1630'],
+    fonts: 'Exo+2:wght@500;800',
   },
 ];
 
