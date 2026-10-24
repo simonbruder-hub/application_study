@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: pomodoro-planer
+        working-directory: taktwerk
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: pomodoro-planer/package-lock.json
+          cache-dependency-path: taktwerk/package-lock.json
       - run: npm ci
       - name: Typprüfung
         run: npm run typecheck
@@ -31,9 +31,9 @@ jobs:
         run: npm test
       - name: Datenbank-Tests (PostgreSQL 16 des Runners)
         run: npm run db:test
-      - name: Build v2 (PWA und Einzeldatei)
+      - name: Build (PWA und Einzeldatei)
         run: |
-          npm run build:v2
+          npm run build
           npm run build:single
       - name: Browser installieren
         run: npx playwright install --with-deps chromium

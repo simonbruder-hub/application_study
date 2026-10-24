@@ -26,30 +26,27 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: pomodoro-planer/package-lock.json
+          cache-dependency-path: taktwerk/package-lock.json
       - name: Abhängigkeiten installieren
-        working-directory: pomodoro-planer
+        working-directory: taktwerk
         run: npm ci
-      - name: v1-Einzeldatei bauen
-        working-directory: pomodoro-planer
-        run: npm run build
-      - name: v2 bauen (PWA und Einzeldatei)
-        working-directory: pomodoro-planer
+      - name: Taktwerk bauen (PWA und Einzeldatei)
+        working-directory: taktwerk
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: |
-          npm run build:v2
+          npm run build
           npm run build:single
       - name: Seite zusammenstellen
         run: |
-          mkdir -p _site/pomodoro-planer
+          mkdir -p _site/taktwerk
           cp index.html _site/
-          rsync -a \
-            --exclude node_modules --exclude src --exclude dist --exclude scripts --exclude supabase --exclude v2 \
-            --exclude tests --exclude 'package*.json' --exclude '*.config.ts' --exclude 'tsconfig.json' --exclude '.npmrc' \
-            pomodoro-planer/ _site/pomodoro-planer/
-          cp -r pomodoro-planer/dist/v2 _site/pomodoro-planer/v2
+          cp -r taktwerk/site/. _site/taktwerk/
+          cp -r taktwerk/dist/app _site/taktwerk/app
+          cp taktwerk/dist/single/index.html _site/taktwerk/taktwerk.html
+          # Frühere Adresse (/pomodoro-planer/v2/) leitet auf die App weiter
+          cp -r .github/pages-legacy/. _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
