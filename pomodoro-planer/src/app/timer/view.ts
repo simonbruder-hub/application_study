@@ -17,6 +17,8 @@ export const PHASE_ATTR: Record<TimerPhase, 'focus' | 'short' | 'long'> = {
   focus: 'focus', short_break: 'short', long_break: 'long',
 };
 export const PHASE_KANJI: Record<TimerPhase, string> = { focus: '集中', short_break: '休憩', long_break: '休息' };
+/** Technik-Stil: Phasen wie Messkanäle am Oszilloskop */
+export const PHASE_CHANNEL: Record<TimerPhase, string> = { focus: 'CH1 Fokus', short_break: 'CH2 Pause', long_break: 'CH3 Pause' };
 
 /** Kurz nach einem geschafften Pomodoro jubelt das Maskottchen */
 export const flashMood = signal<Mood | null>(null);

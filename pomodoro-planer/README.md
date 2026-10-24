@@ -21,7 +21,7 @@ Beim ersten Start übernimmt Version 2 automatisch die Daten von Version 1 im se
 - **Projekte und Aufgaben** – Aufgaben gehören zu einem Projekt, mit Status, Priorität, Fälligkeit und Schätzung in Pomodoros oder Stunden. ▶ bei einer Aufgabe startet den Timer dafür; die Zeit wird ihr gutgeschrieben.
 - **Auswertung** – Woche, Monat, Jahr: Verlauf nach Projekt, Vergleich mit der Vorperiode, Protokoll, Zeit nachtragen, Zusammenfassung zum Kopieren, CSV- und Excel-Export.
 - **Sync** – Mit einem kostenlosen Supabase-Projekt erscheinen Änderungen auf allen Geräten, auch der laufende Timer: auf dem Laptop starten, auf dem Handy pausieren. Offline wird alles lokal gespeichert und später übertragen. Anzeige oben rechts: grün = synchron, gelb = offline, rot = Fehler, grau = nur lokal.
-- **Darstellung** – Tag, Nacht oder automatisch, dazu der **Anime-Stil** mit Tomaten-Chan.
+- **Darstellung** – Tag, Nacht oder automatisch, dazu der **Anime-Stil** mit Tomaten-Chan und der **Technik-Stil** (Tag: Datenblatt mit Raster, Nacht: Oszilloskop mit Kanälen CH1 Fokus, CH2/CH3 Pause).
 
 ### Tastenkürzel
 
@@ -43,7 +43,7 @@ Beim ersten Start übernimmt Version 2 automatisch die Daten von Version 1 im se
 2. **Laptop:** in Chrome oder Edge rechts in der Adressleiste auf das Installieren-Symbol klicken (oder *Einstellungen → App installieren*).
 3. **Android:** in Chrome im Menü ⋮ **«App installieren»** wählen.
 
-Auf Android in den Einstellungen **«Hintergrund-Modus»** einschalten: Dann bleibt der Timer aktiv, wenn die App minimiert ist, klingelt pünktlich und lässt sich über die Benachrichtigung starten und pausieren.
+Auf dem Handy ist der **«Hintergrund-Modus»** automatisch eingeschaltet: Der Timer bleibt aktiv, wenn die App minimiert oder der Bildschirm gesperrt ist, klingelt pünktlich und lässt sich über die Benachrichtigung starten und pausieren. Beim ersten Start des Timers fragt die App einmal, ob sie Benachrichtigungen senden darf: **Zulassen** wählen, sonst meldet sie sich bei gesperrtem Handy nicht.
 
 **Einzeldatei:** [`download/pomodoro-planer-v2.html`](download/pomodoro-planer-v2.html) herunterladen (auf GitHub «Download raw file») und per Doppelklick öffnen. Läuft ohne Internet; die Daten liegen dann im Browser für genau diese Datei.
 

@@ -2,6 +2,7 @@
 import { render } from 'preact';
 import './ui/styles/app.css';
 import './ui/styles/v2.css';
+import './ui/styles/technik.css';
 import { App } from './App';
 import { initBackground } from './app/background';
 import { initKeyboard } from './app/keyboard';

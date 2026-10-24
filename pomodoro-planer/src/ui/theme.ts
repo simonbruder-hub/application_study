@@ -1,5 +1,5 @@
 /**
- * Darstellung: Tag / Nacht / automatisch (System) und Stil klassisch / Anime. Gesetzt als
+ * Darstellung: Tag / Nacht / automatisch (System) und Stil klassisch / Anime / Technik. Gesetzt als
  * data-mode / data-skin auf <html>; die Farben kommen aus den Tokens in app.css.
  */
 import { effect, signal } from '@preact/signals';
@@ -39,8 +39,10 @@ export function initTheme(): () => void {
   return effect(() => {
     applyThemeTo(document);
     const dark = isDark();
-    const anime = prefs.value.skin === 'anime';
-    const color = anime ? (dark ? '#130d26' : '#fdf1f6') : dark ? '#0d1214' : '#edf1f0';
+    const skin = prefs.value.skin;
+    const color = skin === 'anime' ? (dark ? '#130d26' : '#fdf1f6')
+      : skin === 'technik' ? (dark ? '#040a09' : '#e9eff4')
+        : dark ? '#0d1214' : '#edf1f0';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
   });
 }

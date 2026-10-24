@@ -92,7 +92,8 @@ export async function requestNotifyPermission(): Promise<NotificationPermission 
 export function notify(title: string, body: string): void {
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    const opts: NotificationOptions = { body, tag: 'pomodoro', icon: './icon-192.png' };
+    // renotify: gleiche Kennung ersetzt die alte Meldung, soll aber trotzdem wieder klingeln/vibrieren
+    const opts = { body, tag: 'pomodoro', icon: './icon-192.png', renotify: true, vibrate: [200, 100, 200] } as NotificationOptions;
     if (navigator.serviceWorker?.controller) {
       void navigator.serviceWorker.ready.then((reg) => reg.showNotification(title, opts)).catch(() => undefined);
     } else new Notification(title, opts);

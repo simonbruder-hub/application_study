@@ -10,9 +10,21 @@ import { SyncEngine, saveLocalSettings } from '../sync/syncEngine';
 import { TimerSync } from '../sync/timerSync';
 import { SupabaseRemote, createSupabaseClient } from '../sync/supabaseRemote';
 import type { RemoteStore } from '../sync/remote';
-import { loadBackendConfig, prefs, type BackendConfig } from './prefs';
+import { loadBackendConfig, prefs, setPrefs, type BackendConfig } from './prefs';
 import { settings, startClock, syncStatus, timerState, watchDatabase } from './store';
 import { TimerController, type PhaseCompleteInfo } from './timer/controller';
+import { requestNotifyPermission } from './timer/signals';
+
+/**
+ * Beim ersten Timer-Start einmalig nach Benachrichtigungen fragen: Ohne sie meldet sich die App
+ * bei gesperrtem Handy oder verdecktem Fenster nicht. Muss synchron in der Nutzeraktion laufen.
+ */
+function askNotifyOnce(): void {
+  if (prefs.value.notifyAsked) return;
+  setPrefs({ notifyAsked: true });
+  if (prefs.value.notify) return;
+  void requestNotifyPermission().then((res) => { if (res === 'granted') setPrefs({ notify: true }); });
+}
 
 export interface AppServices {
   db: PlannerDB;
@@ -73,6 +85,7 @@ export async function bootstrap(): Promise<AppServices> {
     getSettings: () => settings.value,
     getPrefs: () => prefs.value,
     onPhaseComplete: (info: PhaseCompleteInfo) => phaseEvents.dispatchEvent(new CustomEvent('complete', { detail: info })),
+    onUserStart: askNotifyOnce,
   });
 
   watchDatabase(db);

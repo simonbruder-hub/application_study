@@ -21,7 +21,7 @@ export interface DevicePrefs {
   /** Darstellung: automatisch / Tag / Nacht */
   mode: 'auto' | 'tag' | 'nacht';
   /** Stil */
-  skin: 'klassisch' | 'anime';
+  skin: 'klassisch' | 'anime' | 'technik';
   /** Timer-Art je Modus (Lernmodus standardmässig Pomodoro) */
   timerKind: Record<Workspace, TimerKind>;
   sound: boolean;
@@ -30,6 +30,8 @@ export interface DevicePrefs {
   wakeLock: boolean;
   /** Stille Medienwiedergabe hält die App auf Android im Hintergrund aktiv */
   background: boolean;
+  /** Beim ersten Timer-Start wurde nach Benachrichtigungen gefragt */
+  notifyAsked: boolean;
   presets: TimerPreset[];
   /** Zuletzt gewähltes Projekt je Modus (Vorbelegung beim Anlegen) */
   lastProject: Partial<Record<Workspace, string>>;
@@ -44,6 +46,9 @@ export const DEFAULT_PRESETS: TimerPreset[] = [
   { id: 'deep', name: 'Deep Work', focus: 90, short: 15, long: 30, longEvery: 2 },
 ];
 
+/** Handy/Tablet: dort braucht der Timer den Hintergrund-Modus, sonst schläft er bei gesperrtem Bildschirm ein */
+const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
 const DEFAULTS: DevicePrefs = {
   workspace: 'study',
   mode: 'auto',
@@ -53,7 +58,8 @@ const DEFAULTS: DevicePrefs = {
   volume: 0.7,
   notify: false,
   wakeLock: false,
-  background: false,
+  background: touch,
+  notifyAsked: false,
   presets: DEFAULT_PRESETS,
   lastProject: {},
   mini: false,
@@ -72,6 +78,8 @@ function load(): DevicePrefs {
       timerKind: { ...DEFAULTS.timerKind, ...(saved.timerKind ?? {}) },
       presets: Array.isArray(saved.presets) && saved.presets.length ? saved.presets : structuredClone(DEFAULT_PRESETS),
       lastProject: { ...(saved.lastProject ?? {}) },
+      // Einstellungen von vor diesem Feld: auf dem Handy den Hintergrund-Modus einmalig einschalten
+      ...(saved.notifyAsked === undefined && touch ? { background: true } : {}),
     };
   } catch {
     return structuredClone(DEFAULTS);

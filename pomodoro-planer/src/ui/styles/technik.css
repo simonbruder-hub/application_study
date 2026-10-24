@@ -1,0 +1,96 @@
+/* Technik-Stil. Tag: Datenblatt mit Millimeterraster, Tinte in Marineblau. Nacht: Oszilloskop,
+ * grünes Raster, Leuchtspur. Phasen wie Messkanäle: CH1 = Fokus, CH2 = kurze, CH3 = lange Pause. */
+
+:root[data-skin="technik"] {
+  --bg: #e9eff4;
+  --grid: rgb(28 84 140 / 0.07);
+  --grid-major: rgb(28 84 140 / 0.13);
+  --bg-layers:
+    linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 24px 24px;
+  --surface: #f8fbfd; --surface-2: #eef3f7; --surface-3: #dde6ee;
+  --ink: #0d2235; --ink-2: #2e4a63; --muted: #557089; --line: #cdd9e3; --line-strong: #a3b8ca; --outline: #0d2235;
+  --tomato: #c8361d; --on-tomato: #ffffff; --sage: #00776a; --on-sage: #ffffff; --indigo: #6a3fc4; --on-indigo: #ffffff;
+  --link: #0b5cad; --focus-ring: #0b5cad;
+  --speed: rgb(13 34 53 / 0.06);
+  --dial-track: #dde6ee; --tick: #a3b8ca; --tick-major: #0d2235;
+  --card-border: 1px solid var(--line-strong);
+  --card-shadow: 0 1px 0 rgb(13 34 53 / 0.06);
+  --radius: 6px;
+  --glow: 0;
+  --font-display: "Martian Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* Nacht: Oszilloskop. Drei Blöcke wie beim Anime-Stil (System, Viewer-Schalter, eigene Wahl). */
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="technik"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark;
+    --bg: #040a09;
+    --grid: rgb(60 245 154 / 0.05);
+    --grid-major: rgb(60 245 154 / 0.1);
+    --surface: #08130f; --surface-2: #0d1c17; --surface-3: #15302a;
+    --ink: #d4f7e4; --ink-2: #a3d9bd; --muted: #6f9e87; --line: #163128; --line-strong: #25493c; --outline: #3cf59a;
+    --tomato: #ffd23f; --on-tomato: #1a1400; --sage: #35e0ff; --on-sage: #001a20; --indigo: #ff6ad5; --on-indigo: #22001c;
+    --leaf: #4cf28f; --link: #5ff0a8; --focus-ring: #5ff0a8; --good: #4cf28f; --warn: #ffb84a; --bad: #ff6b6b;
+    --speed: rgb(60 245 154 / 0.08);
+    --dial-track: #10241d; --tick: #25493c; --tick-major: #8ff5c0;
+    --card-shadow: 0 12px 32px -20px rgb(0 0 0 / 0.9);
+    --glow: 1;
+  }
+}
+:root[data-skin="technik"][data-theme="dark"]:not([data-mode="tag"]),
+:root[data-skin="technik"][data-mode="nacht"] {
+  color-scheme: dark;
+  --bg: #040a09;
+  --grid: rgb(60 245 154 / 0.05);
+  --grid-major: rgb(60 245 154 / 0.1);
+  --surface: #08130f; --surface-2: #0d1c17; --surface-3: #15302a;
+  --ink: #d4f7e4; --ink-2: #a3d9bd; --muted: #6f9e87; --line: #163128; --line-strong: #25493c; --outline: #3cf59a;
+  --tomato: #ffd23f; --on-tomato: #1a1400; --sage: #35e0ff; --on-sage: #001a20; --indigo: #ff6ad5; --on-indigo: #22001c;
+  --leaf: #4cf28f; --link: #5ff0a8; --focus-ring: #5ff0a8; --good: #4cf28f; --warn: #ffb84a; --bad: #ff6b6b;
+  --speed: rgb(60 245 154 / 0.08);
+  --dial-track: #10241d; --tick: #25493c; --tick-major: #8ff5c0;
+  --card-shadow: 0 12px 32px -20px rgb(0 0 0 / 0.9);
+  --glow: 1;
+}
+
+/* Kanten statt Pillen: wirkt wie Frontplatte und Datenblatt */
+[data-skin="technik"] :is(.btn, .chip, .badge, .cchip, .phase-tabs, .phase-tab, .seg, .seg-btn, .ws-switch, .ws-btn, .icon-btn, .nav-item, .tab, .sync, .toast, .btn-start, .btn-round) { border-radius: 5px; }
+[data-skin="technik"] :is(.view-head h1, .brand) { letter-spacing: -0.03em; font-weight: 600; }
+[data-skin="technik"] .brand { font-size: 13px; }
+[data-skin="technik"] .round-dots i { border-radius: 2px; }
+
+/* Messschirm: Raster mit 8 x 8 Teilungen hinter dem Zifferblatt */
+[data-skin="technik"] .timer-card {
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+[data-skin="technik"] .dial-track { stroke-width: 10; stroke-dasharray: 2 5; stroke: var(--tick); }
+[data-skin="technik"] .dial-arc { stroke-width: 10; stroke-linecap: butt; }
+[data-skin="technik"] .dial-knob { r: 6; fill: var(--phase); stroke: var(--surface); stroke-width: 3; }
+[data-skin="technik"] .clock { letter-spacing: -0.02em; }
+[data-skin="technik"] .mini-clock { letter-spacing: -0.02em; }
+
+/* Leuchtspur nur im Nachtmodus */
+[data-skin="technik"] .dial-arc { filter: drop-shadow(0 0 calc(var(--glow) * 5px) var(--phase)); }
+[data-skin="technik"] :is(.clock, .mini-clock) { text-shadow: 0 0 calc(var(--glow) * 14px) color-mix(in srgb, var(--phase) 60%, transparent); }
+
+/* Kanal-Anzeige über der Uhr (CH1 Fokus, CH2/CH3 Pause, Δt Stechuhr) */
+.scope-ch {
+  font: 600 11px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--phase); border: 1px solid currentColor; border-radius: 3px; padding: 4px 7px;
+  box-shadow: 0 0 calc(var(--glow, 0) * 8px) color-mix(in srgb, var(--phase) 40%, transparent);
+}
+.dial-wrap.is-running .scope-ch::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
+
+@media (forced-colors: active) {
+  [data-skin="technik"] .timer-card { background-image: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dial-wrap.is-running .scope-ch::before { animation: none; }
+}

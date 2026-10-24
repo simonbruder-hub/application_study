@@ -102,7 +102,7 @@ function LookCard() {
       </div>
       <div class="field" style={{ marginTop: '12px' }}><span class="field-label">Stil</span>
         <Seg label="Stil" value={p.skin} wide onChange={(skin) => setPrefs({ skin })}
-          options={[{ value: 'klassisch', label: 'Klassisch' }, { value: 'anime', label: 'Anime' }]} />
+          options={[{ value: 'klassisch', label: 'Klassisch' }, { value: 'anime', label: 'Anime' }, { value: 'technik', label: 'Technik' }]} />
       </div>
     </section>
   );

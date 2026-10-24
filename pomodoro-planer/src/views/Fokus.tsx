@@ -11,7 +11,7 @@ import { app } from '../app/services';
 import { settings, timerState, workspaceData } from '../app/store';
 import { minimize } from '../app/pip';
 import { PHASE_LABEL } from '../app/timer/controller';
-import { PHASE_ATTR, PHASE_KANJI, readTimer } from '../app/timer/view';
+import { PHASE_ATTR, PHASE_CHANNEL, PHASE_KANJI, readTimer } from '../app/timer/view';
 import { Dial, Mascot, MOOD_LINES } from '../ui/components/Dial';
 import {
   Meter, PomoDots, ProjectChip, Seg, WORKSPACE_ICON, WORKSPACE_LABEL,
@@ -71,6 +71,7 @@ function TimerCard() {
   const ws = prefs.value.workspace;
   const { timer } = app();
   const anime = prefs.value.skin === 'anime';
+  const technik = prefs.value.skin === 'technik';
   const every = Math.max(1, set.long_break_every);
   const inRound = s.cycle % every;
   const otherWs = v.active && s.workspace !== ws;
@@ -116,6 +117,7 @@ function TimerCard() {
         <Dial frac={v.frac} />
         <div class="dial-center">
           {anime && <span class="kanji" aria-hidden="true">{v.kind === 'stopwatch' ? '計時' : PHASE_KANJI[v.phase]}</span>}
+          {technik && <span class="scope-ch" aria-hidden="true">{v.kind === 'stopwatch' ? 'Δt Messung' : PHASE_CHANNEL[v.phase]}</span>}
           <div class="clock mono" role="timer" aria-live="off">{v.clock}</div>
           <div class="dial-sub">{v.statusLabel}</div>
         </div>

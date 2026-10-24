@@ -43,6 +43,8 @@ export interface TimerControllerOptions {
   getPrefs: () => DevicePrefs;
   onPhaseComplete?: (info: PhaseCompleteInfo) => void;
   onLogged?: (seconds: number) => void;
+  /** Start durch eine Nutzeraktion (z. B. um einmalig nach Benachrichtigungen zu fragen) */
+  onUserStart?: () => void;
 }
 
 export class TimerController {
@@ -115,6 +117,7 @@ export class TimerController {
   /** Neue Sitzung im aktuellen Modus starten */
   async begin(at?: number): Promise<void> {
     ensureAudio();
+    this.o.onUserStart?.();
     const ws = this.o.getPrefs().workspace;
     await this.o.timerSync.transition((s, now) => {
       const kind = this.kindFor(ws);
