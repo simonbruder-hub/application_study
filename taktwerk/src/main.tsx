@@ -16,6 +16,8 @@ import './ui/styles/skins/flora.css';
 import './ui/styles/skins/scifi.css';
 import './ui/styles/skins/elemente.css';
 import './ui/styles/skins/zug.css';
+import './ui/styles/skins/weihnacht.css';
+import './ui/styles/skins/halloween.css';
 import './ui/styles/skins/progress.css';
 import './ui/styles/skins/celebration.css';
 import './ui/styles/skins/spectacle.css';

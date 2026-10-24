@@ -7,12 +7,14 @@ import type { Skin } from '../skins';
 import { Memory } from './Memory';
 import { Sudoku } from './Sudoku';
 import { forest } from './forest';
+import { gifts } from './gifts';
+import { pumpkin } from './pumpkin';
 import { hummel } from './hummel';
 import { racer } from './racer';
 import { spaceRider } from './spaceRider';
 import type { Engine } from './types';
 
-export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald' | 'sudoku' | 'memory';
+export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald' | 'sudoku' | 'memory' | 'geschenke' | 'kuerbis';
 
 /** Brettspiele (Sudoku, Memory) zeichnen selbst im DOM */
 export interface BoardProps { onScore: (points: number) => void; ended: boolean; skin: Skin }
@@ -90,6 +92,27 @@ export const GAMES: Record<GameId, GameMeta> = {
     id: 'sudoku', title: 'Sudoku', button: 'Sudoku lösen', overTitle: 'Gelöst',
     intro: '', help: [], board: Sudoku, mode: 'aim', autofire: false, lift: 0,
   },
+  geschenke: {
+    id: 'geschenke', title: 'Geschenkejagd', button: 'Geschenkejagd spielen', overTitle: 'Feierabend, Elf!',
+    intro: 'Fang die Geschenke mit dem Sack des Elfen. Kohle meiden, kein Geschenk in den Schnee fallen lassen. Ab und zu fliegt der Schlitten vorbei.',
+    help: [
+      [['←', '→', '/A', 'D'], 'laufen'],
+      [['P', '/Esc'], 'pausiert'],
+    ],
+    legend: 'Am Handy: Finger ziehen. Geschenk 10 · Zuckerstange 15 · Stern 50 · Glocke zieht an · grosser Sack · ab 5 in Folge ×2, ab 10 ×3',
+    engine: gifts, mode: 'steer', autofire: false, lift: 0,
+  },
+  kuerbis: {
+    id: 'kuerbis', title: 'Kürbismann', button: 'Kürbismann spielen', overTitle: 'Erwischt',
+    intro: 'Nachts im Wald. Taucht der lange Mann mit dem Kürbiskopf auf, tipp ihn schnell an, bevor er dich erwischt. Je schneller, desto mehr Punkte. Bonbons am Weg geben Extrapunkte.',
+    help: [
+      [['Maus', '/Finger'], 'Taschenlampe und antippen'],
+      [['↑', '↓', '←', '→'], 'Lampe bewegen, Leertaste bannt'],
+      [['P', '/Esc'], 'pausiert'],
+    ],
+    legend: 'Gebannt 100 plus Bonus für schnelle Reaktion · Bonbon 15 · drei Leben',
+    engine: pumpkin, mode: 'aim', autofire: false, lift: 0,
+  },
   memory: {
     id: 'memory', title: 'Memory', button: 'Memory spielen', overTitle: 'Geschafft',
     intro: '', help: [], board: Memory, mode: 'aim', autofire: false, lift: 0,
@@ -99,6 +122,7 @@ export const GAMES: Record<GameId, GameMeta> = {
 export const GAME_OF_SKIN: Partial<Record<Skin, GameId>> = {
   scifi: 'spacerider', flora: 'hummel', rennen: 'rennen', natur: 'wald', amtlich: 'sudoku',
   klassisch: 'memory', anime: 'memory', technik: 'memory', barock: 'memory', flug: 'memory', meer: 'memory', elemente: 'memory', zug: 'memory',
+  weihnacht: 'geschenke', halloween: 'kuerbis',
 };
 
 /** Offenes Spiel (null: keins) */

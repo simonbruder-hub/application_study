@@ -17,6 +17,11 @@
   background: radial-gradient(ellipse at 50% 0%, rgb(255 195 0 / 0.16), transparent 60%), rgb(14 26 16 / 0.95); }
 .sr-layer.game-rennen { --g-a: #ffd60a; --g-b: #e10600; --g-c: #4cc9f0; --g-d: #ffffff; --g-ink: #1b1b1b; --g-muted: #a3a8b3; --g-text: #e8eaee;
   background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.03) 0 24px, transparent 24px 48px), rgb(16 18 21 / 0.96); }
+.sr-layer.game-geschenke { --g-a: #ffd166; --g-b: #ff4d5e; --g-c: #6ee7a0; --g-d: #ffffff; --g-ink: #2a1a14; --g-muted: #a9b8cc; --g-text: #e8eef6;
+  background: radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.4) 0.8px, transparent 1.3px) 0 0 / 41px 37px, rgb(10 22 48 / 0.96); }
+.sr-layer.game-kuerbis { --g-a: #ff7518; --g-b: #ff4d6d; --g-c: #7cfc00; --g-d: #ffd166; --g-ink: #1a0a00; --g-muted: #a08fae; --g-text: #e9dccd;
+  background: radial-gradient(ellipse at 50% 0%, rgb(177 76 255 / 0.18), transparent 60%), rgb(10 5 14 / 0.97); }
+.game-kuerbis .sr-screen h2 { font-family: "Creepster", var(--font-display), system-ui; font-weight: 400; letter-spacing: 0.06em; }
 .sr-layer.game-wald { --g-a: #a7d675; --g-b: #ff6b6b; --g-c: #ffd166; --g-d: #fff3b0; --g-ink: #13230f; --g-muted: #a9b89a; --g-text: #eef3e4;
   background: radial-gradient(ellipse at 50% 0%, rgb(167 214 117 / 0.16), transparent 60%), rgb(12 20 15 / 0.95); }
 @keyframes sr-in { from { opacity: 0; transform: scale(1.03); } }

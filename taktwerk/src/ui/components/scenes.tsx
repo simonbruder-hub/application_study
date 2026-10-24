@@ -382,3 +382,152 @@ export function ZugScene({ station, p, stage }: { station: string; p: number; st
     </Deco>
   );
 }
+
+/* ---------- Weihnachten ---------- */
+
+/** Geschmückter Tannenbaum mit Stern, blinkenden Kugeln und Geschenken */
+function XmasTree() {
+  const balls: [number, number, string][] = [[50, 34, '#e63946'], [38, 52, '#ffd166'], [62, 50, '#4cc9f0'], [30, 72, '#ffd166'], [50, 66, '#e63946'], [70, 74, '#c77dff'], [42, 88, '#4cc9f0'], [60, 92, '#e63946'], [24, 96, '#c77dff'], [76, 98, '#ffd166']];
+  return (
+    <svg class="xm-tree" viewBox="0 0 100 130">
+      <rect class="xm-trunk" x="45" y="108" width="10" height="12" />
+      {([[50, 8, 22, 40], [50, 28, 32, 66], [50, 50, 42, 92], [50, 72, 50, 112]] as const).map(([x, top, half, bottom], i) => (
+        <path key={i} class="xm-fir" d={`M${x} ${top} L${x + half} ${bottom} Q${x} ${bottom + 6} ${x - half} ${bottom} Z`} />
+      ))}
+      <path class="xm-tinsel" d="M34 48 Q52 58 66 44 M26 70 Q50 82 74 66 M18 92 Q50 106 82 90" />
+      {balls.map(([x, y, c], i) => <circle key={i} class="xm-ball" cx={x} cy={y} r="3.6" style={{ '--c': c, '--i': i }} />)}
+      <path class="xm-star" d="M50 -1 L53 7 L61 7 L55 12 L57 20 L50 15 L43 20 L45 12 L39 7 L47 7 Z" />
+      <g class="xm-gifts">
+        <rect x="18" y="112" width="18" height="14" fill="#c8102e" /><rect x="25.5" y="112" width="3" height="14" fill="#ffd166" /><rect x="18" y="117.5" width="18" height="3" fill="#ffd166" />
+        <rect x="64" y="108" width="20" height="18" fill="#1b6b3a" /><rect x="72.5" y="108" width="3" height="18" fill="#f1faee" /><rect x="64" y="115.5" width="20" height="3" fill="#f1faee" />
+        <rect x="40" y="118" width="14" height="10" fill="#4361ee" /><rect x="45.5" y="118" width="3" height="10" fill="#ffd166" />
+      </g>
+    </svg>
+  );
+}
+
+/** Kranz aus Tannengrün mit Kugeln und Schleife hinter dem Zifferblatt */
+export function XmasWreath() {
+  return (
+    <svg class="xm-wreath" viewBox="0 0 320 320">
+      {Array.from({ length: 48 }, (_, i) => {
+        const a = (i / 48) * Math.PI * 2;
+        const r = 146 + (i % 3) * 3;
+        const x = 160 + r * Math.sin(a);
+        const y = 160 - r * Math.cos(a);
+        return <ellipse key={i} class={i % 2 ? 'xw-needle' : 'xw-needle dark'} cx={x} cy={y} rx="12" ry="4.5" transform={`rotate(${(i / 48) * 360 + (i % 2 ? 30 : -30)} ${x} ${y})`} />;
+      })}
+      {Array.from({ length: 10 }, (_, i) => {
+        const a = ((i + 0.5) / 10) * Math.PI * 2;
+        return <circle key={`b${i}`} class="xw-ball" cx={160 + 150 * Math.sin(a)} cy={160 - 150 * Math.cos(a)} r="6" style={{ '--c': ['#e63946', '#ffd166', '#f1faee'][i % 3], '--i': i }} />;
+      })}
+      <path class="xw-bow" d="M160 312 L140 298 Q134 312 142 320 Z M160 312 L180 298 Q186 312 178 320 Z M160 312 L150 334 L156 334 Z M160 312 L170 334 L164 334 Z" />
+      <circle class="xw-bow" cx="160" cy="312" r="5" />
+    </svg>
+  );
+}
+
+const SNOW_HILLS = 'M0 80 V52 Q60 34 120 48 T240 44 T360 50 T480 42 T600 50 T720 44 T800 48 V80 Z';
+
+export function WeihnachtScene() {
+  return (
+    <Deco>
+      <div class="xm-sky" />
+      <i class="xm-moon" />
+      <svg class="xm-hills" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={SNOW_HILLS} /></svg>
+      <div class="xm-houses">
+        {[0, 1, 2].map((i) => (
+          <svg key={i} viewBox="0 0 40 40"><path class="xh-wall" d="M6 18 H34 V38 H6 Z" /><path class="xh-roof" d="M2 20 L20 4 L38 20 Z" /><rect class="xh-win" x="11" y="24" width="7" height="7" /><rect class="xh-win" x="23" y="24" width="7" height="7" /><path class="xh-snow" d="M2 20 L20 4 L38 20 L34 20 L20 8 L6 20 Z" /></svg>
+        ))}
+      </div>
+      <div class="xm-garland">{many(16)}</div>
+      <XmasTree />
+      <div class="xm-sleigh">
+        <svg viewBox="0 0 160 40">
+          {[0, 1, 2].map((k) => (
+            <g key={k} class="xm-deer" transform={`translate(${96 + k * 22} 14)`}>
+              <path d="M0 6 Q4 0 12 1 L14 -4 L16 1 Q18 2 18 5 L16 6 L15 12 L13 12 L12 7 L4 8 L3 13 L1 13 Z" />
+              <path class="xm-antler" d="M14 -4 L12 -10 M14 -4 L17 -9 M12 -8 L10 -10" />
+              {k === 2 && <circle class="xm-nose" cx="18" cy="5" r="1.8" />}
+            </g>
+          ))}
+          <path class="xm-rein" d="M70 22 Q90 18 100 20 Q120 22 142 18" />
+          <path class="xm-sled" d="M24 14 H62 Q72 14 72 24 Q72 30 62 30 H24 Z M18 34 H70 Q78 34 78 28 L76 28 Q76 32 70 32 H18 Z" />
+          <circle class="xm-santa" cx="44" cy="10" r="7" />
+          <path class="xm-hat" d="M37 7 Q44 -6 52 6 Z" />
+          <rect class="xm-sack" x="26" y="4" width="12" height="12" rx="4" />
+        </svg>
+      </div>
+      <div class="xm-cabin">
+        <svg viewBox="0 0 90 70">
+          <path class="xc-smoke" d="M66 4 q-6 -4 0 -8 q6 -4 0 -8" />
+          <rect class="xc-chimney" x="60" y="10" width="10" height="16" />
+          <path class="xc-wall" d="M10 30 H80 V68 H10 Z" />
+          <path class="xc-roof" d="M2 34 L45 6 L88 34 Z" />
+          <path class="xc-roofsnow" d="M2 34 L45 6 L88 34 L82 34 L45 12 L8 34 Z" />
+          <rect class="xc-door" x="40" y="46" width="12" height="22" rx="2" />
+          <rect class="xc-win" x="18" y="42" width="14" height="12" /><rect class="xc-win" x="60" y="42" width="14" height="12" />
+          <path class="xc-wreath" d="M46 40 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0" />
+        </svg>
+      </div>
+      <div class="xm-snow">{many(34)}</div>
+      <div class="xm-ground" />
+    </Deco>
+  );
+}
+
+/* ---------- Halloween ---------- */
+
+/** Spinnennetz hinter dem Zifferblatt */
+export function SpiderWeb() {
+  return (
+    <svg class="hw-web" viewBox="0 0 320 320">
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i / 12) * Math.PI * 2;
+        return <line key={i} x1="160" y1="160" x2={160 + 158 * Math.cos(a)} y2={160 + 158 * Math.sin(a)} />;
+      })}
+      {[40, 66, 92, 118, 144].map((r) => (
+        <path key={r} d={Array.from({ length: 13 }, (_, i) => {
+          const a = (i / 12) * Math.PI * 2;
+          const rr = r * (i % 2 ? 0.93 : 1);
+          return `${i ? 'L' : 'M'}${(160 + rr * Math.cos(a)).toFixed(1)} ${(160 + rr * Math.sin(a)).toFixed(1)}`;
+        }).join(' ')} />
+      ))}
+    </svg>
+  );
+}
+
+/** Kürbis mit geschnitztem Gesicht, flackerndes Licht innen */
+function Pumpkin({ size }: { size: number }) {
+  return (
+    <svg class="hw-pumpkin" viewBox="0 0 60 52" style={{ width: `${size}px` }}>
+      <path class="hp-stem" d="M28 8 Q27 2 32 0 L34 2 Q31 4 32 9 Z" />
+      <ellipse class="hp-body" cx="30" cy="30" rx="27" ry="21" />
+      <ellipse class="hp-rib" cx="30" cy="30" rx="10" ry="21" />
+      <ellipse class="hp-rib" cx="30" cy="30" rx="19" ry="21" />
+      <path class="hp-face" d="M16 22 L22 16 L26 24 Z M44 22 L38 16 L34 24 Z M28 28 L30 24 L32 28 Z M14 32 Q30 46 46 32 L42 34 L40 38 L36 35 L33 40 L30 36 L27 40 L24 35 L20 38 L18 34 Z" />
+    </svg>
+  );
+}
+
+const HAUNT = 'M0 80 V58 Q80 40 160 50 L200 50 L200 30 L214 30 L214 18 L222 6 L230 18 L230 30 L260 30 L260 22 L268 12 L276 22 L276 30 L286 30 L286 50 Q360 46 420 54 Q520 44 600 56 Q700 48 800 54 V80 Z';
+
+export function HalloweenScene() {
+  return (
+    <Deco>
+      <div class="hw-sky" />
+      <i class="hw-moon" />
+      <svg class="hw-hill" viewBox="0 0 800 80" preserveAspectRatio="xMidYMax slice">
+        <path d={HAUNT} />
+        {([[206, 36], [236, 36], [266, 36], [212, 22], [270, 26]] as const).map(([x, y], i) => <rect key={i} class="hw-window" x={x} y={y} width="6" height="7" style={{ '--i': i }} />)}
+        <path class="hw-tree" d="M80 50 L84 26 L76 18 M84 26 L92 16 M83 34 L72 30 M84 30 L96 26" />
+        {([[440, 52], [470, 50], [500, 53], [640, 54]] as const).map(([x, y], i) => <path key={i} class="hw-grave" d={`M${x} ${y} V${y - 10} Q${x + 6} ${y - 18} ${x + 12} ${y - 10} V${y} Z`} />)}
+      </svg>
+      <div class="hw-bats">{[0, 1, 2, 3, 4].map((i) => <svg key={i} viewBox="-16 -10 32 20"><path d="M0 -3 Q3 -6 5 -2 Q9 -9 16 -9 Q13 -5 15 -1 Q11 -2 10 2 Q7 -1 5 3 Q2 6 0 9 Q-2 6 -5 3 Q-7 -1 -10 2 Q-11 -2 -15 -1 Q-13 -5 -16 -9 Q-9 -9 -5 -2 Q-3 -6 0 -3 Z" /></svg>)}</div>
+      <div class="hw-spider"><i /></div>
+      <div class="hw-ghosts">{[0, 1].map((i) => <svg key={i} viewBox="0 0 40 50"><path d="M4 22 Q4 2 20 2 Q36 2 36 22 V46 L31 41 L26 46 L20 41 L14 46 L9 41 L4 46 Z" /><circle cx="14" cy="20" r="3" /><circle cx="26" cy="20" r="3" /><ellipse cx="20" cy="30" rx="3" ry="4" /></svg>)}</div>
+      <div class="hw-fog"><i /><i /><i /></div>
+      <div class="hw-pumpkins"><Pumpkin size={54} /><Pumpkin size={38} /><Pumpkin size={46} /></div>
+    </Deco>
+  );
+}

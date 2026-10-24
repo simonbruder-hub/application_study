@@ -3,7 +3,7 @@
  * data-skin auf <html>); hier stehen Name, Vorschaufarben, Browser-Farbe und nachzuladende Schriften.
  */
 
-export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug' | 'meer' | 'flora' | 'scifi' | 'elemente' | 'zug';
+export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug' | 'meer' | 'flora' | 'scifi' | 'elemente' | 'zug' | 'weihnacht' | 'halloween';
 
 export interface SkinInfo {
   id: Skin;
@@ -81,6 +81,16 @@ export const SKINS: readonly SkinInfo[] = [
     id: 'zug', label: 'Zug', hint: 'Bahnfahrt durch die Alpen',
     swatch: ['#eef1f4', '#c1121f', '#2a9d8f'], bar: ['#eef1f4', '#11161c'],
     fonts: 'Barlow+Condensed:wght@600;800',
+  },
+  {
+    id: 'weihnacht', label: 'Weihnachten', hint: 'Schnee, Lichterkette, Schlitten und Adventskranz',
+    swatch: ['#f4f1ea', '#c8102e', '#1b6b3a'], bar: ['#f4f1ea', '#0b1a2e'],
+    fonts: 'Mountains+of+Christmas:wght@700&family=Fredoka:wght@500;700',
+  },
+  {
+    id: 'halloween', label: 'Halloween', hint: 'Kürbisse, Fledermäuse, Nebel und Spukhaus',
+    swatch: ['#1a1024', '#ff7518', '#7cfc00'], bar: ['#f3e6d8', '#120a1a'],
+    fonts: 'Creepster&family=Fredoka:wght@500;700',
   },
 ];
 

@@ -44,6 +44,8 @@ const TEXT: Record<Skin, [string, string]> = {
   scifi: ['Mission erfüllt', 'Sprung ins nächste System'],
   elemente: ['Im Gleichgewicht', 'Feuer · Wasser · Luft · Erde'],
   zug: ['Pünktlich angekommen!', 'Endstation erreicht'],
+  weihnacht: ['Ho ho ho!', 'Geschenk ausgepackt'],
+  halloween: ['Schaurig gut!', 'Pomodoro geschafft'],
 };
 
 export function CelebrationLayer() {
@@ -194,6 +196,34 @@ function build(skin: Skin) {
       return [
         ...puffs.map((b, i) => <span key={`s${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="puff" /></span>),
         ...confetti.map((b, i) => <span key={`c${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="conf" /></span>),
+      ];
+    }
+    case 'weihnacht': {
+      // Geschenke fliegen aus der Mitte, dazu Schneeflocken und goldene Sterne
+      const gifts = thrown(18, () => [50, 62], () => ({
+        '--dx': `${rand(-42, 42).toFixed(1)}vw`, '--up': `${-rand(35, 60).toFixed(0)}vh`, '--fall': `${rand(20, 45).toFixed(0)}vh`,
+        '--rot': `${rand(-360, 360).toFixed(0)}deg`, '--t': `${rand(2.6, 3.4).toFixed(2)}s`,
+      }), ['#c8102e', '#1b6b3a', '#4361ee', '#ffd166']);
+      const flakes = thrown(40, () => [rand(0, 100), -6], () => ({
+        '--dx': `${rand(-10, 10).toFixed(1)}vw`, '--up': '0vh', '--fall': `${rand(100, 115).toFixed(0)}vh`,
+        '--rot': `${rand(-180, 180).toFixed(0)}deg`, '--t': `${rand(3, 4.4).toFixed(2)}s`,
+      }), ['#ffffff']);
+      return [
+        ...rays(24, [120, 360], ['#ffd166', '#fff3b0']).map((r, i) => <span key={`r${i}`} class="p ray" style={r.style}><i class="star-p" /></span>),
+        ...gifts.map((b, i) => <span key={`g${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="gift-p" /></span>),
+        ...flakes.map((b, i) => <span key={`f${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="flake-p" /></span>),
+      ];
+    }
+    case 'halloween': {
+      // Fledermäuse schwärmen aus, Bonbons fliegen, ein Geist steigt auf
+      const candy = thrown(30, () => [50, 64], () => ({
+        '--dx': `${rand(-45, 45).toFixed(1)}vw`, '--up': `${-rand(30, 60).toFixed(0)}vh`, '--fall': `${rand(20, 45).toFixed(0)}vh`,
+        '--rot': `${rand(-540, 540).toFixed(0)}deg`, '--t': `${rand(2.4, 3.4).toFixed(2)}s`,
+      }), ['#ff7518', '#7cfc00', '#b14cff', '#ffd166']);
+      return [
+        <div key="ghost" class="cel-ghost"><svg viewBox="0 0 40 50"><path d="M4 22 Q4 2 20 2 Q36 2 36 22 V46 L31 41 L26 46 L20 41 L14 46 L9 41 L4 46 Z" /><circle cx="14" cy="20" r="3" /><circle cx="26" cy="20" r="3" /><ellipse cx="20" cy="30" rx="3" ry="4" /></svg></div>,
+        ...rays(22, [160, 460], ['#1a1024', '#2d1b3d']).map((r, i) => <span key={`b${i}`} class="p ray" style={r.style}><i class="bat-p" /></span>),
+        ...candy.map((b, i) => <span key={`c${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="candy-p" /></span>),
       ];
     }
     case 'amtlich': {

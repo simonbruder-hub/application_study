@@ -8,8 +8,8 @@ import type { Skin } from '../skins';
 import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../app/timer/view';
 import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
-import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
-import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, SbbClock, ScifiScene, ZugScene } from './scenes';
+import { AdventWreath, Bouquet, Cauldron, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
+import { ElementeScene, ElementMarks, FloraScene, FloraWreath, HalloweenScene, MeerScene, SbbClock, ScifiScene, SpiderWeb, WeihnachtScene, XmasWreath, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 
@@ -25,6 +25,8 @@ export const DIAL_STYLE: Partial<Record<Skin, { numerals?: boolean; knob?: DialK
   flora: { knob: 'bee' },
   scifi: { knob: 'ship' },
   zug: { knob: 'train' },
+  weihnacht: { knob: 'sleigh' },
+  halloween: { knob: 'bat' },
 };
 
 /* ---------- Hintergrund ---------- */
@@ -109,6 +111,8 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
     case 'flora': return <FloraScene />;
     case 'scifi': return <ScifiScene />;
     case 'elemente': return <ElementeScene />;
+    case 'weihnacht': return <WeihnachtScene />;
+    case 'halloween': return <HalloweenScene />;
     case 'zug': {
       // Fahrt im Fokus mit dem Fortschritt, in der Pause steht der Zug am Bahnsteig (ganz rechts)
       const p = v.kind === 'stopwatch' ? v.frac : v.phase !== 'focus' ? 1 : !v.active && v.frac >= 1 ? 0 : 1 - v.frac;
@@ -163,6 +167,10 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
       return <div class="dial-fx" aria-hidden="true"><FloraWreath /></div>;
     case 'zug':
       return <div class="dial-fx" aria-hidden="true"><SbbClock class="sbb-dial" hands={false} /></div>;
+    case 'weihnacht':
+      return <div class="dial-fx" aria-hidden="true"><XmasWreath /></div>;
+    case 'halloween':
+      return <div class="dial-fx" aria-hidden="true"><SpiderWeb /></div>;
     default:
       return null;
   }
@@ -198,6 +206,8 @@ const CUT_IN: Record<Skin, Record<TimerView['phase'], [string, string]>> = {
   scifi: { focus: ['Warp aktiviert', 'Fokus'], short_break: ['Orbit erreicht', 'Kurze Pause'], long_break: ['Andockmanöver', 'Lange Pause'] },
   elemente: { focus: ['Feuer entfacht', 'Fokus'], short_break: ['Wasser fliesst', 'Kurze Pause'], long_break: ['Luft bewegt', 'Lange Pause'] },
   zug: { focus: ['Abfahrt!', 'Fokus'], short_break: ['Kurzer Halt', 'Kurze Pause'], long_break: ['Umsteigen', 'Lange Pause'] },
+  weihnacht: { focus: ['Ho ho ho!', 'Fokus in der Werkstatt'], short_break: ['Plätzchenpause', 'Kurze Pause'], long_break: ['Bescherung', 'Lange Pause'] },
+  halloween: { focus: ['Buh!', 'Geisterstunde'], short_break: ['Süsses oder Saures', 'Kurze Pause'], long_break: ['Spukpause', 'Lange Pause'] },
 };
 
 /** Welle durchs Zifferblatt und Banner im Stil; wird über key bei jedem Wechsel neu abgespielt */
@@ -251,6 +261,10 @@ export function SkinBadge({ skin, v }: { skin: Skin; v: TimerView }) {
       return <span class="theme-badge" aria-hidden="true">{ELEMENT_OF(v) === 3 ? 'Erde' : ['Feuer', 'Wasser', 'Luft'][ELEMENT_OF(v)]}</span>;
     case 'zug':
       return <span class="theme-badge" aria-hidden="true">{stop ? 'Fahrzeit' : v.phase === 'focus' ? 'Fahrt' : v.phase === 'short_break' ? 'Halt' : 'Endstation'}</span>;
+    case 'weihnacht':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Wichtelzeit' : v.phase === 'focus' ? 'Werkstatt' : v.phase === 'short_break' ? 'Plätzchen' : 'Bescherung'}</span>;
+    case 'halloween':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Spukzeit' : v.phase === 'focus' ? 'Geisterstunde' : v.phase === 'short_break' ? 'Süsses' : 'Saures'}</span>;
     case 'amtlich':
       return <span class="form-label" aria-hidden="true">{stop ? 'Feld 1 · Laufzeit' : 'Feld 1 · Restzeit'}</span>;
     default:
@@ -351,6 +365,10 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
       return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
     case 'zug':
       return <Journey p={p} from="Zürich HB" to={pick(ZUG_STOPS, cycle)} vehicle="train" stops={3} seek={seek} />;
+    case 'weihnacht':
+      return <AdventWreath p={p} />;
+    case 'halloween':
+      return <Cauldron p={p} />;
   }
 }
 

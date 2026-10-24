@@ -248,3 +248,54 @@ export function ElementOrbs({ p, active }: { p: number; active: number }) {
     </div>
   );
 }
+
+/* ---------- Weihnachten: Adventskranz, je ein Viertel eine Kerze mehr ---------- */
+
+export function AdventWreath({ p }: { p: number }) {
+  const lit = p >= 1 ? 4 : Math.floor(clamp01(p) * 4);
+  const growing = clamp01(p) * 4 - lit;
+  return (
+    <div class="meter-row" aria-hidden="true">
+      <svg class="advent" viewBox="0 0 120 64">
+        <ellipse class="ad-wreath" cx="60" cy="52" rx="54" ry="10" />
+        {Array.from({ length: 22 }, (_, i) => <ellipse key={i} class={i % 2 ? 'ad-needle' : 'ad-needle dark'} cx={10 + i * 4.8} cy={49 + Math.sin(i) * 3} rx="5" ry="2" transform={`rotate(${(i % 3) * 30 - 30} ${10 + i * 4.8} ${49 + Math.sin(i) * 3})`} />)}
+        {[0, 1, 2, 3].map((k) => {
+          const x = 22 + k * 25;
+          const on = k < lit;
+          const now = k === lit && p < 1;
+          return (
+            <g key={k} class={`ad-candle${on ? ' is-lit' : ''}${now ? ' is-now' : ''}`} style={{ '--g': now ? growing.toFixed(2) : on ? '1' : '0' }}>
+              <rect class="ad-wax" x={x - 5} y="20" width="10" height="28" rx="2" />
+              <path class="ad-wick" d={`M${x} 20 V16`} />
+              <path class="ad-flame" d={`M${x} 4 Q${x + 5} 12 ${x} 17 Q${x - 5} 12 ${x} 4 Z`} />
+            </g>
+          );
+        })}
+        <circle class="ad-ball" cx="38" cy="56" r="3" /><circle class="ad-ball" cx="84" cy="57" r="3" />
+      </svg>
+      <p class="meter-text"><b>{lit} von 4</b><span>Kerzen brennen</span></p>
+    </div>
+  );
+}
+
+/* ---------- Halloween: Hexenkessel füllt sich mit Trank ---------- */
+
+export function Cauldron({ p }: { p: number }) {
+  const y = 48 - clamp01(p) * 26;
+  return (
+    <div class="meter-row" aria-hidden="true">
+      <svg class="cauldron" viewBox="0 0 80 70">
+        <defs><clipPath id="cauldron-clip"><path d="M10 26 Q8 62 40 62 Q72 62 70 26 Z" /></clipPath></defs>
+        <path class="cd-body" d="M10 26 Q8 62 40 62 Q72 62 70 26 Z" />
+        <g clip-path="url(#cauldron-clip)">
+          <rect class="cd-brew" x="0" y={y.toFixed(1)} width="80" height="60" />
+          <path class="cd-wave" d={`M0 ${y.toFixed(1)} q5 -3 10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 t10 0 v4 h-80 Z`} />
+        </g>
+        <rect class="cd-rim" x="6" y="22" width="68" height="7" rx="3.5" />
+        <path class="cd-leg" d="M18 60 L14 68 M62 60 L66 68" />
+        <g class="cd-bubbles"><circle cx="30" cy={y} r="2.5" /><circle cx="46" cy={y} r="3.2" /><circle cx="38" cy={y} r="2" /></g>
+      </svg>
+      <p class="meter-text"><b>{Math.round(clamp01(p) * 100)} %</b><span>Zaubertrank</span></p>
+    </div>
+  );
+}

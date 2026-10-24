@@ -1,0 +1,121 @@
+/* Halloween: Spukhügel unter dem Mond. Fokus = Fledermäuse und Kürbisse, kurze Pause = eine Spinne seilt sich ab,
+ * lange Pause = Geister schweben. Am Tag Dämmerung in Orange, nachts tiefes Violett. Zeiger: eine Fledermaus. */
+:root[data-skin="halloween"] {
+  --bg: #f3e6d8;
+  --bg-layers: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(255 160 80 / 0.35), transparent 70%), linear-gradient(180deg, #f7d9bf, #f1e4d6 60%, #e9dccd);
+  --surface: #fff8f0; --surface-2: #f6ebdf; --surface-3: #ead9c6;
+  --ink: #1a1024; --ink-2: #3b2a48; --muted: #6e5d78; --line: #e4d2c0; --line-strong: #c9ad92; --outline: #1a1024;
+  --tomato: #e85d04; --on-tomato: #ffffff; --sage: #4f8f16; --on-sage: #ffffff; --indigo: #7b2cbf; --on-indigo: #ffffff;
+  --link: #b54703; --focus-ring: #b54703; --dial-track: #ead9c6; --tick: #c9ad92; --tick-major: #1a1024;
+  --radius: 14px; --card-shadow: 0 16px 34px -22px rgb(40 10 50 / 0.5);
+  --font-display: "Creepster", "Fredoka", system-ui, sans-serif;
+  --night: 0;
+  --scene-short: linear-gradient(180deg, color-mix(in srgb, #7cfc00 10%, transparent), transparent 60%);
+  --scene-long: linear-gradient(180deg, color-mix(in srgb, #7b2cbf 22%, transparent), color-mix(in srgb, #120a1a 14%, transparent));
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="halloween"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --night: 1;
+    --bg: #120a1a; --bg-layers: radial-gradient(ellipse 70% 40% at 80% -10%, rgb(177 76 255 / 0.25), transparent 70%), linear-gradient(180deg, #1c1028, #0d0712);
+    --surface: #1d1228; --surface-2: #261833; --surface-3: #332243; --ink: #f3e6d8; --ink-2: #d9c6b4; --muted: #a08fae; --line: #332243; --line-strong: #4d3663; --outline: #f3e6d8;
+    --tomato: #ff7518; --on-tomato: #2a1000; --sage: #7cfc00; --on-sage: #0d2600; --indigo: #b14cff; --on-indigo: #1e0533; --link: #ffa463; --dial-track: #2c1d3a; --tick: #4d3663; --tick-major: #f3e6d8;
+  }
+}
+:root[data-skin="halloween"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="halloween"][data-mode="nacht"] {
+  color-scheme: dark; --night: 1;
+  --bg: #120a1a; --bg-layers: radial-gradient(ellipse 70% 40% at 80% -10%, rgb(177 76 255 / 0.25), transparent 70%), linear-gradient(180deg, #1c1028, #0d0712);
+  --surface: #1d1228; --surface-2: #261833; --surface-3: #332243; --ink: #f3e6d8; --ink-2: #d9c6b4; --muted: #a08fae; --line: #332243; --line-strong: #4d3663; --outline: #f3e6d8;
+  --tomato: #ff7518; --on-tomato: #2a1000; --sage: #7cfc00; --on-sage: #0d2600; --indigo: #b14cff; --on-indigo: #1e0533; --link: #ffa463; --dial-track: #2c1d3a; --tick: #4d3663; --tick-major: #f3e6d8;
+}
+[data-skin="halloween"] .view-head h1 { font-weight: 400; letter-spacing: 0.04em; }
+[data-skin="halloween"] .clock { font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-weight: 700; text-shadow: 0 0 calc(var(--night) * 14px) color-mix(in srgb, var(--phase) 60%, transparent); }
+[data-skin="halloween"] .timer-card { padding-bottom: 70px; }
+[data-skin="halloween"] .dial-track { stroke-width: 8; stroke-dasharray: 3 5; }
+[data-skin="halloween"] .dial-arc { stroke-width: 10; filter: drop-shadow(0 0 6px var(--phase)); }
+[data-skin="halloween"] .dial-knob { fill: #1a1024; stroke: var(--phase); stroke-width: 1.4; }
+[data-skin="halloween"] .dial .tk-major { stroke: var(--indigo); }
+[data-skin="halloween"] .theme-badge { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.1em; font-size: 13px; background: #1a1024; color: var(--phase); }
+
+/* Himmel, Mond und Sterne */
+.hw-sky { inset: 0; background: radial-gradient(circle at 1px 1px, rgb(255 255 255 / calc(var(--night) * 0.7)) 0.8px, transparent 1.3px) 0 0 / 57px 49px, linear-gradient(180deg, color-mix(in srgb, #ff9e4a calc((1 - var(--night)) * 35%), transparent), transparent 60%); }
+.hw-moon {
+  right: 9%; top: 6%; width: 74px; height: 74px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, rgb(0 0 0 / 0.08) 0 6px, transparent 7px), radial-gradient(circle at 62% 58%, rgb(0 0 0 / 0.07) 0 9px, transparent 10px), radial-gradient(circle at 40% 70%, rgb(0 0 0 / 0.06) 0 5px, transparent 6px), radial-gradient(circle at 40% 40%, #fff7d6, #ffd98a 70%, #f0b25a);
+  box-shadow: 0 0 40px 10px rgb(255 214 140 / calc(0.25 + var(--night) * 0.3));
+}
+/* Spukhügel mit Haus, toter Baum, Grabsteine */
+.hw-hill { left: 0; bottom: 0; width: 100%; height: 120px; fill: #1a1024; }
+.hw-window { fill: #ffb347; animation: window-flicker 3.2s steps(1) infinite; animation-delay: calc(var(--i) * -0.7s); }
+@keyframes window-flicker { 0%, 40%, 100% { opacity: 1; } 42% { opacity: 0.2; } 44% { opacity: 1; } 70% { opacity: 0.6; } }
+.hw-tree { fill: none; stroke: #1a1024; stroke-width: 3; stroke-linecap: round; }
+.hw-grave { fill: #2d2238; }
+/* Fledermäuse fliegen quer mit Flügelschlag */
+.hw-bats { inset: 0; }
+.hw-bats svg { position: absolute; left: 0; top: var(--y); width: var(--s); height: calc(var(--s) * 0.62); fill: #1a1024; animation: across var(--t) linear infinite, bat-bob 1.4s ease-in-out infinite alternate; animation-delay: var(--d); }
+.hw-bats svg path { transform-box: fill-box; transform-origin: center; animation: bat-flap 0.22s ease-in-out infinite alternate; }
+@keyframes bat-flap { to { transform: scaleY(0.45); } }
+@keyframes bat-bob { to { translate: 0 -18px; } }
+.hw-bats svg:nth-child(1) { --y: 12%; --s: 34px; --t: 11s; --d: -2s; } .hw-bats svg:nth-child(2) { --y: 20%; --s: 24px; --t: 14s; --d: -7s; }
+.hw-bats svg:nth-child(3) { --y: 30%; --s: 28px; --t: 9s; --d: -4s; } .hw-bats svg:nth-child(4) { --y: 8%; --s: 20px; --t: 16s; --d: -11s; }
+.hw-bats svg:nth-child(5) { --y: 40%; --s: 30px; --t: 12s; --d: -9s; }
+/* Kurze Pause: Spinne seilt sich ab */
+.hw-spider { left: 78%; top: 0; width: 2px; height: 0; display: none; }
+:root[data-phase="short"] .hw-spider { display: block; animation: thread 6s ease-in-out infinite alternate; }
+.hw-spider::before { content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: color-mix(in srgb, var(--ink) 60%, transparent); }
+.hw-spider i { position: absolute; left: -9px; bottom: -14px; width: 18px; height: 16px; border-radius: 50%; background: #1a1024;
+  box-shadow: -8px 2px 0 -6px #1a1024, 8px 2px 0 -6px #1a1024; }
+.hw-spider i::before, .hw-spider i::after { content: ""; position: absolute; top: 4px; width: 26px; height: 10px; left: -4px; border: 2px solid #1a1024; border-bottom: 0; border-radius: 50% 50% 0 0; }
+.hw-spider i::after { top: 8px; }
+@keyframes thread { from { height: 18cqh; } to { height: 46cqh; } }
+/* Lange Pause: Geister schweben */
+.hw-ghosts { inset: 0; display: none; }
+:root[data-phase="long"] .hw-ghosts { display: block; }
+.hw-ghosts svg { position: absolute; width: 46px; height: 58px; opacity: 0.85; animation: ghost 7s ease-in-out infinite alternate; filter: drop-shadow(0 0 10px rgb(255 255 255 / 0.5)); }
+.hw-ghosts svg path { fill: rgb(255 255 255 / 0.92); } .hw-ghosts svg circle, .hw-ghosts svg ellipse { fill: #1a1024; }
+.hw-ghosts svg:nth-child(1) { left: 10%; top: 26%; }
+.hw-ghosts svg:nth-child(2) { right: 12%; top: 46%; width: 34px; height: 44px; animation-duration: 9s; animation-delay: -3s; }
+@keyframes ghost { 0% { transform: translate(0, 0) rotate(-4deg); opacity: 0.5; } 50% { opacity: 0.95; } 100% { transform: translate(24px, -20px) rotate(5deg); opacity: 0.6; } }
+/* Nebel kriecht über den Boden */
+.hw-fog { left: 0; right: 0; bottom: 0; height: 120px; }
+.hw-fog i { position: absolute; bottom: 0; left: -40%; width: 120%; height: 70px; border-radius: 50%; background: radial-gradient(ellipse, rgb(230 225 240 / calc(0.32 + var(--night) * 0.12)), transparent 70%); filter: blur(6px); animation: fog 26s ease-in-out infinite alternate; }
+.hw-fog i:nth-child(2) { bottom: 20px; left: 10%; animation-duration: 34s; animation-delay: -8s; opacity: 0.8; }
+.hw-fog i:nth-child(3) { bottom: 6px; left: -10%; height: 50px; animation-duration: 21s; animation-delay: -15s; opacity: 0.7; }
+@keyframes fog { to { transform: translateX(30%); } }
+/* Kürbisse mit flackerndem Licht */
+.hw-pumpkins { left: 2%; right: 2%; bottom: 6px; display: flex; justify-content: space-between; align-items: flex-end; }
+.hw-pumpkins svg { position: static; height: auto; overflow: visible; }
+.hw-pumpkins svg:nth-child(2) { margin-right: auto; margin-left: 6px; }
+.hp-body { fill: #f07818; } .hp-rib { fill: none; stroke: #c05a0c; stroke-width: 1.2; } .hp-stem { fill: #4f6b1e; }
+.hp-face { fill: #ffd166; filter: drop-shadow(0 0 4px #ffb347); animation: pumpkin 0.9s ease-in-out infinite alternate; }
+@keyframes pumpkin { 0% { opacity: 0.75; } 40% { opacity: 1; } 55% { opacity: 0.85; } 100% { opacity: 1; filter: drop-shadow(0 0 8px #ffb347); } }
+/* Spinnennetz hinter dem Zifferblatt */
+.hw-web { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: web-sway 8s ease-in-out infinite alternate; }
+.hw-web line, .hw-web path { fill: none; stroke: color-mix(in srgb, var(--ink) 22%, transparent); stroke-width: 1; }
+@keyframes web-sway { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
+/* Hexenkessel unter der Uhr */
+.cauldron { width: 78px; height: 68px; overflow: visible; }
+.cd-body { fill: #1d1d24; }
+.cd-brew { fill: var(--sage); } .cd-wave { fill: color-mix(in srgb, var(--sage) 70%, #ffffff); }
+:root[data-run="1"] .cd-wave { animation: tf-wave 1.8s linear infinite; }
+.cd-rim { fill: #2e2e38; }
+.cd-leg { stroke: #1d1d24; stroke-width: 4; stroke-linecap: round; }
+.cd-bubbles circle { fill: color-mix(in srgb, var(--sage) 60%, #ffffff); animation: cd-bubble 2s ease-in infinite; }
+.cd-bubbles circle:nth-child(2) { animation-delay: -0.7s; } .cd-bubbles circle:nth-child(3) { animation-delay: -1.3s; }
+@keyframes cd-bubble { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(-22px); opacity: 0; } }
+/* Einblendung und Feier */
+.cutin-halloween .cutin-band { background: #1a1024; border: 2px solid var(--phase); }
+.cutin-halloween .cutin-band b { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.06em; text-shadow: 0 0 12px var(--phase); }
+.cutin-halloween .cutin-band small { color: #f3e6d8; }
+.cel-halloween .cel-flash { background: #ff7518; opacity: 0.4; }
+.cel-halloween .p.ray { left: 50%; top: 42%; }
+.cel-halloween .p i.bat-p { width: 30px; height: 18px; background: #1a1024; clip-path: polygon(50% 30%, 60% 10%, 70% 30%, 100% 0, 90% 50%, 75% 45%, 65% 70%, 50% 100%, 35% 70%, 25% 45%, 10% 50%, 0 0, 30% 30%, 40% 10%); }
+.cel-halloween .p i.candy-p { width: 22px; height: 10px; background: radial-gradient(circle, var(--c) 0 40%, transparent 41%), linear-gradient(90deg, var(--c) 0 20%, transparent 20% 80%, var(--c) 80%); clip-path: polygon(0 0, 22% 30%, 30% 10%, 70% 10%, 78% 30%, 100% 0, 100% 100%, 78% 70%, 70% 90%, 30% 90%, 22% 70%, 0 100%); }
+.cel-ghost { position: absolute; left: 50%; bottom: -80px; width: 90px; margin-left: -45px; animation: cel-ghost 4s ease-out both; filter: drop-shadow(0 0 16px rgb(255 255 255 / 0.7)); }
+.cel-ghost path { fill: #ffffff; } .cel-ghost circle, .cel-ghost ellipse { fill: #1a1024; }
+@keyframes cel-ghost { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-110vh) scale(1.3) rotate(10deg); opacity: 0.2; } }
+.cel-halloween .cel-text b { font-family: var(--font-display); font-weight: 400; color: #ff7518; font-size: clamp(40px, 9vw, 74px); letter-spacing: 0.04em; text-shadow: 0 0 18px #ff7518; }
+/* Nachts: Silhouetten heben sich vom dunklen Grund ab (Mondlicht-Kante) */
+:root[data-skin="halloween"] .hw-hill { fill: color-mix(in srgb, #000000 calc(var(--night) * 55%), #1a1024); }
+:root[data-skin="halloween"] .hw-bats svg { fill: color-mix(in srgb, #4a3360 calc(var(--night) * 100%), #1a1024); filter: drop-shadow(0 0 calc(var(--night) * 4px) rgb(255 214 140 / 0.45)); }
+:root[data-skin="halloween"] .hw-spider i { background: color-mix(in srgb, #5a4074 calc(var(--night) * 100%), #1a1024); box-shadow: 0 0 calc(var(--night) * 6px) rgb(124 252 0 / 0.4); }
+:root[data-skin="halloween"] .hw-spider i::before, :root[data-skin="halloween"] .hw-spider i::after { border-color: color-mix(in srgb, #5a4074 calc(var(--night) * 100%), #1a1024); }

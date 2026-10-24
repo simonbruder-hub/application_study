@@ -80,3 +80,42 @@ describe('Waldjagd', () => {
     expect(g.over).toBe(true);
   });
 });
+
+describe('Geschenkejagd', () => {
+  it('fängt Geschenke im Sack, Kohle und verpasste Geschenke kosten Leben', async () => {
+    const { createGifts, stepGifts } = await import('./gifts');
+    const g = createGifts(seeded(11));
+    g.spawn = 999; g.nextSleigh = 999;
+    const base = { kind: 'gift' as const, vx: 0, vy: 0, size: 16, color: '#c8102e', ribbon: '#ffd166', spin: 0, rot: 0 };
+    g.items.push({ ...base, x: g.elf.x, y: 560 - 64 - 52 });
+    expect(stepGifts(g, 0.01, NO_INPUT)).toContain('catch');
+    expect(g.score).toBe(10);
+    g.items.push({ ...base, kind: 'coal', x: g.elf.x, y: 560 - 64 - 52 });
+    expect(stepGifts(g, 0.01, NO_INPUT)).toContain('miss');
+    expect(g.lives).toBe(2);
+    g.elf.inv = 0;
+    g.items.push({ ...base, x: 20, y: 560 - 10 });
+    stepGifts(g, 0.01, NO_INPUT);
+    expect(g.lives).toBe(1);
+  });
+});
+
+describe('Kürbismann', () => {
+  it('bannt den Kürbismann beim Antippen, zu langsam kostet ein Leben', async () => {
+    const { createPumpkin, monsterBox, stepPumpkin } = await import('./pumpkin');
+    const g = createPumpkin(seeded(12));
+    g.monster.cool = 0;
+    expect(stepPumpkin(g, 0.01, NO_INPUT)).toContain('appear');
+    const b = monsterBox(g.monster);
+    const events = stepPumpkin(g, 0.2, { ...NO_INPUT, taps: [{ x: b.x, y: (b.top + b.bottom) / 2 }] });
+    expect(events).toContain('banish');
+    expect(g.score).toBeGreaterThan(100);
+    expect(g.banished).toBe(1);
+    for (let i = 0; i < 400 && g.monster.state !== 'appear'; i++) stepPumpkin(g, 0.05, NO_INPUT);
+    const lives = g.lives;
+    let lunged = false;
+    for (let i = 0; i < 100 && !lunged; i++) lunged = stepPumpkin(g, 0.05, NO_INPUT).includes('lunge');
+    expect(lunged).toBe(true);
+    expect(g.lives).toBe(lives - 1);
+  });
+});

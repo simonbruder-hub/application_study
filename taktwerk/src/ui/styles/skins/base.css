@@ -96,7 +96,7 @@ body::after { background: var(--scene-long, none); }
 
 /* ---------- Bewegung (Einstellung): aus, dezent, lebendig ---------- */
 /* Dezent: keine fliegenden Teilchen und kein Wackeln, nur ruhige Flächen, Atemkreis, Messkurve, Landschaft */
-:root:not([data-motion="lebendig"]) :is(.bolts, .sfx, .petals, .hearts, .lanterns, .shooting, .sparkles, .bubbles, .notes, .fireworks, .planes, .birds, .fft, .aura, .butterflies, .cel-flash, .cel-speed, .cel-scan, .school, .sea-bubbles, .jellies, .bees, .ladybug, .beetle, .pollen, .warp, .comets, .dogfight, .embers, .droplets, .wind, .pebbles, .poles, .steam, .plankton, .godrays) { display: none !important; }
+:root:not([data-motion="lebendig"]) :is(.bolts, .sfx, .petals, .hearts, .lanterns, .shooting, .sparkles, .bubbles, .notes, .fireworks, .planes, .birds, .fft, .aura, .butterflies, .cel-flash, .cel-speed, .cel-scan, .school, .sea-bubbles, .jellies, .bees, .ladybug, .beetle, .pollen, .warp, .comets, .dogfight, .embers, .droplets, .wind, .pebbles, .poles, .steam, .plankton, .xm-snow, .xm-sleigh, .hw-bats, .hw-ghosts, .hw-spider, .godrays) { display: none !important; }
 :root[data-motion="dezent"] .celebration .p:nth-child(2n) { display: none; }
 :root[data-motion="aus"] :is(.celebration .p, .cel-bloom, .phase-wave) { display: none; }
 :root[data-motion="aus"] :is(.clock .ch, .cel-text) { animation: none !important; }

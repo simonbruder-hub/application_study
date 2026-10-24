@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { openApp, trackErrors } from './helpers';
 
-const SKINS = ['klassisch', 'anime', 'technik', 'barock', 'natur', 'amtlich', 'rennen', 'flug', 'meer', 'flora', 'scifi', 'elemente', 'zug'] as const;
+const SKINS = ['klassisch', 'anime', 'technik', 'barock', 'natur', 'amtlich', 'rennen', 'flug', 'meer', 'flora', 'scifi', 'elemente', 'zug', 'weihnacht', 'halloween'] as const;
 
 test.describe('Stile', () => {
   for (const skin of SKINS) {
@@ -58,7 +58,7 @@ test.describe('Stile', () => {
     expect(errors).toEqual([]);
   });
 
-  for (const [skin, title] of [['flora', 'Hummelflug'], ['rennen', 'Grand Prix'], ['natur', 'Waldjagd']] as const) {
+  for (const [skin, title] of [['flora', 'Hummelflug'], ['rennen', 'Grand Prix'], ['natur', 'Waldjagd'], ['weihnacht', 'Geschenkejagd'], ['halloween', 'Kürbismann']] as const) {
     test(`${skin}: Pausenspiel ${title} startet und pausiert`, async ({ page }) => {
       const errors = trackErrors(page);
       await page.addInitScript((s) => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: s, notifyAsked: true })), skin);
