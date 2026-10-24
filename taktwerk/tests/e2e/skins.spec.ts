@@ -102,4 +102,30 @@ test.describe('Stile', () => {
     await expect(page.locator('.sd-grid')).toBeVisible();
     expect(errors).toEqual([]);
   });
+
+  test('Meer: Memory mit Paaren', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'meer', notifyAsked: true })));
+    await openApp(page);
+    await page.locator('.phase-tab', { hasText: 'Lange Pause' }).click();
+    await page.locator('.sr-open').click();
+    await page.locator('.mm-level', { hasText: 'Leicht' }).click();
+    await expect(page.locator('.mm-card')).toHaveCount(12);
+    // Paare über die Beschriftung der aufgedeckten Karten finden und alle lösen
+    const labels: string[] = [];
+    for (let i = 0; i < 12; i++) {
+      await page.locator('.mm-card').nth(i).click();
+      labels.push((await page.locator('.mm-card').nth(i).getAttribute('aria-label'))!);
+      if (i % 2 === 1) await page.waitForTimeout(950);
+    }
+    for (let i = 0; i < 12; i++) {
+      if (await page.locator('.mm-card').nth(i).evaluate((e) => e.classList.contains('is-done'))) continue;
+      const j = labels.findIndex((l, k) => k !== i && l === labels[i]);
+      await page.locator('.mm-card').nth(i).click();
+      await page.locator('.mm-card').nth(j).click();
+      await page.waitForTimeout(100);
+    }
+    await expect(page.locator('.mm-done')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
 });

@@ -4,6 +4,7 @@
 import { signal } from '@preact/signals';
 import type { ComponentType } from 'preact';
 import type { Skin } from '../skins';
+import { Memory } from './Memory';
 import { Sudoku } from './Sudoku';
 import { forest } from './forest';
 import { hummel } from './hummel';
@@ -11,7 +12,7 @@ import { racer } from './racer';
 import { spaceRider } from './spaceRider';
 import type { Engine } from './types';
 
-export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald' | 'sudoku';
+export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald' | 'sudoku' | 'memory';
 
 /** Brettspiele (Sudoku, Memory) zeichnen selbst im DOM */
 export interface BoardProps { onScore: (points: number) => void; ended: boolean; skin: Skin }
@@ -89,9 +90,16 @@ export const GAMES: Record<GameId, GameMeta> = {
     id: 'sudoku', title: 'Sudoku', button: 'Sudoku lösen', overTitle: 'Gelöst',
     intro: '', help: [], board: Sudoku, mode: 'aim', autofire: false, lift: 0,
   },
+  memory: {
+    id: 'memory', title: 'Memory', button: 'Memory spielen', overTitle: 'Geschafft',
+    intro: '', help: [], board: Memory, mode: 'aim', autofire: false, lift: 0,
+  },
 };
 
-export const GAME_OF_SKIN: Partial<Record<Skin, GameId>> = { scifi: 'spacerider', flora: 'hummel', rennen: 'rennen', natur: 'wald', amtlich: 'sudoku' };
+export const GAME_OF_SKIN: Partial<Record<Skin, GameId>> = {
+  scifi: 'spacerider', flora: 'hummel', rennen: 'rennen', natur: 'wald', amtlich: 'sudoku',
+  klassisch: 'memory', anime: 'memory', technik: 'memory', barock: 'memory', flug: 'memory', meer: 'memory', elemente: 'memory', zug: 'memory',
+};
 
 /** Offenes Spiel (null: keins) */
 export const gameOpen = signal<GameId | null>(null);
