@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Hauptfenster: nur die Grundfunktionen, keine Datei- oder Shell-Zugriffe",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -1,6 +1,5 @@
 /** App-Rahmen: Seitenleiste (Desktop), Kopfzeile mit Modus und Sync, Ansicht, Mini-Leiste, Navigation */
 import { useEffect } from 'preact/hooks';
-import { useInstallPrompt } from './app/install';
 import { prefs } from './app/prefs';
 import { go, view, VIEWS, type ViewName } from './app/router';
 import { loaded } from './app/store';
@@ -9,6 +8,7 @@ import { ModeSwitch, SideTimer, SyncIndicator } from './ui/components/Chrome';
 import { Dock, dockVisible, MiniPlayer } from './ui/components/Mini';
 import { CelebrationLayer } from './ui/components/Celebration';
 import { DialogHost } from './ui/dialog';
+import { InstallButton } from './ui/components/InstallDialog';
 import { Icon, Logo } from './ui/Icon';
 import { isDark, toggleDayNight } from './ui/theme';
 import { ToastHost } from './ui/toast';
@@ -47,7 +47,6 @@ function HomeLink() {
 export function App() {
   const v = view.value;
   const mini = prefs.value.mini;
-  const install = useInstallPrompt();
   const View = VIEW_COMPONENTS[v];
 
   useEffect(() => {
@@ -70,13 +69,6 @@ export function App() {
             ))}
           </nav>
           <SideTimer />
-          <div class="side-foot">
-            {install.available && (
-              <button type="button" class="btn btn-ghost btn-sm" onClick={() => void install.install()}>
-                <Icon name="download" />App installieren
-              </button>
-            )}
-          </div>
         </aside>
 
         <div class="col">
@@ -85,6 +77,7 @@ export function App() {
             <ModeSwitch />
             <span class="grow" />
             <SyncIndicator />
+            <InstallButton />
             <ThemeButton />
             <button
               type="button" class="icon-btn" title={pipOpen.value ? 'Schwebendes Fenster schliessen (M)' : 'Minimieren (M)'}

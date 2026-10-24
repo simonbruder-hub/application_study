@@ -1,0 +1,101 @@
+name: Desktop-App
+
+# Baut Taktwerk als Desktop-App (Tauri) für Windows und Linux und legt ein GitHub-Release an.
+# Auslöser: Tag desktop-v* (z. B. desktop-v1.0.1). Von Hand gestartet wird nur gebaut, ohne Release.
+
+on:
+  push:
+    tags: ['desktop-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: ubuntu-22.04
+            name: linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: taktwerk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: taktwerk/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Linux-Bibliotheken für Tauri
+        if: matrix.name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: taktwerk/desktop/src-tauri -> target
+      - name: Abhängigkeiten installieren
+        run: npm ci
+      - name: Einzeldatei der App bauen
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://xlbddpaxwjgseqxaicuf.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_HawYMwgitp0Jo9CmA31oIA_tA3Hd-ik' }}
+        run: npx vite build --mode single
+      - name: Symbole erzeugen
+        run: npx tauri icon web/public/icon-512.png -o desktop/src-tauri/icons
+      - name: Desktop-App bauen
+        run: npx tauri build
+      - name: Installer mit festen Namen einsammeln
+        run: |
+          mkdir -p out
+          B=desktop/src-tauri/target/release/bundle
+          if [ "${{ matrix.name }}" = windows ]; then
+            cp "$B"/nsis/*-setup.exe out/Taktwerk-Setup.exe
+            cp "$B"/msi/*.msi out/Taktwerk.msi
+          else
+            cp "$B"/appimage/*.AppImage out/Taktwerk.AppImage
+            cp "$B"/deb/*.deb out/Taktwerk.deb
+          fi
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: taktwerk-${{ matrix.name }}
+          path: taktwerk/out/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: GitHub-Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#desktop-v}"
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Taktwerk Desktop $VERSION" \
+            --latest \
+            --notes "Taktwerk als Desktop-App für Windows und Linux, ideal für Firefox-Nutzer.
+
+          - **Windows:** Taktwerk-Setup.exe (oder Taktwerk.msi). Bei der SmartScreen-Warnung «Weitere Informationen» → «Trotzdem ausführen».
+          - **Linux:** Taktwerk.AppImage (ausführbar machen und starten) oder Taktwerk.deb (Debian, Ubuntu, Mint).
+
+          Die Desktop-App hat einen eigenen Speicher. Mit Sync (Einstellungen → Sync & Konto) erscheinen dieselben Daten wie im Browser und auf dem Handy."

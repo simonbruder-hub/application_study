@@ -102,3 +102,9 @@ a.brand:hover span { color: var(--tomato); }
 .project-card { text-align: left; color: inherit; font: inherit; width: 100%; }
 .project-card.is-archived { opacity: 0.65; }
 .pc-code { font: 500 11px var(--font-mono); color: var(--muted); }
+
+/* Installieren: Knopf in der Kopfzeile und Anleitung */
+.install-btn .ic { width: 16px; height: 16px; }
+@media (max-width: 599px) { .install-btn span { display: none; } .install-btn { padding-inline: 8px; } }
+.install-steps { margin: 0 0 12px; padding-left: 22px; display: grid; gap: 8px; }
+.install-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }

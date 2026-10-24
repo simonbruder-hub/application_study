@@ -114,7 +114,10 @@
   .gallery span { color: var(--muted); font-size: 15px; }
 
   /* Installieren */
-  .install { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: step; }
+  .install { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .install .dl { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .install .dl .btn { padding: 10px 14px; font-size: 14px; }
+  .install .card.desktop { border-color: color-mix(in srgb, var(--tomato) 45%, var(--line)); }
   .install .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
   .install h3 { font-size: 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
   .install h3 svg { width: 26px; height: 26px; color: var(--tomato); }
@@ -123,7 +126,6 @@
   .install kbd { font: 500 13px var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
   .note { margin-top: 26px; padding: 18px 22px; border-radius: 14px; background: color-mix(in srgb, var(--sage) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--sage) 35%, transparent); color: var(--ink-2); font-size: 16px; }
   .note a { font-weight: 700; }
-  @media (max-width: 900px) { .install { grid-template-columns: 1fr; } }
 
   /* Abschluss */
   .final { background: var(--hero-bg); color: var(--hero-ink); text-align: center; }
@@ -216,12 +218,12 @@
     <div class="wrap">
       <p class="eyebrow">Sechs Stile</p>
       <h2>Dein Timer, dein Look.</h2>
-      <p class="intro">Jeder Stil hat Tag- und Nachtmodus, eigene Szenen für Fokus, kurze und lange Pause und eine kleine Belohnung, wenn ein Pomodoro geschafft ist.</p>
+      <p class="intro">Jeder Stil hat Tag- und Nachtmodus, eigene Szenen für Fokus, kurze und lange Pause und feiert jede geschaffte Session: mit Konfetti, Feuerwerk, Funkenregen, Blütenregen oder Stempel.</p>
       <div class="gallery">
         <figure><img src="img/klassisch.jpg" loading="lazy" width="585" height="1170" alt="Stil Klassisch in der kurzen Pause"><figcaption><b>Klassisch</b><span>Leuchtendes Zifferblatt, Atemkreis in der Pause, Konfetti</span></figcaption></figure>
         <figure><img src="img/anime.jpg" loading="lazy" width="585" height="1170" alt="Stil Anime in der langen Pause"><figcaption><b>Anime</b><span>Blitze im Fokus, Herzen in der Pause, Laternenfest</span></figcaption></figure>
         <figure><img src="img/technik.jpg" loading="lazy" width="585" height="1170" alt="Stil Technik bei Nacht"><figcaption><b>Technik</b><span>Oszilloskop: Sinus, Rechteck, Lissajous je nach Phase</span></figcaption></figure>
-        <figure><img src="img/barock.jpg" loading="lazy" width="585" height="1170" alt="Stil Barock in der langen Pause"><figcaption><b>Barock</b><span>Kerzen, Pendel, Tafelmusik und Feuerwerk</span></figcaption></figure>
+        <figure><img src="img/barock.jpg" loading="lazy" width="585" height="1170" alt="Stil Barock in der langen Pause"><figcaption><b>Barock</b><span>Pendel im Zifferblatt, Kerzen, Tafelmusik, Feuerwerk</span></figcaption></figure>
         <figure><img src="img/natur.jpg" loading="lazy" width="585" height="1170" alt="Stil Natur im Sonnenuntergang"><figcaption><b>Natur</b><span>Wald im Wind, Sonnenuntergang, eine Pflanze wächst mit</span></figcaption></figure>
         <figure><img src="img/amtlich.jpg" loading="lazy" width="585" height="1170" alt="Stil Amtlich in der Kaffeepause"><figcaption><b>Amtlich</b><span>Formular, Kaffeepause und Stempel «Erledigt»</span></figcaption></figure>
       </div>
@@ -257,6 +259,18 @@
             <li>Teilen-Symbol antippen, dann <kbd>Zum Home-Bildschirm</kbd>.</li>
             <li>Taktwerk vom Home-Bildschirm aus starten.</li>
           </ol>
+        </div>
+      </div>
+      <div class="install" style="margin-top: 18px">
+        <div class="card desktop">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Desktop-App für Windows und Linux</h3>
+          <p style="margin:0;color:var(--ink-2)">Ideal mit <b>Firefox</b>, das auf dem PC keine Web-Apps installiert: Taktwerk als eigenes Programm mit Startmenü-Eintrag, offline und mit Sync.</p>
+          <div class="dl">
+            <a class="btn btn-primary" href="https://github.com/simonbruder-hub/application_study/releases/latest/download/Taktwerk-Setup.exe">Windows</a>
+            <a class="btn btn-ghost" href="https://github.com/simonbruder-hub/application_study/releases/latest/download/Taktwerk.AppImage">Linux AppImage</a>
+            <a class="btn btn-ghost" href="https://github.com/simonbruder-hub/application_study/releases/latest/download/Taktwerk.deb">Linux .deb</a>
+          </div>
+          <p style="margin:12px 0 0;font-size:14px;color:var(--muted)">Windows warnt beim ersten Start eventuell (SmartScreen): «Weitere Informationen» → «Trotzdem ausführen».</p>
         </div>
       </div>
       <p class="note">Kein Browser zur Hand oder ganz ohne Internet? Die <a href="taktwerk.html" download>Einzeldatei herunterladen</a> und per Doppelklick öffnen. Die Daten liegen dann nur in dieser Datei im Browser.</p>
