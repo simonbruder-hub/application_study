@@ -11,7 +11,7 @@ import { Mascot, type DialKnob } from './Dial';
 import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
-import { ScopeCursors, ScopeTrace } from './Scope';
+import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -62,10 +62,9 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
             <div class="scanlines" />
             <ScopeTrace phase={v.phase} running={v.running} />
             <div class="fft">{many(28)}</div>
-            <span class="scope-state">{v.running ? 'Run' : 'Stop'}</span>
             <span class="scope-trig">T▸</span>
           </div>
-          <ScopeCursors />
+          <ScopeCursors running={v.running} />
         </>
       );
     case 'barock':
@@ -135,7 +134,7 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
     case 'anime':
       return <div class="dial-fx" aria-hidden="true"><div class="aura" /></div>;
     case 'technik':
-      return <div class="dial-fx" aria-hidden="true"><svg class="lissajous" viewBox="0 0 300 300"><path class="ghost" d={LISSAJOUS} /><path d={LISSAJOUS} /></svg></div>;
+      return <div class="dial-fx" aria-hidden="true"><ScopeXY /></div>;
     case 'barock':
       return (
         <div class="dial-fx" aria-hidden="true">
@@ -207,13 +206,6 @@ export function PhaseCutIn({ skin, phase, late = false }: { skin: Skin; phase: T
 
 const SFX: Record<TimerView['phase'], string> = { focus: 'ドキドキ', short_break: 'ふわ〜', long_break: 'すやすや' };
 const OFFICE: Record<TimerView['phase'], string> = { focus: 'In Bearbeitung', short_break: 'Kaffeepause', long_break: 'Mittagspause' };
-
-/* XY-Modus: Lissajous-Figur 3:2 */
-const LISSAJOUS = (() => {
-  const pts: string[] = [];
-  for (let t = 0; t <= Math.PI * 2 + 0.01; t += 0.02) pts.push(`${(150 + 130 * Math.sin(3 * t + Math.PI / 2)).toFixed(1)},${(150 + 130 * Math.sin(2 * t)).toFixed(1)}`);
-  return `M${pts.join(' L')}`;
-})();
 
 /* Baumreihen: Tannen und Laubbäume, als ein Pfad je Ebene */
 const conifer = (x: number, h: number) => {

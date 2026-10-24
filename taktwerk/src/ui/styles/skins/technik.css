@@ -118,11 +118,8 @@
   font: 500 10px/1 var(--font-mono); letter-spacing: 0.06em; color: var(--sage); opacity: 0.85;
 }
 /* Lange Pause: XY-Modus, Lissajous-Figur statt Zeitachse */
-.lissajous { position: absolute; inset: 9%; opacity: 0; transition: opacity 0.8s; overflow: visible; }
-.lissajous path { fill: none; stroke: var(--phase); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.lissajous .ghost { stroke-width: 8; opacity: 0.25; filter: blur(3px); }
-:root[data-skin="technik"][data-phase="long"] .lissajous { opacity: 0.6; animation: spin3d 10s linear infinite; }
-:root[data-skin="technik"][data-phase="long"][data-run="1"] .lissajous { animation-duration: 5s; }
+.lissajous { position: absolute; inset: 9%; width: 82%; height: 82%; opacity: 0; transition: opacity 0.8s; }
+:root[data-skin="technik"][data-phase="long"] .lissajous { opacity: 0.8; }
 /* Kurze Pause: Spektrum-Anzeige am unteren Rand */
 .fft { left: 14px; right: 14px; bottom: 0; height: 30%; display: none; align-items: flex-end; gap: 3px; opacity: 0.35; }
 :root[data-phase="short"] .fft { display: flex; }
@@ -138,10 +135,14 @@
 .fft i:nth-child(7n) { animation-duration: 0.5s; }
 /* Bedienfeld: RUN/STOP und Trigger-Marke */
 .scope-state {
-  top: 12px; right: 14px; font: 600 10px/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase;
-  padding: 4px 6px; border-radius: 3px; color: var(--bad); border: 1px solid currentColor;
+  position: absolute; top: 12px; right: 14px; pointer-events: auto; cursor: pointer; font: 600 10px/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 6px 8px; border-radius: 3px; color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, var(--surface)); border: 1px solid currentColor;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, currentColor 40%, transparent);
 }
-:root[data-run="1"] .scope-state { color: var(--good); box-shadow: 0 0 calc(var(--glow, 0) * 10px) color-mix(in srgb, var(--good) 60%, transparent); }
+.scope-state::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 0; }
+.scope-state:active { translate: 0 1px; box-shadow: none; }
+.scope-state.is-run { color: var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); box-shadow: 0 0 calc(var(--glow, 0) * 10px) color-mix(in srgb, var(--good) 60%, transparent), inset 0 -2px 0 color-mix(in srgb, currentColor 40%, transparent); }
+.scope-state:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .scope-trig { left: 10px; top: calc(42% - 7px); font: 600 11px/1 var(--font-mono); color: var(--phase); }
 /* Röhrenbild: Zeilen im Nachtmodus */
 .scanlines {

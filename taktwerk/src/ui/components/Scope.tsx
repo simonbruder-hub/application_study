@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { TimerPhase } from '../../data/types';
 import { prefs } from '../../app/prefs';
+import { app } from '../../app/services';
 
 /** Lage der Cursor (Anteil der Kartenbreite), bleibt beim Neuzeichnen und Seitenwechsel erhalten */
 const cursors = { x1: 0.28, x2: 0.62 };
@@ -151,8 +152,92 @@ export function ScopeTrace({ phase, running }: { phase: TimerPhase; running: boo
   return <canvas ref={canvas} class="scope-canvas" />;
 }
 
-/** Griffe der Messcursor oben an der Karte und die Anzeige ΔX, Δt, 1/Δt */
-export function ScopeCursors() {
+/**
+ * XY-Modus (lange Pause): Lissajous-Figur 3:2 wie auf einem echten Oszilloskop. Die Frequenzen sind leicht
+ * verstimmt, dadurch wandert die Phase und die Figur dreht sich scheinbar. Der Strahl zeichnet die Kurve,
+ * wo er langsam ist, leuchtet er heller; dahinter glimmt der Phosphor nach. Angehalten steht die Figur.
+ */
+export function ScopeXY() {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = canvas.current!;
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+    let w = 0;
+    let raf = 0;
+    let last = performance.now();
+    let delta = 0.6;
+    let head = 0;
+    let color = '#ffd23f';
+    let colorAt = 0;
+    const root = document.documentElement;
+    const size = () => {
+      const r = c.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      w = r.width;
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(w * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    const ro = new ResizeObserver(size);
+    ro.observe(c);
+    const N = 720;
+    const frame = (t: number) => {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      last = t;
+      raf = requestAnimationFrame(frame);
+      if (root.dataset.phase !== 'long' || w === 0) { ctx.clearRect(0, 0, w, w); return; }
+      const run = root.dataset.run === '1';
+      const still = prefs.value.motion === 'aus' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (run && !still) { delta += dt * 0.42; head = (head + dt * 0.55) % 1; }
+      if (t - colorAt > 1000) { color = getComputedStyle(c).getPropertyValue('--phase').trim() || color; colorAt = t; }
+      const R = w * 0.43;
+      const m = w / 2;
+      const pt = (u: number) => {
+        const a = u * Math.PI * 2;
+        // feines Rauschen wie bei einem echten Strahl
+        const n = run ? (Math.sin(a * 97 + t * 0.03) * 0.5) : 0;
+        return { x: m + R * Math.sin(3 * a + delta) + n, y: m + R * Math.sin(2 * a) + n };
+      };
+      ctx.clearRect(0, 0, w, w);
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = color;
+      ctx.shadowColor = color;
+      // Nachleuchten der ganzen Figur, Helligkeit nach Strahlgeschwindigkeit (langsam = heller)
+      const pts = Array.from({ length: N + 1 }, (_, i) => pt(i / N));
+      for (let i = 0; i < N; i += 4) {
+        const p0 = pts[i]!;
+        const p1 = pts[Math.min(N, i + 4)]!;
+        const speed = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        const bright = Math.min(1, 9 / (speed + 2));
+        // Abstand zum Strahl: frisch gezeichnete Stellen leuchten stärker
+        const age = ((head - i / N) % 1 + 1) % 1;
+        const glow = run ? Math.max(0, 1 - age * 2.2) : 0.35;
+        ctx.globalAlpha = Math.min(1, 0.2 + bright * 0.4 + glow * 0.6);
+        ctx.lineWidth = 1.8 + glow * 1.6;
+        ctx.shadowBlur = 4 + glow * 10;
+        ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+      }
+      // Strahlpunkt
+      if (run) {
+        const p = pt(head);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 16;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    };
+    raf = requestAnimationFrame(frame);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, []);
+  return <canvas ref={canvas} class="lissajous" />;
+}
+
+/** Griffe der Messcursor oben an der Karte, RUN/STOP-Taste und die Anzeige ΔX, Δt, 1/Δt */
+export function ScopeCursors({ running }: { running: boolean }) {
   const [pos, setPos] = useState({ ...cursors });
   const wrap = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -194,6 +279,9 @@ export function ScopeCursors() {
           {key.toUpperCase()}
         </button>
       ))}
+      <button type="button" class={`scope-state${running ? ' is-run' : ''}`} onClick={() => void app().timer.toggle()} aria-label={running ? 'Timer anhalten' : 'Timer starten'}>
+        {running ? 'Run' : 'Stop'}
+      </button>
       <span class="scope-delta" aria-live="off">
         ΔX {div.toFixed(2)} Div · Δt {fmtDt(div)} · 1/Δt {sec > 0 ? ((1 / sec) * 1000).toFixed(1) : '–'} mHz
       </span>
