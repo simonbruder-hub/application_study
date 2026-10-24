@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Taktwerk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { display: grid; place-items: center; font: 600 15px/1.4 system-ui, sans-serif; background: #edf1f0; color: #3c4d53; }
+  @media (prefers-color-scheme: dark) { body { background: #0d1214; color: #b4c2c4; } }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #c63a29; margin: 0 auto 12px; animation: p 1s ease-in-out infinite alternate; }
+  @keyframes p { to { opacity: 0.25; transform: scale(0.6); } }
+</style>
+</head>
+<body>
+<div><div class="dot"></div>Taktwerk wird geladen …</div>
+<script>
+  // Desktop-Start: Mit Internet die aktuelle Online-Version laden (aktualisiert sich selbst und bleibt
+  // danach auch offline verfügbar), sonst die mitgelieferte Offline-Kopie.
+  const ONLINE = 'https://simonbruder-hub.github.io/application_study/taktwerk/app/?desktop=1';
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+  Promise.race([fetch(ONLINE, { mode: 'no-cors', cache: 'no-store' }), timeout])
+    .then(() => location.replace(ONLINE + '#fokus'))
+    .catch(() => location.replace('offline.html#fokus'));
+</script>
+</body>
+</html>

@@ -58,7 +58,11 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://xlbddpaxwjgseqxaicuf.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_HawYMwgitp0Jo9CmA31oIA_tA3Hd-ik' }}
-        run: npx vite build --mode single
+        run: |
+          npx vite build --mode single
+          mkdir -p desktop/dist-desktop
+          cp desktop/loader/index.html desktop/dist-desktop/index.html
+          cp dist/single/index.html desktop/dist-desktop/offline.html
       - name: Symbole erzeugen
         run: npx tauri icon web/public/icon-512.png -o desktop/src-tauri/icons
       - name: Desktop-App bauen

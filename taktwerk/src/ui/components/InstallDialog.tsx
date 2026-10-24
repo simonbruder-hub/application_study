@@ -29,7 +29,7 @@ export const isInstalled = (): boolean =>
   typeof matchMedia === 'function' && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: window-controls-overlay)').matches)
   || (navigator as Navigator & { standalone?: boolean }).standalone === true
   // Desktop-App (Tauri) oder Einzeldatei: dort gibt es nichts zu installieren
-  || '__TAURI_INTERNALS__' in window || location.protocol === 'file:';
+  || '__TAURI_INTERNALS__' in window || location.protocol === 'file:' || new URLSearchParams(location.search).has('desktop');
 
 export function InstallButton() {
   const prompt = useInstallPrompt();

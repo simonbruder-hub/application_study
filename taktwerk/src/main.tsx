@@ -41,7 +41,11 @@ async function main(): Promise<void> {
 
   if (__PP_BUILD__ === 'web' && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !import.meta.env.DEV) {
     const { registerSW } = await import('virtual:pwa-register');
-    registerSW({ immediate: true });
+    registerSW({
+      immediate: true,
+      // Bleibt die App lange offen, trotzdem regelmässig nach Updates schauen; der Timer übersteht das Neuladen
+      onRegisteredSW: (_url, reg) => { if (reg) setInterval(() => { void reg.update(); }, 30 * 60 * 1000); },
+    });
   }
 }
 

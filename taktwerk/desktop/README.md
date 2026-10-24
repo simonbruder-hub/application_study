@@ -1,7 +1,8 @@
 # Taktwerk Desktop (Windows, Linux)
 
-Kleine Desktop-Hülle mit [Tauri 2](https://tauri.app): zeigt die Einzeldatei der Web-App (`dist/single`) in einem
-eigenen Fenster. Gedacht vor allem für Firefox-Nutzer, denn Firefox installiert auf dem PC keine Web-Apps.
+Kleine Desktop-Hülle mit [Tauri 2](https://tauri.app). Beim Start lädt sie mit Internet die aktuelle Online-Version
+(`loader/index.html`): Updates kommen damit automatisch, und dank Service Worker läuft sie danach auch offline. Ohne
+Internet beim allerersten Start öffnet sie die mitgelieferte Einzeldatei (`offline.html`). Gedacht vor allem für Firefox-Nutzer, denn Firefox installiert auf dem PC keine Web-Apps.
 
 Die Installer baut GitHub Actions (`.github/workflows/desktop.yml`), sobald ein Tag `desktop-v*` gepusht wird:
 
@@ -19,6 +20,7 @@ Lokal bauen (Rust und die [Tauri-Voraussetzungen](https://tauri.app/start/prereq
 ```bash
 npm ci
 npx vite build --mode single
+mkdir -p desktop/dist-desktop && cp desktop/loader/index.html desktop/dist-desktop/ && cp dist/single/index.html desktop/dist-desktop/offline.html
 npx tauri icon web/public/icon-512.png -o desktop/src-tauri/icons
 npx tauri build
 ```
