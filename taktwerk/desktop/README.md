@@ -9,6 +9,8 @@ Die Installer baut GitHub Actions (`.github/workflows/desktop.yml`), sobald ein 
 git tag desktop-v1.0.1 && git push origin desktop-v1.0.1
 ```
 
+Oder ohne Tag: GitHub → Actions → «Desktop-App» → «Run workflow» und eine Version eintragen (z. B. `1.0.1`).
+
 Das Release enthält feste Dateinamen, damit die Links auf der Startseite und in der App stabil bleiben:
 `Taktwerk-Setup.exe`, `Taktwerk.msi`, `Taktwerk.AppImage`, `Taktwerk.deb`.
 
