@@ -3,6 +3,7 @@
  * Zifferblatt). Wie in SkinDecor: alles liegt im DOM, CSS blendet je Phase ein und startet Animationen.
  */
 import type { ComponentChildren } from 'preact';
+import { useMemo } from 'preact/hooks';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 const Deco = ({ children }: { children: ComponentChildren }) => <div class="deco" aria-hidden="true">{children}</div>;
@@ -242,6 +243,46 @@ const FIRS = [0, 400].flatMap((o) => Array.from({ length: 16 }, (_, i) => {
   return `M${x - 7} 40 L${x} ${40 - h} L${x + 7} 40 Z`;
 })).join(' ');
 
+/**
+ * SBB-Bahnhofsuhr: weisses Zifferblatt, schwarze Balken, schwarze Zeiger mit der echten Uhrzeit und die rote
+ * Kelle. Wie im Original läuft die Kelle in 58,5 Sekunden einmal herum, wartet oben, und der Minutenzeiger
+ * springt dann weiter. Alles per CSS-Animation, gestartet mit der aktuellen Zeit (kein Takt im JS).
+ */
+export function SbbClock({ class: cls = '', hands = true }: { class?: string; hands?: boolean }) {
+  const delays = useMemo(() => {
+    const d = new Date();
+    const s = d.getSeconds() + d.getMilliseconds() / 1000;
+    const m = d.getMinutes() * 60 + s;
+    const h = (d.getHours() % 12) * 3600 + m;
+    // Startlage auch als feste Drehung: gilt, wenn Bewegung aus ist und die Animation nicht läuft
+    return {
+      h: { animationDelay: `-${h.toFixed(1)}s`, transform: `rotate(${(h / 120).toFixed(2)}deg)` },
+      m: { animationDelay: `-${m.toFixed(1)}s`, transform: `rotate(${Math.floor(m / 60) * 6}deg)` },
+      s: { animationDelay: `-${s.toFixed(2)}s`, transform: `rotate(${Math.min(360, (s / 58.5) * 360).toFixed(1)}deg)` },
+    };
+  }, []);
+  return (
+    <svg class={`sbb ${cls}`} viewBox="0 0 200 200" aria-hidden="true">
+      <circle class="sbb-face" cx="100" cy="100" r="97" />
+      {Array.from({ length: 60 }, (_, i) => {
+        const big = i % 5 === 0;
+        return <rect key={i} class="sbb-mark" x={big ? 96.6 : 98.8} y={big ? 8 : 8} width={big ? 6.8 : 2.4} height={big ? 25 : 7.5} transform={`rotate(${i * 6} 100 100)`} />;
+      })}
+      {hands && (
+        <>
+          <path class="sbb-hand sbb-h" style={delays.h} d="M95.4 118 L96.2 42 L103.8 42 L104.6 118 Z" />
+          <path class="sbb-hand sbb-m" style={delays.m} d="M96.4 120 L97.2 16 L102.8 16 L103.6 120 Z" />
+        </>
+      )}
+      <g class="sbb-s" style={delays.s}>
+        <rect class="sbb-red" x="98.8" y="38" width="2.4" height="92" />
+        <circle class="sbb-red" cx="100" cy="38" r="10" />
+      </g>
+      <circle class="sbb-red" cx="100" cy="100" r="2.6" />
+    </svg>
+  );
+}
+
 /** Zug auf dem Gleis unten: zwei Wagen und eine Lok, Räder drehen sich während der Fahrt */
 function Train() {
   const wheels = [10, 26, 44, 60, 82, 98, 116, 132, 152, 168, 192, 208];
@@ -283,7 +324,7 @@ function Station({ name }: { name: string }) {
         <rect class="st-platform" x="0" y="64" width="120" height="6" />
       </svg>
       <span class="st-sign">{name}</span>
-      <span class="clock-z"><i /></span>
+      <SbbClock class="clock-z" />
     </div>
   );
 }
@@ -302,7 +343,7 @@ function MainStation() {
         <rect class="hb-pillar" x="0" y="100" width="7" height="200" />
         <rect class="hb-pillar" x="393" y="100" width="7" height="200" />
       </svg>
-      <span class="clock-z hb-clock"><i /></span>
+      <SbbClock class="clock-z hb-clock" />
       <div class="hb-board">
         <b>Zürich HB<small>Abfahrt</small></b>
         <span><i>IC 1</i>Genève-Aéroport<em>7</em></span>
@@ -313,8 +354,12 @@ function MainStation() {
   );
 }
 
-/** Zug: Fahrt durch die Alpen im Fokus, Halt an einem Bahnhof (kurze Pause) oder im Hauptbahnhof (lange Pause) */
-export function ZugScene({ station }: { station: string }) {
+/**
+ * Zug: Fahrt durch die Alpen im Fokus, Halt an einem Bahnhof (kurze Pause) oder im Hauptbahnhof (lange Pause).
+ * Der Zug fährt mit dem Fortschritt (p 0..1) über die Karte und steht in der Pause am Bahnsteig rechts;
+ * beginnt die nächste Fahrt, steht er wieder vorne (neuer Schlüssel: kein Zurückgleiten).
+ */
+export function ZugScene({ station, p, stage }: { station: string; p: number; stage: string }) {
   return (
     <Deco>
       <div class="sky-day" />
@@ -330,8 +375,10 @@ export function ZugScene({ station }: { station: string }) {
       <Station name={station} />
       <MainStation />
       <div class="rails"><i class="sleepers" /><i class="rail" /><i class="rail" /></div>
-      <Train />
-      <div class="steam">{many(6)}</div>
+      <div key={stage} class="z-consist" style={{ '--zp': Math.min(1, Math.max(0, p)).toFixed(4) }}>
+        <Train />
+        <div class="steam">{many(6)}</div>
+      </div>
     </Deco>
   );
 }

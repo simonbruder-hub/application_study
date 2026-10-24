@@ -9,7 +9,7 @@ import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../a
 import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
 import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
-import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
+import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, SbbClock, ScifiScene, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 
@@ -109,7 +109,11 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
     case 'flora': return <FloraScene />;
     case 'scifi': return <ScifiScene />;
     case 'elemente': return <ElementeScene />;
-    case 'zug': return <ZugScene station={pick(ZUG_STOPS, Math.max(0, cycle - 1))} />;
+    case 'zug': {
+      // Fahrt im Fokus mit dem Fortschritt, in der Pause steht der Zug am Bahnsteig (ganz rechts)
+      const p = v.kind === 'stopwatch' ? v.frac : v.phase !== 'focus' ? 1 : !v.active && v.frac >= 1 ? 0 : 1 - v.frac;
+      return <ZugScene station={pick(ZUG_STOPS, Math.max(0, cycle - 1))} p={p} stage={`${v.phase}-${v.active}`} />;
+    }
     case 'amtlich':
       return (
         <div class="deco" aria-hidden="true">
@@ -157,6 +161,8 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
       return <div class="dial-fx" aria-hidden="true"><div class="holo"><i /><i /><i /></div></div>;
     case 'flora':
       return <div class="dial-fx" aria-hidden="true"><FloraWreath /></div>;
+    case 'zug':
+      return <div class="dial-fx" aria-hidden="true"><SbbClock class="sbb-dial" hands={false} /></div>;
     default:
       return null;
   }

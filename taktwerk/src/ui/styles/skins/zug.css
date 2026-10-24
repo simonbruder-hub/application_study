@@ -90,8 +90,9 @@
 :root[data-skin="zug"][data-phase="focus"][data-run="1"] .dial-track { animation: ring-sleepers 0.9s linear infinite; }
 @keyframes ring-sleepers { to { stroke-dashoffset: -10; } }
 [data-skin="zug"] .timer-card { padding-bottom: 92px; }
-/* Der Zug auf dem Gleis: steht still, Räder drehen und Wagen wippen nur während der Fahrt */
-.z-train { left: 5%; bottom: 10px; width: clamp(150px, 40cqw, 210px); height: auto; overflow: visible; }
+/* Der Zug auf dem Gleis fährt mit dem Fortschritt nach rechts; Räder drehen und Wagen wippen nur während der Fahrt */
+.z-consist { --zw: clamp(150px, 40cqw, 210px); left: calc(3% + var(--zp, 0) * (94% - var(--zw))); bottom: 10px; width: var(--zw); height: 46px; transition: left 1.1s linear; }
+.z-train { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; overflow: visible; }
 .z-car { fill: #c1121f; stroke: #5c0a10; stroke-width: 1; }
 .z-loco { fill: #d62828; }
 .z-band { fill: #ffffff; opacity: 0.9; }
@@ -107,7 +108,7 @@
 :root[data-skin="zug"][data-phase="focus"][data-run="1"] :is(.z-wheel, .z-body) { animation-play-state: running; }
 @keyframes z-bob { to { transform: translateY(-0.8px); } }
 /* Dampf aus der Lok: kräftig während der Fahrt, leise beim Halt */
-.steam { left: calc(5% + clamp(150px, 40cqw, 210px) * 0.8); bottom: 46px; width: 0; height: 0; display: none; }
+.steam { position: absolute; left: 80%; bottom: 36px; width: 0; height: 0; display: none; }
 :root[data-skin="zug"][data-run="1"] .steam { display: block; }
 .steam i { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: color-mix(in srgb, #ffffff 80%, var(--surface-3)); opacity: 0; animation: puff 2.4s ease-out infinite; }
 .steam i:nth-child(2) { animation-delay: -0.4s; } .steam i:nth-child(3) { animation-delay: -0.8s; } .steam i:nth-child(4) { animation-delay: -1.2s; } .steam i:nth-child(5) { animation-delay: -1.6s; } .steam i:nth-child(6) { animation-delay: -2s; }
@@ -130,7 +131,6 @@
   position: absolute; left: 50%; top: 36%; translate: -50% 0; white-space: nowrap;
   font: 800 13px/1 var(--font-display); letter-spacing: 0.04em; color: #ffffff; background: #1d3557; padding: 5px 10px; border-radius: 3px; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #1d3557;
 }
-.station .clock-z { position: absolute; right: -16px; top: 8px; }
 /* Hauptbahnhof (lange Pause): Glasdach über die ganze Karte, Tafel und Uhr */
 .hb { inset: 0; }
 .hb-hall { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -149,13 +149,25 @@
 .hb-board em { font-style: normal; color: #ffd166; }
 .hb-board span:nth-child(2) { animation: board-flip 6s steps(1) infinite; }
 @keyframes board-flip { 92% { opacity: 1; } 94% { opacity: 0.2; } 96% { opacity: 1; } }
-.hb .hb-clock { position: absolute; right: 16px; top: 22px; width: 38px; height: 38px; }
-.hb .hb-clock::after { content: ""; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 22px; margin-left: -1px; background: #46525f; }
-/* Bahnhofsuhr: Minutenzeiger fest, Sekundenzeiger springt */
-.clock-z { display: inline-block; position: relative; width: 30px; height: 30px; border-radius: 50%; background: #ffffff; border: 3px solid #161b22; }
-.clock-z::before, .clock-z i { content: ""; position: absolute; left: 50%; bottom: 50%; width: 2px; margin-left: -1px; transform-origin: 50% 100%; background: #161b22; }
-.clock-z::before { height: 36%; transform: rotate(60deg); }
-.clock-z i { height: 44%; background: #c1121f; animation: spin 60s steps(60) infinite; }
+/* SBB-Bahnhofsuhr (SbbClock): weisses Blatt, schwarze Balken und Zeiger, rote Kelle */
+.sbb { display: block; overflow: visible; }
+.sbb-face { fill: #ffffff; stroke: #1b1b1b; stroke-width: 5; }
+.sbb-mark, .sbb-hand { fill: #1b1b1b; }
+.sbb-red { fill: #eb0000; }
+.sbb-h, .sbb-m, .sbb-s { transform-box: view-box; transform-origin: 100px 100px; }
+.sbb-h { animation: sbb-turn 43200s linear infinite; }
+.sbb-m { animation: sbb-turn 3600s steps(60, end) infinite; }
+.sbb-s { animation: sbb-sec 60s linear infinite; }
+@keyframes sbb-turn { to { transform: rotate(360deg); } }
+@keyframes sbb-sec { 0% { transform: rotate(0deg); } 97.5%, 100% { transform: rotate(360deg); } }
+.station .clock-z { position: absolute; right: -18px; top: 4px; width: 34px; height: 34px; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.3)); }
+.hb .hb-clock { position: absolute; right: 16px; top: 22px; width: 44px; height: 44px; filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.35)); }
+/* Zifferblatt der Uhr: SBB-Blatt innerhalb des Gleisrings, die Kelle läuft mit der echten Sekunde */
+.dial-fx .sbb-dial { position: absolute; inset: 15%; width: 70%; height: 70%; }
+[data-skin="zug"] .dial-ticks, [data-skin="zug"] .sec-orbit { display: none; }
+[data-skin="zug"] .clock { font-size: clamp(34px, 9.5vw, 48px); color: #1b1b1b; }
+[data-skin="zug"] .dial-sub { color: #4a4a4a; }
+[data-skin="zug"] .theme-badge { position: relative; z-index: 1; }
 .cutin-zug .cutin-band { border-radius: 4px; background: #1d3557; }
 .cutin-zug .cutin-band b, .cutin-zug .cutin-band small { color: #ffffff; text-transform: uppercase; }
 /* Feier: Dampf und Konfetti am Ziel */
