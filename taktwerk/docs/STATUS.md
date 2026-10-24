@@ -37,3 +37,10 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 4. **Natur → «Forest»:** umbenennen; statt der Topfpflanze wächst ein Baum, und **jede Pause ein anderer Baum**
    (z. B. Tanne, Eiche, Birke, Kirschbaum; der Wald füllt sich über den Tag).
 5. Optional: eigener Superhelden-Stil (eigene Figur, keine geschützte wie Spider-Man).
+6. **Zeiger ziehen:** Den Zeiger (Punkt, Auto, Flugzeug, Blatt, Edelstein) mit Maus oder Finger auf dem Zifferblatt
+   verschieben, um vorzuspringen oder die Runde zu verlängern, zusätzlich zu −5/+5.
+   Umsetzung: Pointer-Events auf `.dial` in `src/ui/components/Dial.tsx` (`pointerdown`/`move`/`up`, `setPointerCapture`,
+   `touch-action: none`), Winkel → Restzeit, auf ganze Minuten einrasten, Vorschau während des Ziehens, beim Loslassen
+   einmal `timer.adjust()` bzw. `adjustPlannedSeconds` in `src/app/timer/controller.ts` (läuft über `timerSync`, also auch
+   auf dem anderen Gerät sichtbar). Grenzen: mindestens 1 Minute Rest, höchstens eine volle Umdrehung; Tastatur
+   (Pfeiltasten) für Barrierefreiheit; für Pomodoro und Stechuhr (dort Beginn korrigieren).
