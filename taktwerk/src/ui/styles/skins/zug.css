@@ -1,0 +1,80 @@
+/* Zug: Bahnfahrt durch die Alpen. Fokus = Fahrt (Landschaft zieht vorbei), kurze Pause = Halt am Bahnsteig,
+ * lange Pause = Abend und Tunnel. Zeiger: eine Lokomotive auf dem Gleisring. */
+:root[data-skin="zug"] {
+  --bg: #eef1f4;
+  --bg-layers: linear-gradient(180deg, #e4ecf3, #f3f5f7 60%, #e9ece6);
+  --surface: #ffffff; --surface-2: #f2f4f6; --surface-3: #e2e6ea;
+  --ink: #161b22; --ink-2: #39414d; --muted: #66707d; --line: #dbe0e6; --line-strong: #a9b2bd; --outline: #161b22;
+  --tomato: #c1121f; --on-tomato: #ffffff; --sage: #2a9d8f; --on-sage: #ffffff; --indigo: #e76f51; --on-indigo: #ffffff;
+  --link: #a10f1a; --focus-ring: #a10f1a; --dial-track: #4a5059; --tick: #a9b2bd; --tick-major: #161b22;
+  --radius: 10px; --card-shadow: 0 14px 30px -20px rgb(22 27 34 / 0.45);
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --dusk: 0;
+  --scene-short: linear-gradient(180deg, color-mix(in srgb, var(--sage) 12%, transparent), transparent 60%);
+  --scene-long: linear-gradient(180deg, color-mix(in srgb, #f4a261 26%, transparent), color-mix(in srgb, #264653 16%, transparent) 70%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="zug"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --dusk: 1;
+    --bg: #11161c; --bg-layers: linear-gradient(180deg, #0f1620, #161c24);
+    --surface: #1a2029; --surface-2: #202833; --surface-3: #2b3542; --ink: #eef2f6; --ink-2: #c3ccd6; --muted: #8d98a6; --line: #2b3542; --line-strong: #46525f; --outline: #eef2f6;
+    --tomato: #ef4444; --on-tomato: #2a0404; --sage: #4fd1c5; --on-sage: #032421; --indigo: #f4a261; --on-indigo: #2a1405; --link: #ff8b8b; --dial-track: #3a4350; --tick: #46525f; --tick-major: #eef2f6;
+  }
+}
+:root[data-skin="zug"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="zug"][data-mode="nacht"] {
+  color-scheme: dark; --dusk: 1;
+  --bg: #11161c; --bg-layers: linear-gradient(180deg, #0f1620, #161c24);
+  --surface: #1a2029; --surface-2: #202833; --surface-3: #2b3542; --ink: #eef2f6; --ink-2: #c3ccd6; --muted: #8d98a6; --line: #2b3542; --line-strong: #46525f; --outline: #eef2f6;
+  --tomato: #ef4444; --on-tomato: #2a0404; --sage: #4fd1c5; --on-sage: #032421; --indigo: #f4a261; --on-indigo: #2a1405; --link: #ff8b8b; --dial-track: #3a4350; --tick: #46525f; --tick-major: #eef2f6;
+}
+[data-skin="zug"] .view-head h1 { font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
+[data-skin="zug"] .clock { font-family: var(--font-display); font-weight: 800; letter-spacing: 0.02em; font-size: clamp(50px, 14vw, 78px); }
+/* Gleisring: Schwellen als Striche, Schiene in der Phasenfarbe */
+[data-skin="zug"] .dial-track { stroke-width: 20; stroke-dasharray: 3 7; stroke: #7a5634; }
+[data-skin="zug"] .dial-arc { stroke-width: 4; stroke-linecap: butt; stroke: var(--phase); filter: drop-shadow(0 7px 0 var(--phase)) drop-shadow(0 -7px 0 var(--phase)); }
+[data-skin="zug"] .dial-knob { fill: var(--phase); stroke: #161b22; stroke-width: 1.2; }
+[data-skin="zug"] .theme-badge { border-radius: 4px; background: var(--phase); color: #ffffff; letter-spacing: 0.12em; }
+
+/* Landschaft in Ebenen: Berge langsam, Hügel schneller, Masten am schnellsten (nur während der Fahrt) */
+.sky-z { inset: 0; opacity: 0; transition: opacity 1.6s; background: linear-gradient(180deg, color-mix(in srgb, #f4a261 30%, transparent), transparent 60%); }
+:root[data-phase="long"] .sky-z { opacity: 1; }
+.alps, .hills { left: 0; width: 200%; animation: drift 80s linear infinite paused; }
+.alps { bottom: 46px; height: 90px; fill: color-mix(in srgb, #6c7a89 45%, var(--surface)); }
+.alps .snow { fill: #ffffff; opacity: calc(1 - var(--dusk) * 0.5); }
+.hills { bottom: 26px; height: 60px; fill: color-mix(in srgb, #2a9d8f 40%, var(--surface)); animation-duration: 30s; }
+:root[data-phase="focus"][data-run="1"] :is(.alps, .hills) { animation-play-state: running; }
+.poles { left: 0; right: 0; bottom: 26px; height: 70px; display: none; }
+:root[data-phase="focus"][data-run="1"] .poles { display: block; }
+.poles i { position: absolute; left: 0; bottom: 0; width: 3px; height: 64px; background: #4a3a2a; animation: across 2.4s linear infinite; }
+.poles i::before { content: ""; position: absolute; left: -9px; top: 6px; width: 21px; height: 3px; background: #4a3a2a; }
+.poles i:nth-child(2) { animation-delay: -0.8s; } .poles i:nth-child(3) { animation-delay: -1.6s; }
+.rails { left: 0; right: 0; bottom: 0; height: 26px; background: repeating-linear-gradient(90deg, #7a5634 0 8px, transparent 8px 22px) 0 6px / 100% 12px no-repeat, linear-gradient(#8d99a6, #8d99a6) 0 7px / 100% 2px no-repeat, linear-gradient(#8d99a6, #8d99a6) 0 15px / 100% 2px no-repeat, color-mix(in srgb, #b9a88a 40%, var(--surface)); }
+:root[data-phase="focus"][data-run="1"] .rails { animation: rails 0.4s linear infinite; }
+@keyframes rails { to { background-position: -22px 6px, 0 7px, 0 15px, 0 0; } }
+/* Dampfwolken der Lok */
+.steam { left: 18%; bottom: 120px; width: 0; height: 0; display: none; }
+:root[data-run="1"] .steam { display: block; }
+.steam i { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: color-mix(in srgb, #ffffff 80%, var(--surface-3)); opacity: 0; animation: puff 2.4s ease-out infinite; }
+.steam i:nth-child(2) { animation-delay: -0.4s; } .steam i:nth-child(3) { animation-delay: -0.8s; } .steam i:nth-child(4) { animation-delay: -1.2s; } .steam i:nth-child(5) { animation-delay: -1.6s; } .steam i:nth-child(6) { animation-delay: -2s; }
+@keyframes puff { from { transform: translate(0, 0) scale(0.4); opacity: 0.9; } to { transform: translate(-90px, -50px) scale(2.4); opacity: 0; } }
+/* Halt am Bahnsteig (kurze Pause): Schild und Bahnhofsuhr */
+.platform { right: 16px; top: 56px; display: none; gap: 8px; align-items: center; }
+:root[data-phase="short"] .platform { display: flex; }
+.platform .sign { font: 800 13px/1 var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; color: #ffffff; background: #1d3557; padding: 6px 10px; border-radius: 3px; }
+.clock-z { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; border: 3px solid #161b22; }
+.clock-z::before, .clock-z i { content: ""; position: absolute; left: 50%; bottom: 50%; width: 2px; margin-left: -1px; transform-origin: 50% 100%; background: #161b22; }
+.clock-z::before { height: 9px; transform: rotate(60deg); }
+.clock-z i { height: 13px; animation: spin 60s steps(60) infinite; }
+/* Abend und Tunnellichter (lange Pause) */
+.tunnel-lights { inset: 0; display: none; }
+:root[data-phase="long"] .tunnel-lights { display: block; }
+.tunnel-lights i { position: absolute; top: 18%; left: 0; width: 10px; height: 10px; border-radius: 50%; background: #ffd166; box-shadow: 0 0 14px 4px rgb(255 209 102 / 0.6); animation: across 3.2s linear infinite; }
+.tunnel-lights i:nth-child(2) { animation-delay: -0.53s; } .tunnel-lights i:nth-child(3) { animation-delay: -1.07s; } .tunnel-lights i:nth-child(4) { animation-delay: -1.6s; }
+.tunnel-lights i:nth-child(5) { animation-delay: -2.13s; } .tunnel-lights i:nth-child(6) { animation-delay: -2.67s; }
+.cutin-zug .cutin-band { border-radius: 4px; background: #1d3557; }
+.cutin-zug .cutin-band b, .cutin-zug .cutin-band small { color: #ffffff; text-transform: uppercase; }
+/* Feier: Dampf und Konfetti am Ziel */
+.cel-zug .cel-flash { display: none; }
+.cel-zug .p i.puff { width: 34px; height: 34px; border-radius: 50%; background: rgb(255 255 255 / 0.85); filter: blur(1px); }
+.cel-zug .p i.conf { width: 9px; height: 14px; border-radius: 2px; background: var(--c); }
+.cel-zug .cel-text b { text-transform: uppercase; font-size: clamp(34px, 8vw, 60px); }

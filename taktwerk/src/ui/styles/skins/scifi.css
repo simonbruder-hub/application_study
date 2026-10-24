@@ -1,0 +1,122 @@
+/* Sci-Fi: Raumschiff-Cockpit. Fokus = Warp-Sprung, kurze Pause = Orbit mit Radar, lange Pause = Andocken am Planeten.
+ * Tag: helle Raumstation; Nacht: tiefes All. Zeiger: ein Raumschiff, Hologramm-Ringe ums Zifferblatt. */
+:root[data-skin="scifi"] {
+  --bg: #eef3fb;
+  --bg-layers: linear-gradient(rgb(0 140 200 / 0.06) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, rgb(0 140 200 / 0.06) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(180deg, #f6f9ff, #e2eaf7);
+  --surface: #ffffff; --surface-2: #f1f6fd; --surface-3: #dfe9f7;
+  --ink: #0b1630; --ink-2: #2b3c60; --muted: #5a6b8c; --line: #d6e2f3; --line-strong: #9fb6d8; --outline: #0b1630;
+  --tomato: #0096c7; --on-tomato: #ffffff; --sage: #7c4dff; --on-sage: #ffffff; --indigo: #e5007d; --on-indigo: #ffffff;
+  --link: #0077b6; --focus-ring: #0077b6; --dial-track: #dfe9f7; --tick: #9fb6d8; --tick-major: #0b1630;
+  --radius: 6px; --card-shadow: 0 16px 34px -22px rgb(11 22 48 / 0.45);
+  --font-display: "Orbitron", "Share Tech Mono", system-ui, sans-serif;
+  --space: 0;
+  --scene-short: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--sage) 18%, transparent), transparent 45%);
+  --scene-long: radial-gradient(circle at 50% 120%, color-mix(in srgb, var(--indigo) 22%, transparent), transparent 60%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="scifi"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --space: 1;
+    --bg: #05060f; --bg-layers: radial-gradient(ellipse at 20% 10%, rgb(0 229 255 / 0.12), transparent 50%), radial-gradient(ellipse at 90% 90%, rgb(255 64 129 / 0.1), transparent 50%), #05060f;
+    --surface: #0b1022; --surface-2: #10172e; --surface-3: #18223f; --ink: #e6f6ff; --ink-2: #a9c6e0; --muted: #6f8bb0; --line: #1a2647; --line-strong: #2e4677; --outline: #00e5ff;
+    --tomato: #00e5ff; --on-tomato: #00141a; --sage: #b388ff; --on-sage: #120630; --indigo: #ff4081; --on-indigo: #2a0614; --link: #6ff3ff; --dial-track: #121b36; --tick: #2e4677; --tick-major: #9ff7ff;
+  }
+}
+:root[data-skin="scifi"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="scifi"][data-mode="nacht"] {
+  color-scheme: dark; --space: 1;
+  --bg: #05060f; --bg-layers: radial-gradient(ellipse at 20% 10%, rgb(0 229 255 / 0.12), transparent 50%), radial-gradient(ellipse at 90% 90%, rgb(255 64 129 / 0.1), transparent 50%), #05060f;
+  --surface: #0b1022; --surface-2: #10172e; --surface-3: #18223f; --ink: #e6f6ff; --ink-2: #a9c6e0; --muted: #6f8bb0; --line: #1a2647; --line-strong: #2e4677; --outline: #00e5ff;
+  --tomato: #00e5ff; --on-tomato: #00141a; --sage: #b388ff; --on-sage: #120630; --indigo: #ff4081; --on-indigo: #2a0614; --link: #6ff3ff; --dial-track: #121b36; --tick: #2e4677; --tick-major: #9ff7ff;
+}
+[data-skin="scifi"] .view-head h1 { font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: clamp(22px, 3vw, 30px); }
+[data-skin="scifi"] .clock { font-family: var(--font-display); font-weight: 500; letter-spacing: 0.04em; font-size: clamp(40px, 11vw, 60px); text-shadow: 0 0 calc(4px + var(--space) * 14px) color-mix(in srgb, var(--phase) 60%, transparent); }
+[data-skin="scifi"] .dial-track { stroke-width: 6; stroke-dasharray: 22 6; }
+[data-skin="scifi"] .dial-arc { stroke-width: 6; stroke-linecap: butt; filter: drop-shadow(0 0 6px var(--phase)); }
+[data-skin="scifi"] .dial .tk { stroke-width: 1; }
+[data-skin="scifi"] .dial-knob { fill: var(--surface); stroke: var(--phase); stroke-width: 1.4; filter: drop-shadow(0 0 5px var(--phase)); }
+[data-skin="scifi"] :is(.btn, .chip, .phase-tabs, .phase-tab, .seg, .seg-btn, .ws-switch, .ws-btn, .btn-start, .btn-round, .nav-item) { border-radius: 4px; }
+[data-skin="scifi"] .btn-start { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); letter-spacing: 0.1em; text-transform: uppercase; font-size: 15px; }
+
+/* Sternenfeld in zwei Ebenen (Parallaxe); im Fokus beim Warp schneller */
+.stars-a, .stars-b { inset: -50% 0 0 0; opacity: calc(0.35 + var(--space) * 0.65); }
+.stars-a { background: radial-gradient(circle at 1px 1px, var(--ink-2) 0.9px, transparent 1.3px) 0 0 / 47px 41px; animation: stars 60s linear infinite; }
+.stars-b { background: radial-gradient(circle at 1px 1px, var(--tomato) 1.1px, transparent 1.6px) 0 0 / 89px 77px; animation: stars 35s linear infinite; }
+:root[data-phase="focus"][data-run="1"] .stars-a { animation-duration: 8s; }
+:root[data-phase="focus"][data-run="1"] .stars-b { animation-duration: 4s; }
+@keyframes stars { to { transform: translateY(50%); } }
+/* Warp: Lichtstreifen schiessen aus der Mitte */
+.warp { inset: 0; display: none; }
+:root[data-phase="focus"][data-run="1"] .warp { display: block; }
+.warp i {
+  position: absolute; left: 50%; top: 42%; width: 2px; height: 2px; transform-origin: 0 50%;
+  transform: rotate(calc(var(--n, 0) * 1deg)); animation: warp 1.4s linear infinite;
+}
+.warp i::before { content: ""; position: absolute; left: 0; top: 0; width: 70px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--tomato), #ffffff); animation: warp-line 1.4s cubic-bezier(0.5, 0, 1, 0.5) infinite; animation-delay: inherit; }
+@keyframes warp { from { opacity: 0; } 20% { opacity: 1; } to { opacity: 0; } }
+@keyframes warp-line { from { transform: translateX(30px) scaleX(0.2); } to { transform: translateX(70cqw) scaleX(1.6); } }
+.warp i:nth-child(1) { --n: 0; animation-delay: -0.00s; }
+.warp i:nth-child(2) { --n: 19; animation-delay: -0.37s; }
+.warp i:nth-child(3) { --n: 28; animation-delay: -0.74s; }
+.warp i:nth-child(4) { --n: 48; animation-delay: -1.11s; }
+.warp i:nth-child(5) { --n: 57; animation-delay: -0.08s; }
+.warp i:nth-child(6) { --n: 66; animation-delay: -0.45s; }
+.warp i:nth-child(7) { --n: 86; animation-delay: -0.82s; }
+.warp i:nth-child(8) { --n: 95; animation-delay: -1.19s; }
+.warp i:nth-child(9) { --n: 103; animation-delay: -0.16s; }
+.warp i:nth-child(10) { --n: 123; animation-delay: -0.53s; }
+.warp i:nth-child(11) { --n: 132; animation-delay: -0.90s; }
+.warp i:nth-child(12) { --n: 141; animation-delay: -1.27s; }
+.warp i:nth-child(13) { --n: 161; animation-delay: -0.24s; }
+.warp i:nth-child(14) { --n: 170; animation-delay: -0.61s; }
+.warp i:nth-child(15) { --n: 190; animation-delay: -0.98s; }
+.warp i:nth-child(16) { --n: 198; animation-delay: -1.35s; }
+.warp i:nth-child(17) { --n: 207; animation-delay: -0.32s; }
+.warp i:nth-child(18) { --n: 227; animation-delay: -0.69s; }
+.warp i:nth-child(19) { --n: 236; animation-delay: -1.06s; }
+.warp i:nth-child(20) { --n: 245; animation-delay: -0.03s; }
+.warp i:nth-child(21) { --n: 265; animation-delay: -0.40s; }
+.warp i:nth-child(22) { --n: 274; animation-delay: -0.77s; }
+.warp i:nth-child(23) { --n: 282; animation-delay: -1.14s; }
+.warp i:nth-child(24) { --n: 302; animation-delay: -0.11s; }
+.warp i:nth-child(25) { --n: 311; animation-delay: -0.48s; }
+.warp i:nth-child(26) { --n: 331; animation-delay: -0.85s; }
+.warp i:nth-child(27) { --n: 340; animation-delay: -1.22s; }
+.warp i:nth-child(28) { --n: 349; animation-delay: -0.19s; }
+/* HUD-Ecken und Statuszeilen */
+.hud { inset: 10px; }
+.hud i { position: absolute; width: 22px; height: 22px; border: 2px solid var(--tomato); opacity: 0.7; }
+.hud i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; } .hud i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.hud i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; } .hud i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.hud span { position: absolute; top: 4px; font: 500 9px/1 var(--font-display); letter-spacing: 0.18em; color: var(--tomato); opacity: 0.8; }
+.hud-l { left: 30px; } .hud-r { right: 30px; animation: twinkle 2s steps(2) infinite; }
+/* Radar (kurze Pause) */
+.radar { right: 18px; top: 46px; width: 74px; height: 74px; border-radius: 50%; display: none; border: 1px solid color-mix(in srgb, var(--sage) 60%, transparent);
+  background: repeating-radial-gradient(circle, transparent 0 11px, color-mix(in srgb, var(--sage) 35%, transparent) 11px 12px); }
+:root[data-phase="short"] .radar { display: block; }
+.radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, color-mix(in srgb, var(--sage) 55%, transparent), transparent 25%); animation: spin 2.4s linear infinite; }
+.radar i { position: absolute; left: 60%; top: 30%; width: 5px; height: 5px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 6px var(--sage); animation: twinkle 2.4s ease-in-out infinite; }
+/* Planet mit Ring (lange Pause) */
+.planet { left: 50%; bottom: -60px; width: 150px; height: 150px; margin-left: -75px; border-radius: 50%; display: none;
+  background: radial-gradient(circle at 35% 30%, #ffd6e8, var(--indigo) 55%, #3a0a2a); box-shadow: 0 0 40px color-mix(in srgb, var(--indigo) 50%, transparent);
+  animation: planet-rise 3s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+:root[data-phase="long"] .planet { display: block; }
+.planet .ring { position: absolute; left: -40px; right: -40px; top: 50%; height: 26px; margin-top: -13px; border-radius: 50%; border: 4px solid color-mix(in srgb, #ffe0f0 70%, transparent); transform: rotate(-14deg); }
+@keyframes planet-rise { from { transform: translateY(80px); } to { transform: translateY(0); } }
+/* Kometen */
+.comets i { position: absolute; width: 90px; height: 2px; background: linear-gradient(90deg, transparent, #ffffff); animation: shoot 6s ease-in infinite; opacity: 0; }
+.comets i:nth-child(1) { left: 5%; top: 12%; } .comets i:nth-child(2) { left: 40%; top: 6%; animation-delay: -3s; animation-duration: 8s; }
+.comets { inset: 0; opacity: var(--space); }
+/* Hologramm-Ringe ums Zifferblatt */
+.holo { position: absolute; inset: 0; }
+.holo i { position: absolute; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--phase) 55%, transparent); animation: spin 30s linear infinite; }
+.holo i:nth-child(1) { inset: 1%; } .holo i:nth-child(2) { inset: 22%; border-style: dotted; animation-direction: reverse; animation-duration: 18s; }
+.holo i:nth-child(3) { inset: 30%; border: 2px solid transparent; border-top-color: var(--phase); border-bottom-color: var(--phase); opacity: 0.4; animation-duration: 6s; }
+:root[data-run="0"] .holo i { animation-play-state: paused; }
+.cutin-scifi .cutin-band { border-radius: 2px; border: 1px solid var(--phase); clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+.cutin-scifi .cutin-band b { letter-spacing: 0.1em; text-transform: uppercase; font-size: 24px; text-shadow: 0 0 10px var(--phase); }
+/* Feier: Sprung in den Hyperraum */
+.cel-scifi .cel-flash { background: #e6fdff; }
+.cel-scifi .p.ray { left: 50%; top: 42%; }
+.cel-scifi .p.ray > i { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--c)); box-shadow: 0 0 6px var(--c); animation-duration: 0.9s; animation-timing-function: cubic-bezier(0.6, 0, 1, 0.6); }
+.cel-ring { position: absolute; left: 50%; top: 42%; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 3px solid var(--tomato); box-shadow: 0 0 30px var(--tomato); animation: cel-ring 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) 0.5s both; }
+@keyframes cel-ring { from { transform: scale(0.2); opacity: 1; } to { transform: scale(18); opacity: 0; } }
+.cel-scifi .cel-text b { text-transform: uppercase; letter-spacing: 0.08em; font-size: clamp(30px, 7vw, 54px); color: var(--tomato); }

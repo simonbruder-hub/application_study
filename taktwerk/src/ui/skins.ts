@@ -3,7 +3,7 @@
  * data-skin auf <html>); hier stehen Name, Vorschaufarben, Browser-Farbe und nachzuladende Schriften.
  */
 
-export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug';
+export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug' | 'meer' | 'flora' | 'scifi' | 'elemente' | 'zug';
 
 export interface SkinInfo {
   id: Skin;
@@ -38,7 +38,7 @@ export const SKINS: readonly SkinInfo[] = [
     fonts: 'Playfair+Display:ital,wght@0,600;0,800;1,600&family=EB+Garamond:ital,wght@0,400;0,600;1,400',
   },
   {
-    id: 'natur', label: 'Natur', hint: 'Wald im Wind, Sonnenuntergang, Pflanze wächst',
+    id: 'natur', label: 'Forest', hint: 'Pro Pomodoro wächst ein neuer Baum',
     swatch: ['#eef1e6', '#4f7a3a', '#c2452d'], bar: ['#eef1e6', '#0c140f'],
     fonts: 'Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;700',
   },
@@ -56,6 +56,31 @@ export const SKINS: readonly SkinInfo[] = [
     id: 'flug', label: 'Flug', hint: 'Flugzeug umrundet die Uhr, Wolken ziehen',
     swatch: ['#d6ecff', '#1e6fd9', '#ffffff'], bar: ['#e3f1ff', '#0a1630'],
     fonts: 'Exo+2:wght@500;800',
+  },
+  {
+    id: 'meer', label: 'Meer', hint: 'Fischschwärme, Quallen und ein Oktopus',
+    swatch: ['#bfe9f2', '#ff6f61', '#0a7ea4'], bar: ['#d9f4f8', '#021526'],
+    fonts: 'Baloo+2:wght@500;800',
+  },
+  {
+    id: 'flora', label: 'Flora', hint: 'Blumenwiese, Bienen und Marienkäfer',
+    swatch: ['#f6f3e9', '#e63946', '#52b788'], bar: ['#f6f3e9', '#101a12'],
+    fonts: 'Quicksand:wght@500;700',
+  },
+  {
+    id: 'scifi', label: 'Sci-Fi', hint: 'Warp-Sprung, Radar, Reise zum Mars',
+    swatch: ['#05060f', '#00e5ff', '#ff4081'], bar: ['#eef3fb', '#05060f'],
+    fonts: 'Orbitron:wght@500;800',
+  },
+  {
+    id: 'elemente', label: 'Elemente', hint: 'Feuer, Wasser, Luft und Erde',
+    swatch: ['#f4efe6', '#ff5722', '#1e88e5'], bar: ['#f4efe6', '#12100e'],
+    fonts: 'Cinzel:wght@600;800',
+  },
+  {
+    id: 'zug', label: 'Zug', hint: 'Bahnfahrt durch die Alpen',
+    swatch: ['#eef1f4', '#c1121f', '#2a9d8f'], bar: ['#eef1f4', '#11161c'],
+    fonts: 'Barlow+Condensed:wght@600;800',
   },
 ];
 

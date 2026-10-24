@@ -1,0 +1,133 @@
+/* Fortschritts-Begleiter unter dem Zifferblatt (progress.tsx). Farben kommen aus den Tokens des Stils. */
+
+.companion-stack { display: grid; justify-items: center; gap: 10px; }
+.meter-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.meter-text { margin: 0; display: grid; gap: 2px; line-height: 1.15; }
+.meter-text b { font: 700 18px/1 var(--font-display); color: var(--phase); font-variant-numeric: tabular-nums; }
+.meter-text span { font-size: 12px; color: var(--muted); }
+.theme-badge { font: 700 11px/1 var(--font-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--phase); padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--phase) 12%, transparent); }
+
+/* Reise von A nach B */
+.journey { width: min(100%, 320px); }
+.journey svg { display: block; width: 100%; height: auto; overflow: visible; }
+.j-route { stroke: var(--line-strong); stroke-width: 3; stroke-dasharray: 2 7; stroke-linecap: round; }
+.j-done { stroke: var(--phase); stroke-width: 4; stroke-linecap: round; transition: x2 0.4s linear; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--phase) 50%, transparent)); }
+.j-end { fill: var(--phase); }
+.j-stop { fill: var(--surface); stroke: var(--line-strong); stroke-width: 2; }
+.j-stop.is-past { fill: var(--phase); stroke: var(--phase); }
+.j-goal rect { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
+.j-goal path { fill: var(--ink); }
+.j-vehicle { fill: var(--phase); stroke: var(--ink); stroke-width: 1; transition: transform 0.4s linear; filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.3)); }
+.j-plane, .j-ship { fill: var(--surface); }
+:root[data-run="1"] .j-vehicle { animation: j-bob 0.8s ease-in-out infinite alternate; }
+@keyframes j-bob { to { translate: 0 -1.5px; } }
+.j-labels { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; color: var(--muted); margin-top: -2px; padding: 0 4px; }
+.j-labels b { font: 700 13px/1 var(--font-display); color: var(--phase); font-variant-numeric: tabular-nums; }
+
+/* Klassisch: Tomate */
+.tomato-fill { width: 64px; height: 64px; overflow: visible; }
+.tf-shell { fill: color-mix(in srgb, var(--tomato) 10%, var(--surface)); }
+.tf-juice, .tf-wave { fill: var(--tomato); transition: y 0.6s ease; }
+.tf-wave { opacity: 0.6; }
+:root[data-run="1"] .tf-wave { animation: tf-wave 2.4s linear infinite; }
+@keyframes tf-wave { to { transform: translateX(-32px); } }
+.tf-outline { fill: none; stroke: color-mix(in srgb, var(--tomato) 80%, var(--ink)); stroke-width: 2; }
+.tf-leaf { fill: var(--leaf); }
+
+/* Anime: Power-Leiste */
+.power { display: flex; align-items: center; gap: 8px; }
+.power-label { font: 400 13px/1 var(--font-display); color: var(--tomato); -webkit-text-stroke: 0.5px var(--outline); letter-spacing: 0.08em; }
+.power-cells { display: flex; gap: 3px; padding: 3px; border: 2px solid var(--outline); border-radius: 6px; background: var(--surface); transform: skewX(-12deg); }
+.power-cells i { width: 12px; height: 14px; border-radius: 2px; background: var(--surface-3); transition: background 0.3s; }
+.power-cells i.is-on { background: linear-gradient(180deg, #ffd23f, var(--tomato)); }
+.power.is-full .power-cells { animation: power-flash 0.6s ease-in-out infinite alternate; }
+@keyframes power-flash { to { box-shadow: 0 0 14px #ffd23f; } }
+
+/* Technik: LED-Balken */
+.ledbar { display: flex; align-items: center; gap: 10px; }
+.led-cells { display: flex; gap: 3px; padding: 4px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 8%, var(--surface)); border: 1px solid var(--line-strong); }
+.led-cells i { width: 8px; height: 14px; border-radius: 2px; background: color-mix(in srgb, var(--good) 15%, transparent); }
+.led-cells i.is-on { background: var(--good); box-shadow: 0 0 calc(2px + var(--glow, 0) * 6px) var(--good); }
+.led-cells i.mid.is-on { background: var(--warn); box-shadow: 0 0 calc(2px + var(--glow, 0) * 6px) var(--warn); }
+.led-cells i.hi.is-on { background: var(--bad); box-shadow: 0 0 calc(2px + var(--glow, 0) * 6px) var(--bad); }
+.led-text { font: 500 12px/1 var(--font-mono); color: var(--ink-2); }
+
+/* Barock: Sanduhr */
+.hourglass { width: 34px; height: 56px; overflow: visible; }
+.hg-glass { fill: color-mix(in srgb, #ffffff 30%, transparent); stroke: var(--gold); stroke-width: 1.6; }
+.hg-sand { fill: #e2b866; transition: y 0.8s ease, d 0.8s ease; }
+.hg-cap { fill: var(--gold); stroke: color-mix(in srgb, var(--gold) 60%, #000000); stroke-width: 0.6; }
+.hg-stream { stroke: #e2b866; stroke-width: 1.4; stroke-dasharray: 2 3; opacity: 0; }
+.hourglass.is-running .hg-stream { opacity: 1; animation: hg-flow 0.5s linear infinite; }
+@keyframes hg-flow { to { stroke-dashoffset: -5; } }
+
+/* Amtlich: Aktenstapel */
+.stack-row { display: flex; align-items: flex-end; gap: 10px; }
+.stack { position: relative; width: 44px; height: 46px; }
+.stack i {
+  position: absolute; left: 0; bottom: calc(var(--i) * 5px); width: 40px; height: 8px; border: 1px solid var(--line-strong); background: var(--surface);
+  transform: translateX(calc(var(--i) * 0.6px - 2px)) rotate(calc((var(--i) - 3) * 0.8deg)); opacity: 0.25; transition: opacity 0.3s, transform 0.3s;
+}
+.stack i.is-on { opacity: 1; box-shadow: 0 1px 0 var(--line); }
+.stack-text { font: 500 12px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-bottom: 4px; }
+
+/* Forest: Baum wächst, darunter der Wald des Tages */
+.forest-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.forest-info { display: grid; gap: 4px; justify-items: start; }
+.forest-info .motto { text-align: left; }
+.tree-big { width: 86px; height: 104px; overflow: visible; }
+.tree-mini { width: 18px; height: 22px; }
+.mini-forest { display: flex; flex-wrap: wrap; gap: 1px; max-width: 220px; min-height: 22px; }
+.t-ground { fill: color-mix(in srgb, #6b5432 30%, transparent); }
+.t-trunk { fill: #7a5634; transition: transform 0.6s ease; }
+.t-trunk.is-birch { fill: #f2efe6; stroke: #3a3a3a; stroke-width: 0.6; stroke-dasharray: 2 5; }
+.t-crown { transform-box: fill-box; }
+.t-fir { fill: #2f6b3a; }
+.t-oak { fill: #4f8a3a; }
+.t-birch { fill: #8fbf5a; }
+.t-cherry { fill: #f3a6bd; }
+.t-cherry .t-blossom { fill: #ffffff; }
+.t-willow { fill: #9cc46b; }
+.t-maple { fill: #d9622b; }
+:root[data-run="1"][data-phase="focus"] .tree-big .t-crown { animation: t-sway 4s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes t-sway { from { rotate: -1.5deg; } to { rotate: 1.5deg; } }
+
+/* Flora: Blumen öffnen sich */
+.bouquet-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.bouquet { width: 170px; height: 80px; overflow: visible; }
+.b-stem { fill: none; stroke: #52b788; stroke-width: 2.2; stroke-linecap: round; }
+.b-leaf { fill: #52b788; }
+.b-head ellipse { fill: var(--bc); }
+.b-core { fill: #ffd166; }
+.b-head { transform: scale(0.25); transition: transform 0.7s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.b-flower.is-open .b-head { transform: scale(1); }
+.b-bee { transition: transform 0.8s cubic-bezier(0.3, 1.4, 0.4, 1); }
+.bee-body { fill: #ffc300; stroke: #3b2a00; stroke-width: 0.8; }
+.bee-stripe { stroke: #3b2a00; stroke-width: 1.6; }
+.bee-wing { fill: rgb(255 255 255 / 0.75); stroke: #8aa; stroke-width: 0.4; animation: wing 0.12s linear infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes wing { to { transform: scaleY(0.3); } }
+
+/* Meer: Tauchtiefe */
+.depth-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.depth { width: 132px; height: 70px; overflow: visible; }
+.d-water { fill: color-mix(in srgb, var(--sage) 22%, var(--surface)); }
+.d-surface { fill: none; stroke: color-mix(in srgb, var(--sage) 60%, #ffffff); stroke-width: 2; }
+.d-mark { stroke: color-mix(in srgb, var(--ink) 35%, transparent); stroke-width: 1.4; }
+.d-sub { transition: transform 0.6s ease; }
+.d-sub path { fill: #ffd23f; stroke: #3b2a00; stroke-width: 1; }
+.d-port { fill: #8fe3ff; stroke: #3b2a00; stroke-width: 0.8; }
+.d-bubbles circle { fill: none; stroke: #ffffff; stroke-width: 0.8; animation: d-bub 2s ease-in infinite; }
+.d-bubbles circle:nth-child(2) { animation-delay: -0.7s; } .d-bubbles circle:nth-child(3) { animation-delay: -1.3s; }
+@keyframes d-bub { from { transform: translateY(6px); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(-10px); opacity: 0; } }
+
+/* Elemente: vier Kugeln */
+.orbs { display: flex; gap: 14px; justify-content: center; }
+.orb { display: grid; justify-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.orb i {
+  position: relative; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 2px solid var(--oc);
+  background: linear-gradient(to top, var(--oc) var(--fill), color-mix(in srgb, var(--oc) 10%, var(--surface)) var(--fill));
+  transition: box-shadow 0.4s;
+}
+.orb.is-active i { box-shadow: 0 0 14px var(--oc); }
+.orb.is-active small { color: var(--ink); font-weight: 700; }
+.orb-feuer { --oc: #ff5722; } .orb-wasser { --oc: #1e88e5; } .orb-luft { --oc: #26a69a; } .orb-erde { --oc: #8d6e63; }

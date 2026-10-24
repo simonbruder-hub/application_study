@@ -34,10 +34,15 @@ const TEXT: Record<Skin, [string, string]> = {
   anime: ['やった!', 'Session geschafft!'],
   technik: ['PASS ✓', 'Messung gespeichert'],
   barock: ['Bravissimo!', 'Opus vollendet'],
-  natur: ['Aufgeblüht!', 'Session geschafft'],
+  natur: ['Gepflanzt!', 'Ein neuer Baum in deinem Wald'],
   amtlich: ['Erledigt', 'Akte geschlossen'],
   rennen: ['Sieg!', 'Zielflagge'],
   flug: ['Gelandet!', 'Session geschafft'],
+  meer: ['Perle gefunden!', 'Session geschafft'],
+  flora: ['Volle Blüte!', 'Session geschafft'],
+  scifi: ['Mission erfüllt', 'Sprung ins nächste System'],
+  elemente: ['Im Gleichgewicht', 'Feuer · Wasser · Luft · Erde'],
+  zug: ['Pünktlich angekommen!', 'Endstation erreicht'],
 };
 
 export function CelebrationLayer() {
@@ -134,6 +139,58 @@ function build(skin: Skin) {
       return [
         <div key="loop" class="cel-loop"><svg viewBox="-16 -16 32 32"><path d="M15 0 Q14 -2 8 -2 L-9 -1.6 L-13 -6 L-15.5 -6 L-13.5 0 L-15.5 6 L-13 6 L-9 1.6 L8 2 Q14 2 15 0 Z M5 -1.5 L-2 -14 L-5.5 -14 L-2.5 -1.5 Z M5 1.5 L-2 14 L-5.5 14 L-2.5 1.5 Z" /></svg></div>,
         ...puffs.map((r, i) => <span key={i} class="p ray" style={r.style}><i /></span>),
+      ];
+    }
+    case 'meer': {
+      // Luftblasen steigen auf, Fische springen aus der Mitte
+      const bubbles = thrown(40, () => [rand(10, 90), 104], () => ({
+        '--dx': `${rand(-6, 6).toFixed(1)}vw`, '--up': `${-rand(60, 110).toFixed(0)}vh`, '--fall': `${-rand(110, 130).toFixed(0)}vh`,
+        '--rot': '0deg', '--t': `${rand(2.6, 4).toFixed(2)}s`,
+      }), ['#ffffff']);
+      const fish = thrown(14, () => [50, 60], () => ({
+        '--dx': `${rand(-40, 40).toFixed(1)}vw`, '--up': `${-rand(30, 50).toFixed(0)}vh`, '--fall': `${rand(20, 45).toFixed(0)}vh`,
+        '--rot': `${rand(-200, 200).toFixed(0)}deg`, '--t': `${rand(2.4, 3.2).toFixed(2)}s`,
+      }), ['#ff8a3d', '#ffd23f', '#4cc9f0', '#f72585', '#80ed99']);
+      return [
+        ...bubbles.map((b, i) => <span key={`b${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="bubble-p" /></span>),
+        ...fish.map((b, i) => <span key={`f${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="fish-p" /></span>),
+      ];
+    }
+    case 'flora': {
+      const petals = thrown(50, () => [50, 52], () => ({
+        '--dx': `${rand(-46, 46).toFixed(1)}vw`, '--up': `${-rand(20, 50).toFixed(0)}vh`, '--fall': `${rand(20, 55).toFixed(0)}vh`,
+        '--rot': `${rand(-540, 540).toFixed(0)}deg`, '--t': `${rand(3, 4.4).toFixed(2)}s`,
+      }), ['#e63946', '#ffb703', '#c77dff', '#ff8fab', '#ffffff', '#52b788']);
+      const bees = Array.from({ length: 7 }, (_, i) => ({ '--dx': `${rand(-45, 45).toFixed(0)}vw`, '--dy': `${-rand(20, 45).toFixed(0)}vh`, '--d': `${(0.1 + i * 0.12).toFixed(2)}s` }));
+      return [
+        ...petals.map((b, i) => <span key={i} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class={i % 6 === 5 ? 'leaf' : 'petal'} /></span>),
+        ...bees.map((f, i) => <span key={`b${i}`} class="p fly bee-fly" style={f}><b><i /><i /></b></span>),
+      ];
+    }
+    case 'scifi': {
+      // Hyperraum: Sterne schiessen als Streifen aus der Mitte, danach ein Lichtring
+      return [
+        <div key="ring" class="cel-ring" />,
+        ...rays(60, [300, 900], ['#00e5ff', '#ffffff', '#b388ff', '#ff4081']).map((r, i) => <span key={i} class="p ray" style={r.style}><i /></span>),
+      ];
+    }
+    case 'elemente': {
+      // Vier Wirbel in den Farben der Elemente
+      const sets: [readonly string[], number][] = [[['#ff5722', '#ffb74d'], 0], [['#1e88e5', '#81d4fa'], 0.15], [['#b2dfdb', '#ffffff'], 0.3], [['#6d4c41', '#a1887f', '#7cb342'], 0.45]];
+      return sets.flatMap(([c, d], k) => rays(18, [120, 320], c, d).map((r, i) => <span key={`${k}-${i}`} class={`p ray el-${k}`} style={{ ...r.style, '--spin': `${k % 2 ? -1 : 1}` }}><i /></span>));
+    }
+    case 'zug': {
+      const puffs = thrown(18, () => [rand(30, 70), 70], () => ({
+        '--dx': `${rand(-20, 20).toFixed(1)}vw`, '--up': `${-rand(25, 45).toFixed(0)}vh`, '--fall': `${-rand(45, 60).toFixed(0)}vh`,
+        '--rot': '0deg', '--t': `${rand(2.6, 3.6).toFixed(2)}s`,
+      }), ['#ffffff']);
+      const confetti = thrown(50, (i) => (i % 2 ? [102, 100] : [-2, 100]), (i) => ({
+        '--dx': `${((i % 2 ? -1 : 1) * rand(15, 60)).toFixed(1)}vw`, '--up': `${-rand(45, 90).toFixed(0)}vh`, '--fall': `${rand(-5, 25).toFixed(0)}vh`,
+        '--rot': `${rand(-720, 720).toFixed(0)}deg`, '--t': `${rand(2.6, 3.6).toFixed(2)}s`,
+      }), ['var(--tomato)', '#ffffff', 'var(--sage)', '#f4a261']);
+      return [
+        ...puffs.map((b, i) => <span key={`s${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="puff" /></span>),
+        ...confetti.map((b, i) => <span key={`c${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="conf" /></span>),
       ];
     }
     case 'amtlich': {

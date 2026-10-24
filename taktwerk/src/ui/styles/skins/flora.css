@@ -1,0 +1,94 @@
+/* Flora: Blumenwiese. Fokus = Bienen sammeln, kurze Pause = Marienkäfer und Schmetterlinge, lange Pause = Käfer
+ * und Abendlicht. Nacht: Mondgarten mit Glühwürmchen. Zeiger: eine Biene. */
+:root[data-skin="flora"] {
+  --bg: #f6f3e9;
+  --bg-layers: radial-gradient(circle at 12px 12px, rgb(230 57 70 / 0.12) 0 3px, transparent 3.5px) 0 0 / 64px 64px,
+    radial-gradient(circle at 44px 40px, rgb(255 183 3 / 0.14) 0 2.5px, transparent 3px) 0 0 / 64px 64px, linear-gradient(180deg, #fbf8ef, #eef3e2);
+  --surface: #fffdf7; --surface-2: #f6f2e6; --surface-3: #e9e4d2;
+  --ink: #2d2a1f; --ink-2: #4b4636; --muted: #77705a; --line: #e5dfcb; --line-strong: #c9c09f; --outline: #2d2a1f;
+  --tomato: #e63946; --on-tomato: #ffffff; --sage: #2d9d6a; --on-sage: #ffffff; --indigo: #7b61ff; --on-indigo: #ffffff;
+  --leaf: #52b788; --link: #b5303b; --focus-ring: #b5303b; --dial-track: #ece6d2; --tick: #c9c09f; --tick-major: #2d2a1f;
+  --radius: 22px; --card-shadow: 0 14px 30px -20px rgb(80 60 10 / 0.4);
+  --font-display: "Quicksand", ui-rounded, system-ui, sans-serif;
+  --night: 0;
+  --scene-short: radial-gradient(ellipse 70% 50% at 50% 100%, color-mix(in srgb, var(--leaf) 22%, transparent), transparent 70%);
+  --scene-long: linear-gradient(180deg, color-mix(in srgb, #ffb703 22%, transparent), color-mix(in srgb, #ff8fab 14%, transparent) 50%, transparent 85%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="flora"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --night: 1;
+    --bg: #101a12; --bg-layers: radial-gradient(circle at 85% 5%, rgb(240 240 210 / 0.14), transparent 25%), linear-gradient(180deg, #0f1a13, #142318);
+    --surface: #17241a; --surface-2: #1d2d20; --surface-3: #27392a; --ink: #eef3e4; --ink-2: #c8d4bb; --muted: #94a48a; --line: #27392a; --line-strong: #3d553f; --outline: #eef3e4;
+    --tomato: #ff6b6b; --on-tomato: #2a0505; --sage: #6fdc9f; --on-sage: #062012; --indigo: #a594ff; --on-indigo: #140e38; --link: #ff9b9b; --dial-track: #223325; --tick: #3d553f; --tick-major: #eef3e4;
+  }
+}
+:root[data-skin="flora"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="flora"][data-mode="nacht"] {
+  color-scheme: dark; --night: 1;
+  --bg: #101a12; --bg-layers: radial-gradient(circle at 85% 5%, rgb(240 240 210 / 0.14), transparent 25%), linear-gradient(180deg, #0f1a13, #142318);
+  --surface: #17241a; --surface-2: #1d2d20; --surface-3: #27392a; --ink: #eef3e4; --ink-2: #c8d4bb; --muted: #94a48a; --line: #27392a; --line-strong: #3d553f; --outline: #eef3e4;
+  --tomato: #ff6b6b; --on-tomato: #2a0505; --sage: #6fdc9f; --on-sage: #062012; --indigo: #a594ff; --on-indigo: #140e38; --link: #ff9b9b; --dial-track: #223325; --tick: #3d553f; --tick-major: #eef3e4;
+}
+[data-skin="flora"] .clock { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; }
+[data-skin="flora"] .dial-track { stroke-width: 10; stroke-dasharray: 1 9; stroke-linecap: round; stroke: var(--leaf); opacity: 0.6; }
+[data-skin="flora"] .dial-arc { stroke-width: 10; }
+[data-skin="flora"] .dial-knob { fill: #ffc300; stroke: #3b2a00; stroke-width: 1; }
+[data-skin="flora"] .dial .tk-major { stroke: var(--tomato); }
+[data-skin="flora"] .timer-card { padding-bottom: 46px; }
+
+/* Wiese unten, Blumen wiegen sich */
+.meadow { left: 0; bottom: 0; width: 100%; height: 92px; }
+.grass { fill: color-mix(in srgb, var(--leaf) 55%, var(--surface)); }
+.mf { animation: mf-sway 3.4s ease-in-out infinite alternate; }
+.mf:nth-child(odd) { animation-duration: 4.2s; animation-delay: -1.5s; }
+.mf-stem { fill: none; stroke: #2d9d6a; stroke-width: 1.8; }
+.mf-tulip, .mf-petal, .mf-bell { fill: var(--c); }
+.mf-petal { stroke: color-mix(in srgb, var(--c) 70%, #999999); stroke-width: 0.4; }
+.mf-core { fill: #ffd166; }
+@keyframes mf-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+:root[data-phase="short"] .mf { animation-duration: 1.8s; }
+/* Pollen schweben */
+.pollen { inset: 0; }
+.pollen i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #ffd166; opacity: 0.8; animation: float 9s ease-in-out infinite; }
+.pollen i:nth-child(1) { left: 10%; top: 30%; } .pollen i:nth-child(2) { left: 24%; top: 55%; animation-delay: -2s; } .pollen i:nth-child(3) { left: 38%; top: 20%; animation-delay: -4s; }
+.pollen i:nth-child(4) { left: 55%; top: 65%; animation-delay: -1s; } .pollen i:nth-child(5) { left: 68%; top: 28%; animation-delay: -6s; } .pollen i:nth-child(6) { left: 82%; top: 48%; animation-delay: -3s; }
+.pollen i:nth-child(7) { left: 92%; top: 18%; animation-delay: -5s; } .pollen i:nth-child(8) { left: 6%; top: 70%; animation-delay: -7s; } .pollen i:nth-child(9) { left: 46%; top: 40%; animation-delay: -2.5s; }
+.pollen i:nth-child(10) { left: 75%; top: 75%; animation-delay: -8s; }
+/* Bienen fliegen Achten, im Fokus aktiv */
+.bees { inset: 0; display: none; }
+:root[data-phase="focus"] .bees { display: block; }
+.bee {
+  position: absolute; left: 0; top: 0; width: 14px; height: 10px; border-radius: 50%;
+  background: repeating-linear-gradient(90deg, #ffc300 0 3px, #2b2000 3px 5px); box-shadow: 0 0 0 1px #2b2000;
+  animation: bee-a 9s ease-in-out infinite paused;
+}
+:root[data-run="1"] .bee { animation-play-state: running; }
+.bee:nth-child(2) { animation-name: bee-b; animation-duration: 11s; animation-delay: -4s; }
+.bee:nth-child(3) { animation-name: bee-c; animation-duration: 13s; animation-delay: -8s; }
+.bee-w { position: absolute; top: -7px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: rgb(255 255 255 / 0.8); box-shadow: 0 0 0 1px rgb(120 140 150 / 0.6); animation: wing 0.08s linear infinite alternate; transform-origin: 50% 100%; }
+.bee-w + .bee-w { left: 6px; }
+@keyframes bee-a { 0% { transform: translate(8cqw, 30cqh); } 25% { transform: translate(30cqw, 12cqh) rotate(10deg); } 50% { transform: translate(55cqw, 34cqh); } 75% { transform: translate(30cqw, 52cqh) rotate(-10deg); } 100% { transform: translate(8cqw, 30cqh); } }
+@keyframes bee-b { 0% { transform: translate(88cqw, 20cqh) scaleX(-1); } 33% { transform: translate(64cqw, 44cqh) scaleX(-1); } 66% { transform: translate(80cqw, 64cqh) scaleX(-1); } 100% { transform: translate(88cqw, 20cqh) scaleX(-1); } }
+@keyframes bee-c { 0% { transform: translate(20cqw, 75cqh); } 50% { transform: translate(70cqw, 80cqh) rotate(8deg); } 100% { transform: translate(20cqw, 75cqh); } }
+/* Marienkäfer (kurze Pause) und Käfer (lange Pause) krabbeln über die Wiese */
+.ladybug, .beetle { bottom: 18px; left: 0; width: 18px; height: 14px; display: none; animation: crawl 22s linear infinite; }
+:root[data-phase="short"] .ladybug { display: block; }
+:root[data-phase="long"] .beetle { display: block; }
+.ladybug i, .beetle i { position: absolute; inset: 0; border-radius: 50% 50% 46% 46%; }
+.ladybug i { background: radial-gradient(circle at 30% 40%, #111 0 2px, transparent 2.5px), radial-gradient(circle at 68% 35%, #111 0 2px, transparent 2.5px), radial-gradient(circle at 55% 70%, #111 0 2px, transparent 2.5px), linear-gradient(90deg, #d00000 48%, #111 48% 52%, #d00000 52%); }
+.ladybug::before, .beetle::before { content: ""; position: absolute; right: -5px; top: 3px; width: 7px; height: 8px; border-radius: 50%; background: #111; }
+.beetle { width: 22px; height: 14px; animation-duration: 30s; }
+.beetle i { background: linear-gradient(135deg, #2b9348, #0b525b 60%, #6a4c93); box-shadow: inset 0 0 0 1px #052b2f; }
+.ladybug::after, .beetle::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -3px; height: 3px; background: repeating-linear-gradient(90deg, #111 0 1px, transparent 1px 4px); animation: legs 0.25s steps(2) infinite; }
+@keyframes crawl { from { transform: translateX(-30px); } 50% { translate: 0 -2px; } to { transform: translateX(calc(100cqw + 30px)); } }
+@keyframes legs { to { background-position: 2px 0; } }
+.flora-petals i { background: #ff8fab; }
+.flora-petals i:nth-child(2n) { background: #ffffff; }
+.flora-butterflies span:nth-child(1) i { background: radial-gradient(circle at 60% 40%, #fff3b0, #e09f3e 70%); }
+[data-skin="flora"] .fireflies { opacity: var(--night); }
+.cutin-flora .cutin-band b::before { content: "✿ "; color: var(--tomato); }
+.cel-flora .cel-flash { display: none; }
+.cel-flora .p i.petal { width: 14px; height: 18px; border-radius: 60% 10% 60% 10%; background: var(--c); }
+.cel-flora .p i.leaf { width: 16px; height: 11px; border-radius: 0 100% 0 100%; background: var(--leaf); }
+.p.bee-fly i { background: rgb(255 255 255 / 0.85); border-color: #889; }
+.p.bee-fly b { width: 20px; height: 14px; border-radius: 50%; background: repeating-linear-gradient(90deg, #ffc300 0 4px, #2b2000 4px 7px); align-items: flex-start; justify-content: center; }
+.cel-flora .cel-text { top: 64%; }

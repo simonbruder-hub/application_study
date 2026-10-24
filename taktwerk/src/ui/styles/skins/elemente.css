@@ -1,0 +1,118 @@
+/* Elemente: Feuer (Fokus), Wasser (kurze Pause), Luft (lange Pause), Erde (Ruhe). Die Phasenfarben sind die
+ * Elementfarben; auf dem Zifferblatt stehen die vier alchemistischen Zeichen. */
+:root[data-skin="elemente"] {
+  --bg: #f4efe6;
+  --bg-layers: radial-gradient(ellipse 60% 45% at 50% 0%, rgb(255 87 34 / 0.08), transparent 70%), linear-gradient(180deg, #f8f4ec, #ece4d6);
+  --surface: #fffcf6; --surface-2: #f5eee2; --surface-3: #e8dfcd;
+  --ink: #2a2118; --ink-2: #4a3d30; --muted: #7a6a58; --line: #e3d8c4; --line-strong: #c4b394; --outline: #2a2118;
+  --tomato: #e64a19; --on-tomato: #ffffff; --sage: #1e88e5; --on-sage: #ffffff; --indigo: #26a69a; --on-indigo: #ffffff;
+  --link: #b23a12; --focus-ring: #b23a12; --dial-track: #ebe2d0; --tick: #c4b394; --tick-major: #2a2118;
+  --radius: 14px; --card-shadow: 0 16px 32px -22px rgb(60 40 20 / 0.45);
+  --font-display: "Cinzel", "Times New Roman", serif;
+  --scene-short: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--sage) 18%, transparent));
+  --scene-long: radial-gradient(ellipse 80% 60% at 30% 30%, color-mix(in srgb, var(--indigo) 16%, transparent), transparent 70%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="elemente"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark;
+    --bg: #12100e; --bg-layers: radial-gradient(ellipse 60% 45% at 50% 0%, rgb(255 87 34 / 0.14), transparent 70%), linear-gradient(180deg, #16120f, #0e0c0b);
+    --surface: #1c1814; --surface-2: #241f19; --surface-3: #312a21; --ink: #f5ece0; --ink-2: #d6c8b4; --muted: #a38f78; --line: #312a21; --line-strong: #54473a; --outline: #f5ece0;
+    --tomato: #ff7043; --on-tomato: #2a0b02; --sage: #64b5f6; --on-sage: #031628; --indigo: #4db6ac; --on-indigo: #04201d; --link: #ffab91; --dial-track: #2a241d; --tick: #54473a; --tick-major: #f5ece0;
+  }
+}
+:root[data-skin="elemente"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="elemente"][data-mode="nacht"] {
+  color-scheme: dark;
+  --bg: #12100e; --bg-layers: radial-gradient(ellipse 60% 45% at 50% 0%, rgb(255 87 34 / 0.14), transparent 70%), linear-gradient(180deg, #16120f, #0e0c0b);
+  --surface: #1c1814; --surface-2: #241f19; --surface-3: #312a21; --ink: #f5ece0; --ink-2: #d6c8b4; --muted: #a38f78; --line: #312a21; --line-strong: #54473a; --outline: #f5ece0;
+  --tomato: #ff7043; --on-tomato: #2a0b02; --sage: #64b5f6; --on-sage: #031628; --indigo: #4db6ac; --on-indigo: #04201d; --link: #ffab91; --dial-track: #2a241d; --tick: #54473a; --tick-major: #f5ece0;
+}
+:root[data-skin="elemente"][data-active="0"], :root[data-skin="elemente"][data-active="0"] .focus-grid { --phase: #8d6e63; }
+[data-skin="elemente"] .view-head h1 { font-weight: 800; letter-spacing: 0.04em; }
+[data-skin="elemente"] .clock { font-family: var(--font-display); font-weight: 800; letter-spacing: 0.02em; }
+[data-skin="elemente"] .dial-track { stroke-width: 8; }
+[data-skin="elemente"] .dial-arc { stroke-width: 8; filter: drop-shadow(0 0 6px var(--phase)); }
+[data-skin="elemente"] .dial-knob { fill: var(--phase); stroke: var(--surface); stroke-width: 3; filter: drop-shadow(0 0 8px var(--phase)); }
+
+/* Zeichen der Elemente auf dem Zifferblatt */
+.el-marks span { position: absolute; width: 22px; height: 22px; margin: -11px; opacity: 0.35; transition: opacity 0.5s, filter 0.5s; }
+.el-marks svg { width: 100%; height: 100%; fill: none; stroke-width: 2; stroke-linejoin: round; }
+.el-fire { left: 50%; top: 21%; } .el-fire svg { stroke: #e64a19; }
+.el-water { left: 79%; top: 50%; } .el-water svg { stroke: #1e88e5; }
+.el-air { left: 50%; top: 79%; } .el-air svg { stroke: #26a69a; }
+.el-earth { left: 21%; top: 50%; } .el-earth svg { stroke: #8d6e63; }
+:root[data-active="1"][data-phase="focus"] .el-fire, :root[data-active="1"][data-phase="short"] .el-water,
+:root[data-active="1"][data-phase="long"] .el-air, :root[data-active="0"] .el-earth { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+.el-aura { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--phase) 20%, transparent), transparent 70%); animation: breathe 6s ease-in-out infinite; }
+
+/* Feuer (Fokus): Glut steigt auf, Feuerschein flackert */
+.fire-glow { left: 0; right: 0; bottom: 0; height: 45%; display: none; background: radial-gradient(ellipse 70% 90% at 50% 100%, rgb(255 112 67 / 0.45), rgb(255 183 77 / 0.15) 45%, transparent 70%); animation: glow-flick 1.8s ease-in-out infinite alternate; }
+.embers { inset: 0; display: none; }
+:root[data-active="1"][data-phase="focus"] :is(.fire-glow, .embers) { display: block; }
+.embers i { position: absolute; bottom: -10px; width: 5px; height: 5px; border-radius: 50%; background: #ffb74d; box-shadow: 0 0 8px 2px rgb(255 112 67 / 0.8); animation: ember 5s ease-in infinite paused; }
+:root[data-run="1"] .embers i { animation-play-state: running; }
+@keyframes ember { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx, 20px), -70cqh) scale(0.3); opacity: 0; } }
+@keyframes glow-flick { 0% { opacity: 0.7; } 30% { opacity: 1; } 55% { opacity: 0.8; } 80% { opacity: 0.95; } 100% { opacity: 0.75; } }
+.embers i:nth-child(1) { left: 45%; --dx: -21px; animation-delay: -1.97s; animation-duration: 3.64s; }
+.embers i:nth-child(2) { left: 72%; --dx: -28px; animation-delay: -1.83s; animation-duration: 3.67s; }
+.embers i:nth-child(3) { left: 68%; --dx: -13px; animation-delay: -0.19s; animation-duration: 4.80s; }
+.embers i:nth-child(4) { left: 12%; --dx: -10px; animation-delay: -0.45s; animation-duration: 4.77s; }
+.embers i:nth-child(5) { left: 76%; --dx: -25px; animation-delay: -4.74s; animation-duration: 5.39s; }
+.embers i:nth-child(6) { left: 78%; --dx: -33px; animation-delay: -2.89s; animation-duration: 4.69s; }
+.embers i:nth-child(7) { left: 32%; --dx: -35px; animation-delay: -2.78s; animation-duration: 3.90s; }
+.embers i:nth-child(8) { left: 57%; --dx: -22px; animation-delay: -2.70s; animation-duration: 5.21s; }
+.embers i:nth-child(9) { left: 75%; --dx: -17px; animation-delay: -0.52s; animation-duration: 5.21s; }
+.embers i:nth-child(10) { left: 28%; --dx: 7px; animation-delay: -0.49s; animation-duration: 5.64s; }
+.embers i:nth-child(11) { left: 76%; --dx: -33px; animation-delay: -3.10s; animation-duration: 4.99s; }
+.embers i:nth-child(12) { left: 72%; --dx: 14px; animation-delay: -3.89s; animation-duration: 4.90s; }
+.embers i:nth-child(13) { left: 62%; --dx: 6px; animation-delay: -1.50s; animation-duration: 5.88s; }
+.embers i:nth-child(14) { left: 93%; --dx: -9px; animation-delay: -0.41s; animation-duration: 4.40s; }
+.embers i:nth-child(15) { left: 67%; --dx: 3px; animation-delay: -3.65s; animation-duration: 4.36s; }
+.embers i:nth-child(16) { left: 13%; --dx: -25px; animation-delay: -2.56s; animation-duration: 3.99s; }
+.droplets i:nth-child(1) { left: 47%; animation-delay: -0.46s; animation-duration: 2.28s; }
+.droplets i:nth-child(2) { left: 9%; animation-delay: -2.89s; animation-duration: 1.71s; }
+.droplets i:nth-child(3) { left: 75%; animation-delay: -1.72s; animation-duration: 2.83s; }
+.droplets i:nth-child(4) { left: 44%; animation-delay: -1.02s; animation-duration: 2.09s; }
+.droplets i:nth-child(5) { left: 67%; animation-delay: -1.74s; animation-duration: 2.24s; }
+.droplets i:nth-child(6) { left: 15%; animation-delay: -2.83s; animation-duration: 2.26s; }
+.droplets i:nth-child(7) { left: 89%; animation-delay: -0.19s; animation-duration: 2.62s; }
+.droplets i:nth-child(8) { left: 43%; animation-delay: -1.94s; animation-duration: 2.99s; }
+.droplets i:nth-child(9) { left: 61%; animation-delay: -0.85s; animation-duration: 2.14s; }
+.droplets i:nth-child(10) { left: 89%; animation-delay: -1.04s; animation-duration: 2.92s; }
+.wind i:nth-child(1) { top: 10%; animation-delay: -1.42s; animation-duration: 3.90s; width: 133px; }
+.wind i:nth-child(2) { top: 24%; animation-delay: -0.24s; animation-duration: 4.18s; width: 86px; }
+.wind i:nth-child(3) { top: 38%; animation-delay: -2.95s; animation-duration: 3.52s; width: 133px; }
+.wind i:nth-child(4) { top: 52%; animation-delay: -0.32s; animation-duration: 3.61s; width: 140px; }
+.wind i:nth-child(5) { top: 66%; animation-delay: -1.11s; animation-duration: 3.05s; width: 125px; }
+.wind i:nth-child(6) { top: 80%; animation-delay: -3.46s; animation-duration: 3.30s; width: 123px; }
+.pebbles i:nth-child(1) { left: 8%; top: 40%; width: 20px; height: 14px; animation-delay: -5.75s; }
+.pebbles i:nth-child(2) { left: 24%; top: 27%; width: 11px; height: 10px; animation-delay: -0.91s; }
+.pebbles i:nth-child(3) { left: 40%; top: 60%; width: 13px; height: 8px; animation-delay: -2.91s; }
+.pebbles i:nth-child(4) { left: 56%; top: 55%; width: 12px; height: 12px; animation-delay: -1.69s; }
+.pebbles i:nth-child(5) { left: 72%; top: 27%; width: 16px; height: 16px; animation-delay: -2.22s; }
+.pebbles i:nth-child(6) { left: 88%; top: 54%; width: 15px; height: 10px; animation-delay: -4.14s; }
+/* Wasser (kurze Pause): Wellen und Tropfen */
+.waves { left: 0; bottom: 0; width: 200%; height: 70px; display: none; animation: drift 7s linear infinite; }
+:root[data-active="1"][data-phase="short"] .waves { display: block; }
+.wave-a { fill: color-mix(in srgb, var(--sage) 45%, transparent); }
+.wave-b { fill: color-mix(in srgb, var(--sage) 25%, transparent); animation: wave-shift 3.5s ease-in-out infinite alternate; }
+@keyframes wave-shift { to { transform: translateX(-50px); } }
+.droplets { inset: 0; display: none; }
+:root[data-active="1"][data-phase="short"] .droplets { display: block; }
+.droplets i { position: absolute; top: -20px; width: 6px; height: 9px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: color-mix(in srgb, var(--sage) 70%, #ffffff); animation: drop 2s cubic-bezier(0.5, 0, 1, 1) infinite; }
+@keyframes drop { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(85cqh); opacity: 0.3; } }
+/* Luft (lange Pause): Windböen ziehen in Bögen vorbei */
+.wind { inset: 0; display: none; }
+:root[data-active="1"][data-phase="long"] .wind { display: block; }
+.wind i { position: absolute; left: 0; height: 18px; border-top: 2px solid color-mix(in srgb, var(--indigo) 55%, transparent); border-radius: 50%; animation: gust 3.6s ease-in-out infinite; }
+@keyframes gust { from { transform: translateX(-160px) scaleX(0.6); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(calc(100cqw + 40px)) scaleX(1.2); opacity: 0; } }
+/* Erde (Ruhe): schwebende Steine */
+.pebbles { inset: 0; display: none; }
+:root[data-active="0"] .pebbles { display: block; }
+.pebbles i { position: absolute; border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%; background: linear-gradient(135deg, #a1887f, #6d4c41); box-shadow: 0 6px 10px -6px rgb(0 0 0 / 0.5); animation: float 7s ease-in-out infinite; opacity: 0.75; }
+.cutin-elemente .cutin-band b { letter-spacing: 0.06em; }
+/* Feier: vier Wirbel in den Elementfarben */
+.cel-elemente .cel-flash { display: none; }
+.cel-elemente .p.ray { left: 50%; top: 42%; animation: el-spin 2.2s ease-out both; }
+.cel-elemente .p.ray > i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); animation-duration: 2.2s; }
+@keyframes el-spin { to { transform: rotate(calc(var(--a) + var(--spin) * 160deg)); } }
+.cel-elemente .cel-text b { background: linear-gradient(90deg, #e64a19, #1e88e5, #26a69a, #8d6e63); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }

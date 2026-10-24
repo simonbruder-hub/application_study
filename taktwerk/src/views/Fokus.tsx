@@ -151,7 +151,7 @@ function TimerCard() {
         </div>
         {cut && <div key={cut.n} class="phase-wave" aria-hidden="true" />}
       </div>
-      <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} />
+      <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} cycle={s.cycle} every={every} />
       {otherWs && <p class="ws-note">Dieser Timer läuft im Modus {WORKSPACE_LABEL[s.workspace]}.</p>}
       {v.kind === 'pomodoro'
         ? (

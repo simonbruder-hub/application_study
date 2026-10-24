@@ -6,7 +6,10 @@ import { useState } from 'preact/hooks';
 import type { UserSettings } from '../../data/types';
 import type { Skin } from '../skins';
 import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../app/timer/view';
+import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
+import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, TomatoFill, Tree, TREE_KINDS } from './progress';
+import { ElementeScene, ElementMarks, FloraScene, MeerScene, ScifiScene, ZugScene } from './scenes';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -16,6 +19,10 @@ export const DIAL_STYLE: Partial<Record<Skin, { numerals?: boolean; knob?: DialK
   natur: { knob: 'leaf' },
   rennen: { knob: 'car' },
   flug: { knob: 'plane' },
+  meer: { knob: 'fish' },
+  flora: { knob: 'bee' },
+  scifi: { knob: 'ship' },
+  zug: { knob: 'train' },
 };
 
 /* ---------- Hintergrund ---------- */
@@ -97,6 +104,11 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
           <div class="stars-f" />
         </div>
       );
+    case 'meer': return <MeerScene />;
+    case 'flora': return <FloraScene />;
+    case 'scifi': return <ScifiScene />;
+    case 'elemente': return <ElementeScene />;
+    case 'zug': return <ZugScene />;
     case 'amtlich':
       return (
         <div class="deco" aria-hidden="true">
@@ -138,6 +150,10 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
           <div class="closed"><span>Mittagspause</span><small>Schalter geschlossen</small></div>
         </div>
       );
+    case 'elemente':
+      return <div class="dial-fx" aria-hidden="true"><ElementMarks /><div class="el-aura" /></div>;
+    case 'scifi':
+      return <div class="dial-fx" aria-hidden="true"><div class="holo"><i /><i /><i /></div></div>;
     default:
       return null;
   }
@@ -164,10 +180,15 @@ const CUT_IN: Record<Skin, Record<TimerView['phase'], [string, string]>> = {
   anime: { focus: ['集中モード!', 'Fokus'], short_break: ['休憩タイム!', 'Kurze Pause'], long_break: ['おやすみ〜', 'Lange Pause'] },
   technik: { focus: ['TRIG CH1', 'Fokus · Sinus'], short_break: ['TRIG CH2', 'Pause · Rechteck'], long_break: ['XY-MODUS', 'Lange Pause · Lissajous'] },
   barock: { focus: ['Allegro', 'Fokus'], short_break: ['Intermezzo', 'Kurze Pause'], long_break: ['Adagio', 'Lange Pause'] },
-  natur: { focus: ['Wachsen', 'Fokus'], short_break: ['Durchatmen', 'Kurze Pause'], long_break: ['Abendruhe', 'Lange Pause'] },
+  natur: { focus: ['Pflanzen', 'Fokus'], short_break: ['Durchatmen', 'Kurze Pause'], long_break: ['Abendruhe', 'Lange Pause'] },
   amtlich: { focus: ['Antrag: Fokus', 'In Bearbeitung'], short_break: ['Bewilligt', 'Kaffeepause'], long_break: ['Bewilligt', 'Mittagspause'] },
   rennen: { focus: ['Lights out!', 'Fokus'], short_break: ['Boxenstopp', 'Kurze Pause'], long_break: ['Safety Car', 'Lange Pause'] },
   flug: { focus: ['Take-off', 'Fokus'], short_break: ['Reiseflughöhe', 'Kurze Pause'], long_break: ['Landeanflug', 'Lange Pause'] },
+  meer: { focus: ['Abtauchen', 'Fokus'], short_break: ['Luft holen', 'Kurze Pause'], long_break: ['Ebbe', 'Lange Pause'] },
+  flora: { focus: ['Aufblühen', 'Fokus'], short_break: ['Nektarpause', 'Kurze Pause'], long_break: ['Siesta im Garten', 'Lange Pause'] },
+  scifi: { focus: ['Warp aktiviert', 'Fokus'], short_break: ['Orbit erreicht', 'Kurze Pause'], long_break: ['Andockmanöver', 'Lange Pause'] },
+  elemente: { focus: ['Feuer entfacht', 'Fokus'], short_break: ['Wasser fliesst', 'Kurze Pause'], long_break: ['Luft bewegt', 'Lange Pause'] },
+  zug: { focus: ['Abfahrt!', 'Fokus'], short_break: ['Kurzer Halt', 'Kurze Pause'], long_break: ['Umsteigen', 'Lange Pause'] },
 };
 
 /** Welle durchs Zifferblatt und Banner im Stil; wird über key bei jedem Wechsel neu abgespielt */
@@ -234,6 +255,16 @@ export function SkinBadge({ skin, v }: { skin: Skin; v: TimerView }) {
       return <span class="race-badge" aria-hidden="true">{stop ? 'Zeitfahren' : v.phase === 'focus' ? 'Rennen' : v.phase === 'short_break' ? 'Box' : 'Safety Car'}</span>;
     case 'flug':
       return <span class="flight-badge" aria-hidden="true">{stop ? 'Flugzeit' : v.phase === 'focus' ? 'Steigflug' : v.phase === 'short_break' ? 'Reiseflug' : 'Sinkflug'}</span>;
+    case 'meer':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Tauchzeit' : v.phase === 'focus' ? 'Tauchgang' : v.phase === 'short_break' ? 'Auftauchen' : 'Riff-Pause'}</span>;
+    case 'flora':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Gartenzeit' : v.phase === 'focus' ? 'Blütezeit' : v.phase === 'short_break' ? 'Nektarpause' : 'Siesta'}</span>;
+    case 'scifi':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Missionszeit' : v.phase === 'focus' ? 'Warp' : v.phase === 'short_break' ? 'Orbit' : 'Andocken'}</span>;
+    case 'elemente':
+      return <span class="theme-badge" aria-hidden="true">{ELEMENT_OF(v) === 3 ? 'Erde' : ['Feuer', 'Wasser', 'Luft'][ELEMENT_OF(v)]}</span>;
+    case 'zug':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Fahrzeit' : v.phase === 'focus' ? 'Fahrt' : v.phase === 'short_break' ? 'Halt' : 'Endstation'}</span>;
     case 'amtlich':
       return <span class="form-label" aria-hidden="true">{stop ? 'Feld 1 · Laufzeit' : 'Feld 1 · Restzeit'}</span>;
     default:
@@ -251,46 +282,82 @@ const MOTTO: Record<TimerView['mood'], string> = {
   yay: 'Bravissimo!',
 };
 
-const SPROUT_TEXT: Record<TimerView['mood'], string> = {
-  idle: 'Ein Samen wartet auf dich',
-  focus: 'Wächst mit jeder Minute',
-  break: 'Licht und Wasser tanken',
-  paused: 'Die Pflanze ruht kurz',
-  yay: 'Aufgeblüht!',
-};
+/** Elemente-Stil: Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe und bei der Stechuhr */
+const ELEMENT_OF = (v: TimerView): number => (!v.active || v.kind === 'stopwatch' ? 3 : v.phase === 'focus' ? 0 : v.phase === 'short_break' ? 1 : 2);
+const pick = <T,>(list: readonly T[], i: number): T => list[((i % list.length) + list.length) % list.length]!;
 
-export function SkinCompanion({ skin, v, say, set, yay }: { skin: Skin; v: TimerView; say: string; set: UserSettings; yay: boolean }) {
+/** Heute geschaffte Pomodoros (für den Wald im Forest-Stil) */
+function todaysPomodoros(): number {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  return entities.value.time_logs.filter((l) => l.counts_as_pomodoro && l.start_time >= start.getTime()).length;
+}
+
+export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
+  skin: Skin; v: TimerView; say: string; set: UserSettings; yay: boolean; cycle: number; every: number;
+}) {
+  // Fortschritt der laufenden Phase: 0 am Anfang, 1 am Ende (Stechuhr: Anteil der laufenden Stunde)
+  const p = yay ? 1 : !v.active ? 0 : v.kind === 'stopwatch' ? v.frac : 1 - v.frac;
+  const lap = `Runde ${(cycle % Math.max(1, every)) + 1} von ${Math.max(1, every)}`;
   switch (skin) {
+    case 'klassisch':
+      return <TomatoFill p={p} round={lap} />;
     case 'anime':
-      return <div class="mascot-wrap"><Mascot mood={v.mood} /><p class="bubble">{say}</p></div>;
+      return <div class="companion-stack"><div class="mascot-wrap"><Mascot mood={v.mood} /><p class="bubble">{say}</p></div><PowerBar p={p} /></div>;
     case 'technik':
-      return <ScopeReadout v={v} set={set} />;
+      return <div class="companion-stack"><ScopeReadout v={v} set={set} /><LedBar p={p} /></div>;
     case 'barock':
       return (
         <div class="baroque-row" aria-hidden="true">
           <Candle />
+          <Hourglass p={p} running={v.running} />
           <p class="motto baroque-motto">{yay ? MOTTO.yay : MOTTO[v.mood]}</p>
           <Candle />
         </div>
       );
     case 'natur': {
-      const growth = yay ? 1 : !v.active ? 0.06 : v.kind === 'stopwatch' ? v.frac : v.phase === 'focus' ? 1 - v.frac : 1;
+      // Pro Pomodoro ein Baum, jedes Mal eine andere Art; in der Pause steht der gerade gewachsene Baum
+      const focus = v.phase === 'focus' && v.kind === 'pomodoro';
+      const done = todaysPomodoros();
+      // In der Pause steht der zuletzt gewachsene Baum, aber nur wenn heute schon einer gewachsen ist
+      const grown = !focus && v.kind === 'pomodoro' && done > 0;
+      const kind = grown ? cycle - 1 : cycle;
+      const growth = yay ? 1 : v.kind === 'stopwatch' ? p : grown ? 1 : focus && v.active ? p : 0.04;
       return (
-        <div class="sprout-wrap" aria-hidden="true">
-          <Sprout growth={growth} bloom={yay || (v.active && v.phase !== 'focus')} />
-          <p class="motto">{yay ? SPROUT_TEXT.yay : SPROUT_TEXT[v.mood]}{v.running && v.phase === 'focus' ? ` · ${Math.round(growth * 100)} %` : ''}</p>
+        <div class="forest-row" aria-hidden="true">
+          <Tree kind={((kind % 6) + 6) % 6} growth={growth} />
+          <div class="forest-info">
+            <p class="motto">{pick(TREE_KINDS, kind)}{grown ? ' · gewachsen' : v.active ? ` · ${Math.round(growth * 100)} %` : ' · wartet auf dich'}</p>
+            <div class="mini-forest">{Array.from({ length: Math.min(done, 12) }, (_, i) => <Tree key={i} kind={i} growth={1} size="mini" />)}</div>
+            <small class="muted">{done ? `Dein Wald heute: ${done} ${done === 1 ? 'Baum' : 'Bäume'}` : 'Heute noch kein Baum'}</small>
+          </div>
         </div>
       );
     }
     case 'amtlich':
       return (
-        <div class="visum" aria-hidden="true">
-          <span>Visum <i /></span>
-          <span>Datum <b>{new Date().toLocaleDateString('de-CH')}</b></span>
+        <div class="companion-stack">
+          <div class="visum" aria-hidden="true">
+            <span>Visum <i /></span>
+            <span>Datum <b>{new Date().toLocaleDateString('de-CH')}</b></span>
+          </div>
+          <PaperStack p={p} />
         </div>
       );
-    default:
-      return null;
+    case 'rennen':
+      return <Journey p={p} from="Start" to="Ziel" vehicle="car" detail={lap} />;
+    case 'flug':
+      return <Journey p={p} from="ZRH" to={pick(['CDG', 'FCO', 'LHR', 'BCN', 'JFK', 'NRT'], cycle)} vehicle="plane" detail={`FL ${Math.round(p * 350)}`} />;
+    case 'meer':
+      return <DepthGauge p={p} />;
+    case 'flora':
+      return <Bouquet p={p} />;
+    case 'scifi':
+      return <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} />;
+    case 'elemente':
+      return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
+    case 'zug':
+      return <Journey p={p} from="Zürich HB" to={pick(['Bern', 'Luzern', 'Chur', 'Lugano', 'Genève', 'St. Gallen'], cycle)} vehicle="train" stops={3} />;
   }
 }
 
@@ -310,25 +377,5 @@ function ScopeReadout({ v, set }: { v: TimerView; set: UserSettings }) {
     <p class="scope-readout" aria-hidden="true">
       <span>T {period} min</span><span>f {fmt(mhz)} mHz</span><span>D {fmt(duty, 0)} %</span>
     </p>
-  );
-}
-
-/** Pflanze: Stiel wächst mit dem Fortschritt, Blätter erscheinen nach und nach, Blüte am Ende */
-function Sprout({ growth, bloom }: { growth: number; bloom: boolean }) {
-  const g = Math.min(1, Math.max(0, growth));
-  const leaf = (at: number) => `sp-leaf${g >= at ? ' is-on' : ''}`;
-  return (
-    <svg class="sprout" viewBox="0 0 80 96">
-      <path class="sp-stem" d="M40 78 C40 64 35 52 40 40 C44 30 40 22 40 14" pathLength="1" stroke-dasharray="1" stroke-dashoffset={(1 - g).toFixed(3)} />
-      <path class={leaf(0.2)} d="M40 64 C30 62 24 54 24 48 C32 48 39 54 40 64 Z" />
-      <path class={leaf(0.45)} d="M39 50 C49 48 56 40 57 34 C48 34 41 40 39 50 Z" />
-      <path class={leaf(0.7)} d="M41 32 C33 30 28 24 28 18 C35 19 40 24 41 32 Z" />
-      <g class={`sp-flower${bloom ? ' is-on' : ''}`}>
-        {[0, 72, 144, 216, 288].map((a) => <ellipse key={a} cx="40" cy="8" rx="4.5" ry="7" transform={`rotate(${a} 40 14)`} />)}
-        <circle cx="40" cy="14" r="4" class="sp-core" />
-      </g>
-      <path class="sp-pot" d="M22 78 H58 L54 94 H26 Z" />
-      <rect class="sp-rim" x="19" y="74" width="42" height="7" rx="2" />
-    </svg>
   );
 }

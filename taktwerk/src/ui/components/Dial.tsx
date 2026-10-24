@@ -18,13 +18,18 @@ const TICKS = Array.from({ length: 60 }, (_, i) => {
 
 const ROMAN = ['XII', 'III', 'VI', 'IX'];
 
-export type DialKnob = 'dot' | 'leaf' | 'gem' | 'car' | 'plane';
+export type DialKnob = 'dot' | 'leaf' | 'gem' | 'car' | 'plane' | 'fish' | 'bee' | 'ship' | 'train';
 
-const KNOB_PATH: Record<Exclude<DialKnob, 'dot'>, string> = {
+/** Zeiger-Formen in Draufsicht bzw. Seitenansicht, Nase zeigt nach rechts (+x) */
+export const KNOB_PATH: Record<Exclude<DialKnob, 'dot'>, string> = {
   leaf: 'M0 -13 C9 -7 9 7 0 13 C-9 7 -9 -7 0 -13 Z M0 -10 V10',
   gem: 'M0 -12 L8 0 L0 12 L-8 0 Z',
   car: 'M-12 -6 H6 Q13 -6 14 0 Q13 6 6 6 H-12 Q-14 6 -14 4 V-4 Q-14 -6 -12 -6 Z M1 -4 H5 V4 H1 Z M-13 -9 H-9 V9 H-13 Z M-8 -9 H-4 V-7 H-8 Z M-8 7 H-4 V9 H-8 Z M4 -9 H8 V-7 H4 Z M4 7 H8 V9 H4 Z',
   plane: 'M15 0 Q14 -2 8 -2 L-9 -1.6 L-13 -6 L-15.5 -6 L-13.5 0 L-15.5 6 L-13 6 L-9 1.6 L8 2 Q14 2 15 0 Z M5 -1.5 L-2 -14 L-5.5 -14 L-2.5 -1.5 Z M5 1.5 L-2 14 L-5.5 14 L-2.5 1.5 Z',
+  fish: 'M15 0 Q9 -9 -3 -7 Q-9 -5 -11 0 Q-9 5 -3 7 Q9 9 15 0 Z M-11 0 L-19 -8 L-17 0 L-19 8 Z M9 -3 a1.8 1.8 0 1 0 0.01 0 Z M1 -7 L-3 -12 L4 -8 Z',
+  bee: 'M12 0 Q12 -6 2 -6 L-8 -6 Q-13 -6 -13 0 Q-13 6 -8 6 L2 6 Q12 6 12 0 Z M-1 -6 H2 V6 H-1 Z M-6 -6 H-3 V6 H-6 Z M2 -6 Q-1 -16 -8 -13 Q-7 -7 -1 -6 Z M2 6 Q-1 16 -8 13 Q-7 7 -1 6 Z',
+  ship: 'M17 0 L5 -5 L-7 -5 L-11 -12 L-15 -12 L-12 -4 L-15 0 L-12 4 L-15 12 L-11 12 L-7 5 L5 5 Z M3 -2 H8 V2 H3 Z',
+  train: 'M15 -7 Q18 0 15 7 L-15 7 L-15 -7 Z M9 -5 H13 V5 H9 Z M-12 -5 H6 V-3 H-12 Z M-12 3 H6 V5 H-12 Z',
 };
 
 /** Kometenschweif: kurze Bogenstücke hinter dem Zeiger, nach aussen blasser */

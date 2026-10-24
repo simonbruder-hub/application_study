@@ -27,6 +27,7 @@ export function initBackground(): () => void {
     const root = document.documentElement;
     root.dataset.phase = PHASE_ATTR[v.phase];
     root.dataset.run = v.running ? '1' : '0';
+    root.dataset.active = v.active ? '1' : '0';
     syncMediaSession({
       enabled: p.background && v.active,
       running: v.running,
