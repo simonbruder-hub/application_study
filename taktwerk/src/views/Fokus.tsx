@@ -12,7 +12,7 @@ import { settings, timerState, workspaceData } from '../app/store';
 import { minimize } from '../app/pip';
 import { PHASE_LABEL } from '../app/timer/controller';
 import { flashMood, PHASE_ATTR, readTimer } from '../app/timer/view';
-import { DIAL_STYLE, PhaseCutIn, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
+import { DIAL_STYLE, GameButton, PhaseCutIn, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
 import { Dial, DialHandle, MOOD_LINES } from '../ui/components/Dial';
 import {
   Meter, PomoDots, ProjectChip, Seg, WORKSPACE_ICON, WORKSPACE_LABEL,
@@ -164,6 +164,7 @@ function TimerCard() {
         {cut && <div key={cut.n} class="phase-wave" aria-hidden="true" />}
       </div>
       <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} cycle={s.cycle} every={every} frac={shownFrac} seek={seek} />
+      <GameButton skin={skin} v={v} />
       {otherWs && <p class="ws-note">Dieser Timer läuft im Modus {WORKSPACE_LABEL[s.workspace]}.</p>}
       {v.kind === 'pomodoro'
         ? (

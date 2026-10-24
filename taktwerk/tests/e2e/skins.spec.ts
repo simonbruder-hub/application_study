@@ -54,4 +54,29 @@ test.describe('Stile', () => {
     await expect(page.locator('.sr-layer')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
+
+  for (const [skin, title] of [['flora', 'Hummelflug'], ['rennen', 'Grand Prix'], ['natur', 'Waldjagd']] as const) {
+    test(`${skin}: Pausenspiel ${title} startet und pausiert`, async ({ page }) => {
+      const errors = trackErrors(page);
+      await page.addInitScript((s) => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: s, notifyAsked: true })), skin);
+      await openApp(page);
+      await expect(page.locator('.sr-open')).toHaveCount(0);
+      await page.locator('.phase-tab', { hasText: 'Kurze Pause' }).click();
+      await page.locator('.sr-open').click();
+      await expect(page.locator('.sr-screen h2')).toHaveText(title);
+      await page.locator('.sr-go').click();
+      await expect(page.locator('.sr-screen')).toHaveCount(0);
+      const canvas = (await page.locator('.sr-canvas').boundingBox())!;
+      await page.mouse.click(canvas.x + canvas.width / 2, canvas.y + canvas.height * 0.6);
+      await page.keyboard.down('ArrowLeft');
+      await page.waitForTimeout(500);
+      await page.keyboard.up('ArrowLeft');
+      await expect(page.locator('.sr-hud')).toContainText('Punkte');
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.sr-screen h2')).toHaveText('Pausiert');
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.sr-layer')).toHaveCount(0);
+      expect(errors).toEqual([]);
+    });
+  }
 });

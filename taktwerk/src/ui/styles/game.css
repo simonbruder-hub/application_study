@@ -1,49 +1,61 @@
+/* Knopf unter der Uhr, der in den Pausen das Spiel des Stils öffnet */
+.sr-open { gap: 8px; border-color: var(--phase); color: var(--phase); font-family: var(--font-display); font-weight: 700; box-shadow: 0 0 14px -4px var(--phase); }
+.sr-open svg { width: 18px; height: 18px; fill: currentColor; }
+
 /* Space Rider: Vollbild-Ebene mit Anzeige oben und Spielfeld darunter (immer dunkel, Neonfarben) */
 .sr-layer {
   position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; gap: 8px;
   padding: max(10px, env(safe-area-inset-top)) 12px max(10px, env(safe-area-inset-bottom));
   background: radial-gradient(ellipse at 50% 0%, rgb(0 229 255 / 0.12), transparent 60%), rgb(3 4 12 / 0.94);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  color: #e6fdff; font-family: "Orbitron", system-ui, sans-serif;
+  color: #e6fdff; font-family: var(--font-display, system-ui), system-ui, sans-serif;
+  --g-a: #00e5ff; --g-b: #ff4081; --g-c: #69f0ae; --g-d: #ffd740; --g-ink: #03141a; --g-muted: #7fa6b8; --g-text: #c9e9f5;
   animation: sr-in 0.35s ease-out;
 }
+/* Farben je Spiel */
+.sr-layer.game-hummel { --g-a: #ffc300; --g-b: #ff6b8b; --g-c: #95d5b2; --g-d: #fff3b0; --g-ink: #2b2000; --g-muted: #b9c9a8; --g-text: #f1f7e8;
+  background: radial-gradient(ellipse at 50% 0%, rgb(255 195 0 / 0.16), transparent 60%), rgb(14 26 16 / 0.95); }
+.sr-layer.game-rennen { --g-a: #ffd60a; --g-b: #e10600; --g-c: #4cc9f0; --g-d: #ffffff; --g-ink: #1b1b1b; --g-muted: #a3a8b3; --g-text: #e8eaee;
+  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.03) 0 24px, transparent 24px 48px), rgb(16 18 21 / 0.96); }
+.sr-layer.game-wald { --g-a: #a7d675; --g-b: #ff6b6b; --g-c: #ffd166; --g-d: #fff3b0; --g-ink: #13230f; --g-muted: #a9b89a; --g-text: #eef3e4;
+  background: radial-gradient(ellipse at 50% 0%, rgb(167 214 117 / 0.16), transparent 60%), rgb(12 20 15 / 0.95); }
 @keyframes sr-in { from { opacity: 0; transform: scale(1.03); } }
 .sr-hud { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; max-width: 760px; width: 100%; margin: 0 auto; }
 .sr-stat { display: grid; gap: 2px; min-width: 52px; text-align: center; }
-.sr-stat small { font: 600 9px/1 system-ui, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: #7fa6b8; }
-.sr-stat b { font-size: 17px; font-weight: 700; color: #00e5ff; text-shadow: 0 0 8px rgb(0 229 255 / 0.6); font-variant-numeric: tabular-nums; }
-.sr-lives b { color: #ff4081; text-shadow: 0 0 8px rgb(255 64 129 / 0.6); letter-spacing: 0.1em; }
-.sr-extra b { color: #69f0ae; text-shadow: 0 0 8px rgb(105 240 174 / 0.6); font-size: 14px; }
-.sr-time b { color: #ffd740; text-shadow: 0 0 8px rgb(255 215 64 / 0.5); }
+.sr-stat small { font: 600 9px/1 system-ui, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--g-muted); }
+.sr-stat b { font-size: 17px; font-weight: 700; color: var(--g-a); text-shadow: 0 0 8px color-mix(in srgb, var(--g-a) 60%, transparent); font-variant-numeric: tabular-nums; }
+.sr-stat.tone-b b { color: var(--g-b); text-shadow: 0 0 8px color-mix(in srgb, var(--g-b) 60%, transparent); letter-spacing: 0.08em; }
+.sr-stat.tone-c b { color: var(--g-c); text-shadow: 0 0 8px color-mix(in srgb, var(--g-c) 60%, transparent); font-size: 14px; }
+.sr-time b { color: var(--g-d); text-shadow: 0 0 8px color-mix(in srgb, var(--g-d) 50%, transparent); }
 .sr-tools { display: flex; gap: 6px; margin-left: auto; }
 .sr-btn {
-  font: 600 12px/1 system-ui, sans-serif; color: #e6fdff; background: rgb(0 229 255 / 0.08); border: 1px solid rgb(0 229 255 / 0.4);
+  font: 600 12px/1 system-ui, sans-serif; color: #ffffff; background: color-mix(in srgb, var(--g-a) 10%, transparent); border: 1px solid color-mix(in srgb, var(--g-a) 45%, transparent);
   border-radius: 4px; padding: 8px 10px; cursor: pointer; min-height: 34px;
 }
-.sr-btn:hover { background: rgb(0 229 255 / 0.18); }
-.sr-btn[aria-pressed="false"] { color: #7fa6b8; border-color: rgb(127 166 184 / 0.35); }
+.sr-btn:hover { background: color-mix(in srgb, var(--g-a) 22%, transparent); }
+.sr-btn[aria-pressed="false"] { color: var(--g-muted); border-color: color-mix(in srgb, var(--g-muted) 40%, transparent); }
 .sr-close { font-size: 15px; width: 36px; padding: 0; }
 .sr-box { flex: 1; min-height: 0; display: grid; place-items: center; }
-.sr-stage { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgb(0 229 255 / 0.35), 0 0 40px -6px rgb(0 229 255 / 0.4); }
+.sr-stage { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-a) 40%, transparent), 0 0 40px -6px color-mix(in srgb, var(--g-a) 45%, transparent); }
 .sr-canvas { display: block; touch-action: none; cursor: crosshair; }
+.sr-canvas.mode-aim { cursor: none; }
 .sr-screen {
   position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 20px; text-align: center;
   background: rgb(3 4 12 / 0.72);
 }
-.sr-screen h2 { margin: 0; font-size: clamp(24px, 6vw, 34px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #00e5ff; text-shadow: 0 0 14px #00e5ff; }
-.sr-screen p { margin: 0; max-width: 300px; font: 500 13px/1.45 system-ui, sans-serif; color: #c9e9f5; }
-.sr-keys { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font: 500 12px/1.3 system-ui, sans-serif; color: #c9e9f5; }
-.sr-keys kbd { display: inline-block; min-width: 20px; padding: 2px 5px; margin: 0 1px; border-radius: 4px; border: 1px solid rgb(0 229 255 / 0.5); background: rgb(0 229 255 / 0.1); font: 700 11px/1.3 system-ui, sans-serif; color: #e6fdff; }
-.sr-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: 12px !important; }
-.sr-e1 { color: #ff4081; } .sr-e2 { color: #ea80fc; } .sr-e3 { color: #ffab00; }
+.sr-screen h2 { margin: 0; font-size: clamp(24px, 6vw, 34px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-a); text-shadow: 0 0 14px var(--g-a); }
+.sr-screen p { margin: 0; max-width: 300px; font: 500 13px/1.45 system-ui, sans-serif; color: var(--g-text); }
+.sr-keys { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font: 500 12px/1.3 system-ui, sans-serif; color: var(--g-text); }
+.sr-keys kbd { display: inline-block; min-width: 20px; padding: 2px 5px; margin: 0 1px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--g-a) 55%, transparent); background: color-mix(in srgb, var(--g-a) 12%, transparent); font: 700 11px/1.3 system-ui, sans-serif; color: #ffffff; }
+.sr-legend { font-size: 12px !important; color: var(--g-c) !important; }
 .sr-go {
-  font: 800 16px/1 "Orbitron", system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #03141a; cursor: pointer;
-  background: linear-gradient(180deg, #6ff7ff, #00b8d4); border: 0; padding: 14px 30px; min-height: 46px;
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 0 24px rgb(0 229 255 / 0.6);
+  font: 800 16px/1 var(--font-display, system-ui), system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--g-ink); cursor: pointer;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--g-a) 60%, #ffffff), var(--g-a)); border: 0; padding: 14px 30px; min-height: 46px;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 0 24px color-mix(in srgb, var(--g-a) 60%, transparent);
 }
 .sr-go:hover { filter: brightness(1.1); }
-.sr-score { font: 800 22px/1 "Orbitron", system-ui, sans-serif !important; color: #ffd740 !important; }
-.sr-best { color: #69f0ae !important; font-weight: 700 !important; animation: sr-pulse 0.8s ease-in-out infinite alternate; }
+.sr-score { font: 800 22px/1 var(--font-display, system-ui), system-ui, sans-serif !important; color: var(--g-d) !important; }
+.sr-best { color: var(--g-c) !important; font-weight: 700 !important; animation: sr-pulse 0.8s ease-in-out infinite alternate; }
 @keyframes sr-pulse { to { transform: scale(1.08); } }
 @media (max-width: 520px) {
   .sr-hud { gap: 4px 10px; }

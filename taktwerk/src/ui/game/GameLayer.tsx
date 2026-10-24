@@ -1,28 +1,27 @@
 /**
- * Space Rider als Vollbild-Ebene: nur in den Pausen (Stil Sci-Fi) über den Knopf unter dem Zifferblatt zu öffnen.
- * Steuerung: Pfeiltasten oder WASD, Leertaste schiesst, P oder Esc pausiert; am Handy mit dem Finger ziehen.
- * Solange das Spiel offen ist, gehen Tasten nicht an die App (die Leertaste startet also nicht den Timer).
+ * Vollbild-Ebene für die Pausenspiele (Space Rider, Hummelflug, Grand Prix, Waldjagd). Zu öffnen in den Pausen
+ * über den Knopf unter dem Zifferblatt des passenden Stils. Steuern: Pfeiltasten oder WASD, Leertaste;
+ * am Handy mit dem Finger. Solange ein Spiel offen ist, gehen Tasten nicht an die App.
  */
-import { signal } from '@preact/signals';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { readTimer } from '../../app/timer/view';
-import { draw, type Game, type GameEvent, H, type Input, newGame, step, W } from './spaceRider';
+import { GAMES, gameOpen, type GameId, type GameMeta } from './games';
+import type { Pt, Tone } from './types';
 
-export const spaceRiderOpen = signal(false);
-
-export function SpaceRiderLayer() {
-  return spaceRiderOpen.value ? <SpaceRider onClose={() => (spaceRiderOpen.value = false)} /> : null;
+export function GameLayer() {
+  const id = gameOpen.value;
+  return id ? <Game key={id} meta={GAMES[id]} onClose={() => (gameOpen.value = null)} /> : null;
 }
 
 type Mode = 'ready' | 'play' | 'paused' | 'over' | 'ended';
-interface Saved { best: number; sound: boolean; auto: boolean }
+interface Saved { best: Partial<Record<GameId, number>>; sound: boolean; auto: boolean }
 
-const STORE = 'taktwerk.spacerider';
+const STORE = 'taktwerk.games';
 function load(): Saved {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) ?? '{}') as Partial<Saved>;
-    return { best: Number(raw.best) || 0, sound: raw.sound ?? true, auto: raw.auto ?? true };
-  } catch { return { best: 0, sound: true, auto: true }; }
+    return { best: raw.best ?? {}, sound: raw.sound ?? true, auto: raw.auto ?? true };
+  } catch { return { best: {}, sound: true, auto: true }; }
 }
 function save(s: Saved): void {
   try { localStorage.setItem(STORE, JSON.stringify(s)); } catch { /* privater Modus: nur für diese Sitzung */ }
@@ -34,18 +33,7 @@ const MOVE: Record<string, [number, number]> = {
 };
 const FIRE = new Set([' ', 'Spacebar', 'j', 'k']);
 
-/** Kurze Synthesizer-Töne zu den Ereignissen */
-const TONE: Partial<Record<GameEvent, [OscillatorType, number, number, number, number]>> = {
-  shoot: ['square', 900, 420, 0.05, 0.012],
-  boom: ['sawtooth', 180, 40, 0.28, 0.05],
-  hit: ['triangle', 240, 60, 0.4, 0.09],
-  power: ['sine', 520, 1300, 0.22, 0.06],
-  level: ['sine', 660, 1320, 0.4, 0.06],
-  over: ['triangle', 330, 70, 0.9, 0.08],
-};
-function tone(ac: AudioContext, ev: GameEvent): void {
-  const cfg = TONE[ev];
-  if (!cfg) return;
+function tone(ac: AudioContext, cfg: Tone): void {
   const [type, f0, f1, dur, vol] = cfg;
   const t = ac.currentTime;
   const o = ac.createOscillator();
@@ -60,22 +48,28 @@ function tone(ac: AudioContext, ev: GameEvent): void {
   o.stop(t + dur + 0.02);
 }
 
-function SpaceRider({ onClose }: { onClose: () => void }) {
+function Game({ meta, onClose }: { meta: GameMeta; onClose: () => void }) {
+  const { engine } = meta;
   const v = readTimer();
   const breakOver = v.kind !== 'pomodoro' || v.phase === 'focus';
   const [mode, setMode] = useState<Mode>(breakOver ? 'ended' : 'ready');
   const [saved, setSaved] = useState(load);
-  const [hud, setHud] = useState({ score: 0, lives: 3, level: 1, double: false, shield: false });
+  const [hud, setHud] = useState(() => engine.hud(engine.create()));
+  const [score, setScore] = useState(0);
   const [newBest, setNewBest] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
   const box = useRef<HTMLDivElement>(null);
-  const game = useRef<Game>(newGame());
+  const game = useRef<unknown>(engine.create());
   const keys = useRef(new Set<string>());
-  const pointer = useRef<{ x: number; y: number } | null>(null);
+  const pointer = useRef<Pt | null>(null);
+  const pressed = useRef(false);
+  const taps = useRef<Pt[]>([]);
+  const reload = useRef(false);
   const audio = useRef<AudioContext | null>(null);
   const scale = useRef(1);
   const live = useRef({ mode, saved, onClose });
   live.current = { mode, saved, onClose };
+  const best = saved.best[meta.id] ?? 0;
 
   const setSave = (patch: Partial<Saved>) => setSaved((s) => { const n = { ...s, ...patch }; save(n); return n; });
 
@@ -85,7 +79,7 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
     if (!c || !ctx) return;
     const k = scale.current * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
-    draw(ctx, game.current);
+    engine.draw(ctx, game.current);
   };
 
   const start = () => {
@@ -94,10 +88,14 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
     }
     void audio.current?.resume();
     if (live.current.mode !== 'paused') {
-      game.current = newGame();
-      setHud({ score: 0, lives: 3, level: 1, double: false, shield: false });
+      game.current = engine.create();
+      setHud(engine.hud(game.current));
+      setScore(0);
       setNewBest(false);
     }
+    keys.current.clear();
+    pressed.current = false;
+    taps.current = [];
     setMode('play');
   };
 
@@ -112,13 +110,13 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
     const c = canvas.current;
     if (!el || !c) return;
     const fit = () => {
-      const k = Math.max(0.4, Math.min(el.clientWidth / W, el.clientHeight / H));
+      const k = Math.max(0.4, Math.min(el.clientWidth / engine.W, el.clientHeight / engine.H));
       scale.current = k;
       const dpr = window.devicePixelRatio || 1;
-      c.width = Math.round(W * k * dpr);
-      c.height = Math.round(H * k * dpr);
-      c.style.width = `${W * k}px`;
-      c.style.height = `${H * k}px`;
+      c.width = Math.round(engine.W * k * dpr);
+      c.height = Math.round(engine.H * k * dpr);
+      c.style.width = `${engine.W * k}px`;
+      c.style.height = `${engine.H * k}px`;
       paint();
     };
     fit();
@@ -134,7 +132,12 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       const m = live.current.mode;
       e.stopPropagation();
-      if (MOVE[key] || FIRE.has(key)) { e.preventDefault(); keys.current.add(key); }
+      if (MOVE[key] || FIRE.has(key)) {
+        e.preventDefault();
+        if (FIRE.has(key) && !e.repeat && m === 'play') pressed.current = true;
+        keys.current.add(key);
+      }
+      if (key === 'r' && m === 'play') reload.current = true;
       if (key === 'Escape' || key === 'p') {
         e.preventDefault();
         if (m === 'play') setMode('paused');
@@ -170,6 +173,7 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
     let raf = 0;
     let last = performance.now();
     let overFor = 0;
+    let lastHud = '';
     const frame = (t: number) => {
       const dt = (t - last) / 1000;
       last = t;
@@ -178,18 +182,35 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
       let dx = 0;
       let dy = 0;
       for (const key of k) { const m = MOVE[key]; if (m) { dx += m[0]; dy += m[1]; } }
-      const fire = live.current.saved.auto || pointer.current !== null || [...k].some((key) => FIRE.has(key));
-      const input: Input = { dx, dy, fire, target: pointer.current };
-      const events = step(g, dt, input);
-      if (live.current.saved.sound && audio.current) for (const ev of new Set(events)) tone(audio.current, ev);
-      setHud((h) => (h.score === g.score && h.lives === g.lives && h.level === g.level && h.double === g.player.double > 0 && h.shield === g.player.shield
-        ? h : { score: g.score, lives: g.lives, level: g.level, double: g.player.double > 0, shield: g.player.shield }));
+      const held = [...k].some((key) => FIRE.has(key));
+      const steerHeld = meta.mode === 'steer' && pointer.current !== null;
+      const events = engine.step(g, dt, {
+        dx: Math.max(-1, Math.min(1, dx)), dy: Math.max(-1, Math.min(1, dy)),
+        fire: held || steerHeld || (meta.autofire && live.current.saved.auto),
+        press: pressed.current,
+        target: pointer.current,
+        taps: taps.current,
+        reload: reload.current,
+      });
+      pressed.current = false;
+      taps.current = [];
+      reload.current = false;
+      // Zielen: die Zeigerposition gilt nur, wenn sich die Maus bewegt hat (sonst zielen die Tasten)
+      if (meta.mode === 'aim') pointer.current = null;
+      if (live.current.saved.sound && audio.current) {
+        for (const ev of new Set(events)) { const cfg = engine.tones[ev]; if (cfg) tone(audio.current, cfg); }
+      }
+      const h = engine.hud(g);
+      const key = JSON.stringify(h);
+      if (key !== lastHud) { lastHud = key; setHud(h); setScore(engine.score(g)); }
       paint();
-      if (g.over) {
+      if (engine.over(g)) {
         overFor += dt;
         if (overFor > 1.2) {
-          const best = live.current.saved.best;
-          if (g.score > best) { setSave({ best: g.score }); setNewBest(true); }
+          const sc = engine.score(g);
+          const b = live.current.saved.best[meta.id] ?? 0;
+          setScore(sc);
+          if (sc > b) { setSave({ best: { ...live.current.saved.best, [meta.id]: sc } }); setNewBest(true); }
           setMode('over');
           return;
         }
@@ -200,25 +221,23 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
     return () => cancelAnimationFrame(raf);
   }, [mode]);
 
-  // Finger oder Maus: Schiff folgt (am Handy etwas über dem Finger, damit es sichtbar bleibt)
-  const toWorld = (e: PointerEvent) => {
+  /** Bildschirm → Spielwelt; beim Steuern am Handy etwas über dem Finger, damit die Figur sichtbar bleibt */
+  const toWorld = (e: PointerEvent, lift: boolean): Pt => {
     const r = canvas.current!.getBoundingClientRect();
-    const lift = e.pointerType === 'touch' ? 56 : 0;
-    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H - lift };
+    const up = lift && e.pointerType === 'touch' ? meta.lift : 0;
+    return { x: ((e.clientX - r.left) / r.width) * engine.W, y: ((e.clientY - r.top) / r.height) * engine.H - up };
   };
 
-  const best = Math.max(saved.best, hud.score);
   return (
-    <div class="sr-layer" role="dialog" aria-modal="true" aria-label="Space Rider">
+    <div class={`sr-layer game-${meta.id}`} role="dialog" aria-modal="true" aria-label={meta.title}>
       <div class="sr-hud">
-        <span class="sr-stat"><small>Punkte</small><b>{hud.score}</b></span>
-        <span class="sr-stat"><small>Rekord</small><b>{best}</b></span>
-        <span class="sr-stat"><small>Stufe</small><b>{hud.level}</b></span>
-        <span class="sr-stat sr-lives" aria-label={`${hud.lives} Leben`}><small>Leben</small><b>{'♥'.repeat(Math.max(0, hud.lives)) || '–'}</b></span>
-        {(hud.double || hud.shield) && <span class="sr-stat sr-extra"><small>Extra</small><b>{[hud.double && '2×', hud.shield && 'Schild'].filter(Boolean).join(' ')}</b></span>}
+        {hud.map((h) => <span key={h.label} class={`sr-stat${h.tone ? ` tone-${h.tone}` : ''}`}><small>{h.label}</small><b>{h.value}</b></span>)}
+        <span class="sr-stat"><small>Rekord</small><b>{Math.max(best, score)}</b></span>
         <span class="sr-stat sr-time"><small>Pause</small><b>{breakOver ? 'vorbei' : v.clock}</b></span>
         <span class="sr-tools">
-          <button type="button" class="sr-btn" aria-pressed={saved.auto} onClick={() => setSave({ auto: !saved.auto })} title="Automatisch schiessen">Autofeuer {saved.auto ? 'an' : 'aus'}</button>
+          {meta.autofire && (
+            <button type="button" class="sr-btn" aria-pressed={saved.auto} onClick={() => setSave({ auto: !saved.auto })} title="Automatisch schiessen">Autofeuer {saved.auto ? 'an' : 'aus'}</button>
+          )}
           <button type="button" class="sr-btn" aria-pressed={saved.sound} onClick={() => setSave({ sound: !saved.sound })}>Ton {saved.sound ? 'an' : 'aus'}</button>
           {mode === 'play' && <button type="button" class="sr-btn" onClick={() => setMode('paused')}>Pause</button>}
           <button type="button" class="sr-btn sr-close" onClick={onClose} aria-label="Spiel schliessen">✕</button>
@@ -227,29 +246,41 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
       <div class="sr-box" ref={box}>
         <div class="sr-stage">
           <canvas
-            ref={canvas} class="sr-canvas"
+            ref={canvas} class={`sr-canvas mode-${meta.mode}`}
+            onContextMenu={(e) => e.preventDefault()}
             onPointerDown={(e) => {
               if (mode !== 'play') return;
-              (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
-              pointer.current = toWorld(e);
+              const el = e.currentTarget as HTMLCanvasElement;
+              if (meta.mode === 'aim') {
+                if (e.button === 2) { reload.current = true; return; }
+                const p = toWorld(e, false);
+                pointer.current = p;
+                taps.current.push(p);
+                return;
+              }
+              el.setPointerCapture(e.pointerId);
+              pointer.current = toWorld(e, true);
+              pressed.current = true;
             }}
-            onPointerMove={(e) => { if (pointer.current) pointer.current = toWorld(e); }}
-            onPointerUp={() => { pointer.current = null; }}
-            onPointerCancel={() => { pointer.current = null; }}
+            onPointerMove={(e) => {
+              if (meta.mode === 'aim') { if (e.pointerType !== 'touch') pointer.current = toWorld(e, false); return; }
+              if (pointer.current) pointer.current = toWorld(e, true);
+            }}
+            onPointerUp={() => { if (meta.mode === 'steer') pointer.current = null; }}
+            onPointerCancel={() => { if (meta.mode === 'steer') pointer.current = null; }}
           />
           {mode !== 'play' && (
             <div class="sr-screen">
               {mode === 'ready' && (
                 <>
-                  <h2>Space Rider</h2>
-                  <p>Schiess die Angreifer ab, sammle Extras und hol dir den Rekord, solange die Pause dauert.</p>
+                  <h2>{meta.title}</h2>
+                  <p>{meta.intro}</p>
                   <ul class="sr-keys">
-                    <li><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> oder <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> steuern</li>
-                    <li><kbd>Leertaste</kbd> schiesst (oder Autofeuer)</li>
-                    <li><kbd>P</kbd> oder <kbd>Esc</kbd> pausiert</li>
-                    <li>Am Handy: Finger ziehen, das Schiff folgt</li>
+                    {meta.help.map(([ks, text]) => (
+                      <li key={text}>{ks.map((k, i) => <span key={k}>{i > 0 && k.startsWith('/') ? ' oder ' : ''}<kbd>{k.replace(/^\//, '')}</kbd></span>)} {text}</li>
+                    ))}
                   </ul>
-                  <p class="sr-legend"><span class="sr-e1">▼ 10</span><span class="sr-e2">◉ 25</span><span class="sr-e3">▣ 50</span><span>Extras: 2× · Schild · Leben</span></p>
+                  {meta.legend && <p class="sr-legend">{meta.legend}</p>}
                   <button type="button" class="sr-go" onClick={start}>Start</button>
                 </>
               )}
@@ -262,8 +293,8 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
               )}
               {mode === 'over' && (
                 <>
-                  <h2>Game Over</h2>
-                  <p class="sr-score">{hud.score} Punkte</p>
+                  <h2>{meta.overTitle}</h2>
+                  <p class="sr-score">{score} Punkte</p>
                   {newBest && <p class="sr-best">Neuer Rekord!</p>}
                   <button type="button" class="sr-go" onClick={start}>Nochmal</button>
                   <button type="button" class="sr-btn" onClick={onClose}>Schliessen</button>
@@ -272,7 +303,7 @@ function SpaceRider({ onClose }: { onClose: () => void }) {
               {mode === 'ended' && (
                 <>
                   <h2>Pause vorbei</h2>
-                  <p>Zurück an die Arbeit. {hud.score > 0 ? `Du hast ${hud.score} Punkte geholt.` : ''}</p>
+                  <p>Zurück an die Arbeit. {score > 0 ? `Du hast ${score} Punkte geholt.` : ''}</p>
                   <button type="button" class="sr-go" onClick={onClose}>Zum Fokus</button>
                 </>
               )}

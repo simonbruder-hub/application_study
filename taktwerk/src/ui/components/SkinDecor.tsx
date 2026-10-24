@@ -10,7 +10,7 @@ import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
 import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
-import { spaceRiderOpen } from '../game/SpaceRider';
+import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -363,17 +363,7 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
     case 'flora':
       return <Bouquet p={p} />;
     case 'scifi':
-      return (
-        <div class="companion-stack">
-          <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} seek={seek} />
-          {v.kind === 'pomodoro' && v.phase !== 'focus' && (
-            <button type="button" class="btn sr-open" onClick={() => (spaceRiderOpen.value = true)}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 L15 9 L21 13 L15 14 L13 20 H11 L9 14 L3 13 L9 9 Z" /></svg>
-              Space Rider spielen
-            </button>
-          )}
-        </div>
-      );
+      return <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} seek={seek} />;
     case 'elemente':
       return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
     case 'zug':
@@ -397,5 +387,17 @@ function ScopeReadout({ v, set }: { v: TimerView; set: UserSettings }) {
     <p class="scope-readout" aria-hidden="true">
       <span>T {period} min</span><span>f {fmt(mhz)} mHz</span><span>D {fmt(duty, 0)} %</span>
     </p>
+  );
+}
+
+/** Knopf zum Pausenspiel des Stils (Sci-Fi, Flora, Rennen, Forest), nur in den Pausen */
+export function GameButton({ skin, v }: { skin: Skin; v: TimerView }) {
+  const id = GAME_OF_SKIN[skin];
+  if (!id || v.kind !== 'pomodoro' || v.phase === 'focus') return null;
+  return (
+    <button type="button" class="btn sr-open" onClick={() => (gameOpen.value = id)}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 0 10c-1.6 0-2.4-1-3.4-2h-3.2c-1 1-1.8 2-3.4 2A5 5 0 0 1 7 7Zm1 3v1.5H6.5v1.5H8v1.5h1.5V13H11v-1.5H9.5V10H8Zm8 .5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" /></svg>
+      {GAMES[id].button}
+    </button>
   );
 }

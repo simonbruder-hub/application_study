@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { type Game, H, type Input, newGame, seeded, step, W } from './spaceRider';
+import { type Game, H, newGame, step, W } from './spaceRider';
+import { type Input, NO_INPUT, seeded } from './types';
 
-const idle: Input = { dx: 0, dy: 0, fire: false, target: null };
+const idle: Input = NO_INPUT;
 /** Spiel ohne zufällige Gegner: der Spawn-Zähler steht weit in der Zukunft */
 const quiet = (): Game => { const g = newGame(seeded(1)); g.spawn = 999; g.player.inv = 0; return g; };
 
@@ -77,5 +78,24 @@ describe('Space Rider', () => {
     for (let i = 0; i < 100; i++) step(g, 0.05, idle);
     expect(g.enemies.length).toBeGreaterThan(0);
     expect(g.enemies.every((e) => e.x >= 0 && e.x <= W && e.y < H + 30)).toBe(true);
+  });
+
+  it('schickt ab 600 Punkten das Mutterschiff, das abgeschossen viele Punkte bringt', () => {
+    const g = quiet();
+    g.score = 600;
+    expect(step(g, 0.01, idle)).toContain('boss');
+    const b = g.boss!;
+    expect(b.hp).toBe(40);
+    b.y = 96;
+    b.hp = 1;
+    g.player.x = b.x;
+    g.player.y = b.y + 120;
+    g.player.inv = 5;
+    const events = [];
+    for (let i = 0; i < 30 && g.boss; i++) events.push(...step(g, 0.02, { ...idle, fire: true }));
+    expect(events).toContain('bossdown');
+    expect(g.boss).toBeNull();
+    expect(g.score).toBeGreaterThanOrEqual(1100);
+    expect(g.nextBoss).toBe(g.score + 1500);
   });
 });

@@ -144,5 +144,4 @@
 @keyframes df-die { 0%, 41% { opacity: 1; } 43%, 100% { opacity: 0; } }
 @keyframes df-boom { 0%, 40% { opacity: 0; transform: scale(0.2); } 43% { opacity: 1; transform: scale(0.8); } 52% { opacity: 0; transform: scale(1.8); } 100% { opacity: 0; } }
 /* Knopf zum Spiel (in den Pausen) */
-.sr-open { gap: 8px; border-color: var(--phase); color: var(--phase); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-display); box-shadow: 0 0 14px -4px var(--phase); }
-.sr-open svg { width: 16px; height: 16px; fill: currentColor; }
+[data-skin="scifi"] .sr-open { text-transform: uppercase; letter-spacing: 0.08em; }
