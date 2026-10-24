@@ -18,13 +18,23 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
 - **Projekte und Aufgaben** – Aufgaben gehören zu einem Projekt, mit Status, Priorität, Fälligkeit und Schätzung in Pomodoros oder Stunden. ▶ bei einer Aufgabe startet den Timer dafür; die Zeit wird ihr gutgeschrieben.
 - **Auswertung** – Woche, Monat, Jahr: Verlauf nach Projekt, Vergleich mit der Vorperiode, Protokoll, Zeit nachtragen, Zusammenfassung zum Kopieren, CSV- und Excel-Export.
 - **Sync** – Mit einem kostenlosen Supabase-Projekt erscheinen Änderungen auf allen Geräten, auch der laufende Timer: auf dem Laptop starten, auf dem Handy pausieren. Offline wird alles lokal gespeichert und später übertragen. Anzeige oben rechts: grün = synchron, gelb = offline, rot = Fehler, grau = nur lokal.
-- **Darstellung** – Tag, Nacht oder automatisch und sechs Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause (auch der Seitenhintergrund wechselt) und feiert einen geschafften Pomodoro:
-  - **Klassisch:** leuchtendes Zifferblatt, pulsierender Ring; Pause mit Atemkreis (4 s ein, 4 s aus), lange Pause mit Blasen; Konfetti.
-  - **Anime:** Tomaten-Chan, Manga-Linien; Fokus mit Blitzen und Energie-Aura, kurze Pause mit Herzen und Blüten, lange Pause als Laternenfest mit Sternschnuppen; «やった!».
-  - **Technik:** Datenblatt am Tag, Oszilloskop in der Nacht; laufende Messkurve (Sinus CH1, Rechteck mit Spektrum CH2, Lissajous im XY-Modus CH3), Kennwerte T, f und Tastgrad; «PASS».
-  - **Barock:** Gold, römische Ziffern, Pendel im Sekundentakt und Kerzen; kurze Pause mit Tafelmusik, lange Pause mit Feuerwerk; «Bravissimo!».
-  - **Natur:** Wald mit Sonne bzw. Mond und Wolken, eine Pflanze wächst mit dem Fokus; Wind und fallende Blätter in der Pause, Sonnenuntergang mit Vögeln in der langen Pause; die Pflanze blüht auf.
-  - **Amtlich:** Formular mit Status im Kopf, Kaffeepause, Schild «Mittagspause» und Papierflieger; Stempel «Pendent» und «Erledigt».
+- **Zeiger ziehen** – den Zeiger auf dem Zifferblatt mit Maus oder Finger verschieben: vorspringen oder verlängern (auch über eine volle Runde hinaus), rastet auf ganze Minuten ein; Pfeiltasten ±1, Bild auf/ab ±5 Minuten.
+- **Tags und Farben** – Projekte mit Tags (z. B. «Coding», «Lernen», «Admin») und freier Farbe; Tags in Projektkarten, Auswertung «Nach Tag», Verwaltung unter Einstellungen → Tags.
+- **Signale** – sieben synthetische Töne (Glocke, Marimba, Gong, Harfe, Kristall, Vogelruf, Digital), je für Ende Fokus, kurze und lange Pause; Restzeit auf Wunsch ausblenden (nur Zifferblatt).
+- **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 13 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
+  - **Klassisch:** Glas-Karten, leuchtendes Zifferblatt, Atemkreis in der Pause, Tomate füllt sich; Konfetti.
+  - **Anime:** Tomaten-Chan, Blitze, Herzen, Laternenfest, Power-Leiste; «やった!».
+  - **Technik:** Oszilloskop (Sinus, Rechteck mit Spektrum, Lissajous), Kennwerte, LED-Pegel; Funkenregen.
+  - **Barock:** römische Ziffern, Pendel im Sekundentakt, Sanduhr, Kerzen, Tafelmusik, Feuerwerk.
+  - **Forest:** pro Pomodoro wächst ein Baum (jedes Mal eine andere Art), darunter der Wald des Tages; Wind und Sonnenuntergang in den Pausen.
+  - **Amtlich:** Formular mit getipptem Status, Aktenstapel, Kaffeepause, Stempel «Pendent» und «Erledigt».
+  - **Rennen:** Rennwagen als Zeiger, Randsteine, Startampel, Strecke bis zur Zielflagge.
+  - **Flug:** Flugzeug als Zeiger, Wolken, Route ZRH → Ziel mit Flughöhe, Looping.
+  - **Meer:** Fisch als Zeiger, Fischschwärme, Quallen, Oktopus, Tauchtiefe, Plankton in der Nacht.
+  - **Flora:** Biene als Zeiger, Blumenwiese, Bienen, Marienkäfer und Käfer, Blumen öffnen sich nacheinander.
+  - **Sci-Fi:** Raumschiff als Zeiger, Warp-Sprung, Radar, Planet mit Ring, HUD, Reise zum Mars.
+  - **Elemente:** Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe; vier Element-Kugeln.
+  - **Zug:** Lok als Zeiger auf dem Gleisring, Alpen-Parallaxe, Bahnsteig mit Uhr, Reise Zürich HB → Ziel.
 
 ### Tastenkürzel
 
@@ -54,7 +64,7 @@ Auf dem Handy ist der **«Hintergrund-Modus»** automatisch eingeschaltet: Der T
 
 Ohne Sync liegen die Daten nur auf dem jeweiligen Gerät. Für den Abgleich zwischen Laptop und Handy:
 
-1. Kostenloses Projekt auf [supabase.com](https://supabase.com) anlegen und das SQL-Skript ausführen – Schritt für Schritt in [`supabase/README.md`](supabase/README.md).
+1. Kostenloses Projekt auf [supabase.com](https://supabase.com) anlegen und das SQL-Skript ausführen – Schritt für Schritt in [`supabase/README.md`](supabase/README.md). Nach App-Updates das Skript erneut ausführen (es ist idempotent); seit den Tags braucht es die Spalten `projects.tags` und `user_settings.tag_colors`.
 2. In der App *Einstellungen → Sync & Konto* die Projekt-URL und den Anon-Key eintragen.
 3. Mit deiner E-Mail-Adresse anmelden (Code aus der E-Mail eingeben). Auf jedem Gerät gleich vorgehen.
 

@@ -22,25 +22,18 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 4. Auswertung: CSV-Export und Textzusammenfassung wie in v1 (in v2 noch nicht übernommen).
 5. E2E-Tests für Aufgaben, Projekte, Auswertung, Einstellungen und die v1-Übernahme ergänzen.
 
-## Nächste Session (Wünsche vom 24.10.2026)
+## Erledigt (Oktober 2026)
 
-1. **Name und Domain:** «Taktwerk» ist schon vergeben (auch als Firma). Vor dem Kauf einer Domain einen neuen Namen
-   wählen und prüfen (nic.ch für `.ch`, swissreg.ch für Marken). Danach umbenennen (Texte, Manifest, Startseite) und
-   Pages so umbauen, dass die Startseite unter `/` und die App unter `/app/` liegt; Custom Domain in den Pages-Einstellungen,
-   DNS beim Registrar (CNAME `www` → `simonbruder-hub.github.io`), Supabase Site-URL/Redirects und `desktop/loader/index.html`
-   anpassen. Achtung: neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
-2. **Tags und Farbsystem** (Konzept steht im Chat): Feld `tags text[]` an `projects`, Tag-Farben in `user_settings`
-   (`tag_colors jsonb`), Schema-Update in Supabase, Projekt-Dialog mit Tag-Auswahl, farbige Projektauswahl, Auswertung nach Tag.
-3. **Neue Stile «Tiere»:**
-   - **Meer:** Fische, Oktopus usw. (z. B. Fischschwärme im Fokus, Quallen in der Pause, Feier mit Luftblasen).
-   - **Flora:** Blumen mit Bienen, Käfern, Schmetterlingen.
-4. **Natur → «Forest»:** umbenennen; statt der Topfpflanze wächst ein Baum, und **jede Pause ein anderer Baum**
-   (z. B. Tanne, Eiche, Birke, Kirschbaum; der Wald füllt sich über den Tag).
-5. Optional: eigener Superhelden-Stil (eigene Figur, keine geschützte wie Spider-Man).
-6. **Zeiger ziehen:** Den Zeiger (Punkt, Auto, Flugzeug, Blatt, Edelstein) mit Maus oder Finger auf dem Zifferblatt
-   verschieben, um vorzuspringen oder die Runde zu verlängern, zusätzlich zu −5/+5.
-   Umsetzung: Pointer-Events auf `.dial` in `src/ui/components/Dial.tsx` (`pointerdown`/`move`/`up`, `setPointerCapture`,
-   `touch-action: none`), Winkel → Restzeit, auf ganze Minuten einrasten, Vorschau während des Ziehens, beim Loslassen
-   einmal `timer.adjust()` bzw. `adjustPlannedSeconds` in `src/app/timer/controller.ts` (läuft über `timerSync`, also auch
-   auf dem anderen Gerät sichtbar). Grenzen: mindestens 1 Minute Rest, höchstens eine volle Umdrehung; Tastatur
-   (Pfeiltasten) für Barrierefreiheit; für Pomodoro und Stechuhr (dort Beginn korrigieren).
+- Zeiger ziehen, Tags und Farbsystem (Supabase-Spalten `projects.tags`, `user_settings.tag_colors`; fehlende Spalten
+  werden beim Sync übersprungen und in den Einstellungen gemeldet).
+- 13 Stile mit Szenen je Phase, Fortschritts-Begleiter, Einblendungen und Feiern; Natur heisst jetzt Forest
+  (ein Baum pro Pomodoro, jedes Mal eine andere Art). Neu: Meer, Flora, Sci-Fi, Elemente, Zug.
+- Desktop-App (Tauri) lädt die Online-Version und aktualisiert sich selbst.
+
+## Offen
+
+1. **Name und Domain:** «Taktwerk» ist schon vergeben (auch als Firma). Neuen Namen wählen, prüfen (nic.ch, swissreg.ch),
+   dann umbenennen (Texte, Manifest, Startseite, Desktop), Pages auf `/` und `/app/` umbauen, Custom Domain und DNS,
+   Supabase Site-URL/Redirects und `desktop/loader/index.html` anpassen. Neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
+2. Optional: eigener Superhelden-Stil (eigene Figur).
+3. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.

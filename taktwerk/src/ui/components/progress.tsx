@@ -41,8 +41,10 @@ export function TomatoFill({ p, round }: { p: number; round: string }) {
       <svg class="tomato-fill" viewBox="0 0 64 64">
         <defs><clipPath id="tf-clip"><circle cx="32" cy="38" r="22" /></clipPath></defs>
         <circle class="tf-shell" cx="32" cy="38" r="22" />
-        <rect class="tf-juice" clip-path="url(#tf-clip)" x="0" y={y.toFixed(1)} width="64" height="64" />
-        <path class="tf-wave" clip-path="url(#tf-clip)" d={`M0 ${y.toFixed(1)} q8 -3 16 0 t16 0 t16 0 t16 0 v4 h-64 Z`} />
+        <g clip-path="url(#tf-clip)">
+          <rect class="tf-juice" x="0" y={y.toFixed(1)} width="64" height="64" />
+          <path class="tf-wave" d={`M0 ${y.toFixed(1)} q8 -3 16 0 t16 0 t16 0 t16 0 t16 0 t16 0 v4 h-96 Z`} />
+        </g>
         <circle class="tf-outline" cx="32" cy="38" r="22" />
         <path class="tf-leaf" d="M32 16 l5 -7 3 6 7 -2 -5 6 -10 1 -10 -1 -5 -6 7 2 3 -6 z" />
       </svg>
