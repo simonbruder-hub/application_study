@@ -82,4 +82,24 @@ test.describe('Stile', () => {
       expect(errors).toEqual([]);
     });
   }
+
+  test('Amtlich: Sudoku mit gesperrten Feldern und Tipp', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'amtlich', notifyAsked: true })));
+    await openApp(page);
+    await page.locator('.phase-tab', { hasText: 'Kurze Pause' }).click();
+    await page.locator('.sr-open').click();
+    await page.locator('.sd-level', { hasText: 'Anfänger' }).click();
+    await expect(page.locator('.sd-cell')).toHaveCount(81);
+    await page.locator('.sd-num').nth(4).click();
+    expect(await page.locator('.sd-cell.is-blocked').count()).toBeGreaterThan(20);
+    await page.locator('.sd-tools button', { hasText: 'Tipp' }).click();
+    await expect(page.locator('.sd-hint')).toBeVisible();
+    await expect(page.locator('.sd-head')).toContainText('1');
+    // Spielstand bleibt: schliessen und wieder öffnen
+    await page.keyboard.press('Escape');
+    await page.locator('.sr-open').click();
+    await expect(page.locator('.sd-grid')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
 });

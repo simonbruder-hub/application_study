@@ -63,3 +63,78 @@
   .sr-stat b { font-size: 15px; }
   .sr-tools { width: 100%; justify-content: center; margin-left: 0; }
 }
+
+/* ---------- Brettspiele (Sudoku, Memory): Hülle ---------- */
+.sr-layer.is-board { overflow: hidden; }
+.sr-board { flex: 1; min-height: 0; overflow: auto; display: grid; justify-items: center; align-content: start; padding: 4px 0 12px; }
+.sr-ended {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 2; display: grid; justify-items: center; gap: 12px; padding: 24px 28px; text-align: center;
+  border-radius: 12px; background: var(--g-panel, rgb(3 4 12 / 0.92)); box-shadow: 0 20px 60px -10px rgb(0 0 0 / 0.6); max-width: min(90vw, 360px);
+}
+.sr-ended h2 { margin: 0; font-size: 26px; color: var(--g-a); }
+.sr-ended p { margin: 0; font: 500 13px/1.45 system-ui, sans-serif; color: var(--g-text); }
+
+/* ---------- Sudoku im Stil Amtlich: Formular, Kugelschreiber, Leuchtmarker ---------- */
+.sr-layer.game-sudoku {
+  --g-a: #d52b1e; --g-b: #d52b1e; --g-c: #1f4fbf; --g-d: #111111; --g-ink: #ffffff; --g-muted: #6b6b6b; --g-text: #222222; --g-panel: #ffffff;
+  color: #111111; background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.025) 0 1px, transparent 1px 26px), rgb(244 244 240 / 0.98);
+  font-family: "Inter", system-ui, sans-serif;
+}
+.game-sudoku .sr-stat b { text-shadow: none; font-size: 16px; }
+.game-sudoku .sr-btn { color: #111111; background: #ffffff; border-color: #111111; border-radius: 3px; }
+.game-sudoku .sr-btn:hover { background: #f0f0ea; }
+.game-sudoku .sr-btn[aria-pressed="true"] { background: #111111; color: #ffffff; }
+.game-sudoku .sr-btn[aria-pressed="false"] { color: #555555; border-color: #999999; }
+.game-sudoku .sr-go { clip-path: none; border-radius: 3px; background: #d52b1e; color: #ffffff; box-shadow: none; font-family: "Inter", system-ui, sans-serif; }
+.sd, .sd-choose { --sd: min(94vw, calc(100dvh - 300px), 470px); display: grid; justify-items: center; gap: 10px; width: max(var(--sd), 280px); }
+.sd-choose { padding-top: 6vh; text-align: center; }
+.sd-choose h2 { margin: 0; font: 800 30px/1 "Inter", system-ui, sans-serif; letter-spacing: 0.02em; }
+.sd-choose p { margin: 0; color: #444444; font-size: 14px; line-height: 1.45; }
+.sd-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.sd-level { display: grid; gap: 4px; padding: 16px 12px; border: 2px solid #111111; border-radius: 4px; background: #ffffff; color: #111111; cursor: pointer; text-align: left; }
+.sd-level b { font-size: 17px; }
+.sd-level small { font: 500 11px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: #666666; }
+.sd-level:hover:not(:disabled) { background: #fff6d6; }
+.sd-level:disabled { opacity: 0.5; }
+.sd-busy { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.sd-head { display: flex; justify-content: space-between; width: 100%; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.sd-head span { display: grid; gap: 2px; }
+.sd-head small { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #777777; }
+.sd-head b { font-size: 15px; }
+.sd-grid { display: grid; grid-template-columns: repeat(9, 1fr); width: 100%; aspect-ratio: 1; border: 3px solid #111111; background: #ffffff; user-select: none; }
+.sd-cell {
+  position: relative; display: grid; place-items: center; padding: 0; border: 0; border-right: 1px solid #c9c9c4; border-bottom: 1px solid #c9c9c4;
+  background: #ffffff; color: #1f4fbf; font: 500 calc(var(--sd) / 17) / 1 "IBM Plex Mono", ui-monospace, monospace; cursor: pointer;
+}
+.sd-cell:nth-child(9n) { border-right: 0; }
+.sd-cell:nth-last-child(-n + 9) { border-bottom: 0; }
+.sd-cell.b-r { border-right: 2.5px solid #111111; }
+.sd-cell.b-b { border-bottom: 2.5px solid #111111; }
+.sd-cell.is-given { color: #111111; font-weight: 700; }
+.sd-cell.is-peer { background: #f4f4ef; }
+.sd-cell.is-blocked { background: repeating-linear-gradient(45deg, rgb(213 43 30 / 0.16) 0 3px, transparent 3px 8px), #fbfbf8; }
+.sd-cell.is-same { background: #ffe58a; }
+.sd-cell.is-sel { background: #ffd23f; box-shadow: inset 0 0 0 2px #111111; }
+.sd-cell.is-wrong { color: #d52b1e; background: #fde3e0; text-decoration: line-through; text-decoration-thickness: 2px; }
+.sd-cell.is-hint-unit { background: #e6efff; }
+.sd-cell.is-hint { box-shadow: inset 0 0 0 3px #d52b1e; animation: sd-hint 0.6s ease-in-out 3 alternate; }
+@keyframes sd-hint { to { box-shadow: inset 0 0 0 5px #d52b1e; } }
+.sd-cell:focus-visible { outline: 2px solid #1f4fbf; outline-offset: -2px; z-index: 1; }
+.sd-notes { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; padding: 2px; }
+.sd-notes i { display: grid; place-items: center; font: 500 calc(var(--sd) / 48) / 1 "IBM Plex Mono", ui-monospace, monospace; font-style: normal; color: #777777; }
+.sd-notes i.is-on { color: #111111; font-weight: 700; background: #ffe58a; border-radius: 2px; }
+.sd-hint { margin: 0; width: 100%; padding: 8px 10px; border-left: 4px solid #d52b1e; background: #ffffff; font-size: 13px; line-height: 1.4; }
+.sd-pad { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; width: 100%; }
+.sd-num {
+  display: grid; justify-items: center; gap: 1px; padding: 8px 0 5px; border: 2px solid #111111; border-radius: 4px; background: #ffffff; color: #111111;
+  font: 700 clamp(18px, 4.6vw, 24px)/1 "IBM Plex Mono", ui-monospace, monospace; cursor: pointer;
+}
+.sd-num small { font-size: 9px; font-weight: 500; color: #888888; }
+.sd-num.is-on { background: #111111; color: #ffffff; }
+.sd-num.is-on small { color: #cccccc; }
+.sd-num.is-full { opacity: 0.35; }
+.sd-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.sd-help { margin: 0; font-size: 11px; line-height: 1.4; color: #666666; text-align: center; }
+.sd-done { display: grid; justify-items: center; gap: 6px; padding: 12px 20px; border: 3px solid #d52b1e; border-radius: 6px; color: #d52b1e; rotate: -2deg; background: #ffffff; }
+.sd-done b { font: 800 26px/1 "Inter", system-ui, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+.sd-done span { font: 500 12px/1.3 "IBM Plex Mono", ui-monospace, monospace; color: #444444; }

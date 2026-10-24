@@ -2,14 +2,19 @@
  * Die Pausenspiele und zu welchem Stil sie gehören. Der Knopf unter dem Zifferblatt öffnet sie in den Pausen.
  */
 import { signal } from '@preact/signals';
+import type { ComponentType } from 'preact';
 import type { Skin } from '../skins';
+import { Sudoku } from './Sudoku';
 import { forest } from './forest';
 import { hummel } from './hummel';
 import { racer } from './racer';
 import { spaceRider } from './spaceRider';
 import type { Engine } from './types';
 
-export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald';
+export type GameId = 'spacerider' | 'hummel' | 'rennen' | 'wald' | 'sudoku';
+
+/** Brettspiele (Sudoku, Memory) zeichnen selbst im DOM */
+export interface BoardProps { onScore: (points: number) => void; ended: boolean; skin: Skin }
 
 export interface GameMeta {
   id: GameId;
@@ -21,8 +26,10 @@ export interface GameMeta {
   help: [string[], string][];
   legend?: string;
   overTitle: string;
+  /** Actionspiel auf Canvas (engine) oder Brettspiel im DOM (board) */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  engine: Engine<any>;
+  engine?: Engine<any>;
+  board?: ComponentType<BoardProps>;
   /** steer: Figur folgt Finger oder Maus; aim: Klick oder Tippen zielt */
   mode: 'steer' | 'aim';
   /** Autofeuer anbieten */
@@ -78,9 +85,13 @@ export const GAMES: Record<GameId, GameMeta> = {
     legend: 'Eichhörnchen 40 · Hirsch 30 · Wildschwein 20 · weiter hinten zählt doppelt · Wanderer −50 · Igel −30 · Vogelhaus −20',
     engine: forest, mode: 'aim', autofire: false, lift: 0,
   },
+  sudoku: {
+    id: 'sudoku', title: 'Sudoku', button: 'Sudoku lösen', overTitle: 'Gelöst',
+    intro: '', help: [], board: Sudoku, mode: 'aim', autofire: false, lift: 0,
+  },
 };
 
-export const GAME_OF_SKIN: Partial<Record<Skin, GameId>> = { scifi: 'spacerider', flora: 'hummel', rennen: 'rennen', natur: 'wald' };
+export const GAME_OF_SKIN: Partial<Record<Skin, GameId>> = { scifi: 'spacerider', flora: 'hummel', rennen: 'rennen', natur: 'wald', amtlich: 'sudoku' };
 
 /** Offenes Spiel (null: keins) */
 export const gameOpen = signal<GameId | null>(null);

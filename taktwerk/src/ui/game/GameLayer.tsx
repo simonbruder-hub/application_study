@@ -4,13 +4,63 @@
  * am Handy mit dem Finger. Solange ein Spiel offen ist, gehen Tasten nicht an die App.
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { prefs } from '../../app/prefs';
 import { readTimer } from '../../app/timer/view';
 import { GAMES, gameOpen, type GameId, type GameMeta } from './games';
 import type { Pt, Tone } from './types';
 
 export function GameLayer() {
   const id = gameOpen.value;
-  return id ? <Game key={id} meta={GAMES[id]} onClose={() => (gameOpen.value = null)} /> : null;
+  if (!id) return null;
+  const meta = GAMES[id];
+  const close = () => (gameOpen.value = null);
+  return meta.board ? <BoardGame key={id} meta={meta} onClose={close} /> : <Game key={id} meta={meta} onClose={close} />;
+}
+
+/** Hülle für Brettspiele: Kopfzeile mit Rekord und Pausenzeit; Tasten gehen ans Spiel, nicht an die App */
+function BoardGame({ meta, onClose }: { meta: GameMeta; onClose: () => void }) {
+  const Board = meta.board!;
+  const v = readTimer();
+  const breakOver = v.kind !== 'pomodoro' || v.phase === 'focus';
+  const [saved, setSaved] = useState(load);
+  const [dismissed, setDismissed] = useState(false);
+  const best = saved.best[meta.id] ?? 0;
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') return;
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+    };
+    window.addEventListener('keydown', down, true);
+    return () => window.removeEventListener('keydown', down, true);
+  }, []);
+  const onScore = (points: number) => setSaved((s) => {
+    if (points <= (s.best[meta.id] ?? 0)) return s;
+    const n = { ...s, best: { ...s.best, [meta.id]: points } };
+    save(n);
+    return n;
+  });
+  return (
+    <div class={`sr-layer game-${meta.id} is-board`} role="dialog" aria-modal="true" aria-label={meta.title}>
+      <div class="sr-hud">
+        <span class="sr-stat"><small>Spiel</small><b>{meta.title}</b></span>
+        <span class="sr-stat"><small>Rekord</small><b>{best}</b></span>
+        <span class="sr-stat sr-time"><small>Pause</small><b>{breakOver ? 'vorbei' : v.clock}</b></span>
+        <span class="sr-tools"><button type="button" class="sr-btn sr-close" onClick={onClose} aria-label="Spiel schliessen">✕</button></span>
+      </div>
+      <div class="sr-board">
+        <Board onScore={onScore} ended={breakOver} skin={prefs.value.skin} />
+      </div>
+      {breakOver && !dismissed && (
+        <div class="sr-ended">
+          <h2>Pause vorbei</h2>
+          <p>Zurück an die Arbeit. Der Spielstand bleibt für die nächste Pause.</p>
+          <button type="button" class="sr-go" onClick={onClose}>Zum Fokus</button>
+          <button type="button" class="sr-btn" onClick={() => setDismissed(true)}>Noch kurz fertig spielen</button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 type Mode = 'ready' | 'play' | 'paused' | 'over' | 'ended';
@@ -49,7 +99,7 @@ function tone(ac: AudioContext, cfg: Tone): void {
 }
 
 function Game({ meta, onClose }: { meta: GameMeta; onClose: () => void }) {
-  const { engine } = meta;
+  const engine = meta.engine!;
   const v = readTimer();
   const breakOver = v.kind !== 'pomodoro' || v.phase === 'focus';
   const [mode, setMode] = useState<Mode>(breakOver ? 'ended' : 'ready');
