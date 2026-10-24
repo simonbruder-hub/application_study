@@ -101,17 +101,23 @@
 }
 .dial-wrap.is-running .scope-ch::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
 
-/* Messkurve quer über den Schirm: Sinus im Fokus, Rechteck in der kurzen, Dreieck in der langen Pause.
- * Läuft immer, mit laufendem Timer schneller und heller; dahinter eine Nachleuchtspur. */
-.scope-wave {
-  left: 0; top: calc(42% - 30px); width: 200%; height: 60px; opacity: 0.3;
-  animation: drift 14s linear infinite;
+/* Messkurve quer über den Schirm (Scope.tsx, Canvas): Sinus im Fokus, Rechteck in der kurzen Pause.
+ * Läuft immer, mit laufendem Timer schneller und heller; Maus oder Finger ziehen sie kurz mit. */
+.deco > .scope-canvas { inset: 0; width: 100%; height: 100%; }
+/* Messcursor X1, X2: Griffe oben an der Karte, Abstand unten links */
+.timer-card > .scope-cursors { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.scope-cursor {
+  position: absolute; top: 0; translate: -50% 0; min-width: 30px; height: 20px; pointer-events: auto; padding: 0 6px; border: 0; border-radius: 0 0 5px 5px;
+  font: 700 10px/20px var(--font-mono); letter-spacing: 0.08em; color: var(--surface); background: var(--sage); cursor: ew-resize; touch-action: none;
+  box-shadow: 0 0 calc(var(--glow, 0) * 10px) color-mix(in srgb, var(--sage) 70%, transparent);
 }
-:root[data-run="1"] .scope-wave { animation-duration: 4s; opacity: 0.55; }
-.scope-wave path { fill: none; stroke: var(--phase); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
-.scope-wave .ghost { stroke-width: 9; opacity: calc(0.12 + var(--glow, 0) * 0.18); filter: blur(3px); }
+.scope-cursor::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--sage); }
+.scope-cursor:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.scope-delta {
+  position: absolute; left: 12px; bottom: 10px;
+  font: 500 10px/1 var(--font-mono); letter-spacing: 0.06em; color: var(--sage); opacity: 0.85;
+}
 /* Lange Pause: XY-Modus, Lissajous-Figur statt Zeitachse */
-:root[data-phase="long"] .scope-wave { display: none; }
 .lissajous { position: absolute; inset: 9%; opacity: 0; transition: opacity 0.8s; overflow: visible; }
 .lissajous path { fill: none; stroke: var(--phase); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .lissajous .ghost { stroke-width: 8; opacity: 0.25; filter: blur(3px); }
@@ -156,9 +162,6 @@
   .dial-wrap.is-running .scope-ch::before { animation: none; }
 }
 
-/* Signal fällt beim Anhalten auf eine flache Linie zusammen und baut sich beim Start wieder auf */
-.scope-wave path { transform-box: fill-box; transform-origin: center; transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.3, 1); }
-:root[data-run="0"] .scope-wave path { transform: scaleY(0.1); }
 /* Kathodenstrahl: heller Punkt am vorderen Ende der Spur */
 .scope-trig { animation: trig 1s steps(2) infinite; }
 @keyframes trig { 50% { opacity: 0.35; } }

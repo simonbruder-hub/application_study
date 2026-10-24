@@ -35,10 +35,37 @@
 [data-skin="zug"] .dial-knob { fill: var(--phase); stroke: #161b22; stroke-width: 1.2; }
 [data-skin="zug"] .theme-badge { border-radius: 4px; background: var(--phase); color: #ffffff; letter-spacing: 0.12em; }
 
+/* Himmel: am Tag blau mit Sonne und langsam ziehenden Wolken, in der Nacht Sterne und Mond */
+.sky-day { inset: 0; opacity: calc(1 - var(--dusk)); background: linear-gradient(180deg, #7fbdf2 0%, #a9d4f7 30%, #d6ebfb 58%, transparent 80%); }
+.sun-z { right: 12%; top: 7%; width: 64px; height: 64px; opacity: calc(1 - var(--dusk)); animation: sun-z 180s ease-in-out infinite alternate; }
+.sun-z::before { content: ""; position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(circle, rgb(255 236 150 / 0.75), rgb(255 214 90 / 0.25) 45%, transparent 70%); animation: sun-glow 6s ease-in-out infinite alternate; }
+.sun-z i { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 40% 38%, #fffbe0, #ffe066 45%, #ffb703); box-shadow: 0 0 30px 8px rgb(255 209 102 / 0.55); }
+@keyframes sun-z { from { transform: translate(0, 0); } to { transform: translate(-22cqw, 4cqh); } }
+@keyframes sun-glow { to { transform: scale(1.12); opacity: 0.8; } }
+.clouds-z { inset: 0; opacity: calc(1 - var(--dusk) * 0.85); }
+.clouds-z svg { position: absolute; left: 0; width: 120px; height: 50px; fill: #ffffff; filter: drop-shadow(0 4px 6px rgb(60 100 140 / 0.18)); animation: across 90s linear infinite reverse; }
+.clouds-z svg:nth-child(1) { top: 6%; animation-delay: -10s; }
+.clouds-z svg:nth-child(2) { top: 15%; width: 170px; height: 70px; animation-duration: 120s; animation-delay: -55s; opacity: 0.9; }
+.clouds-z svg:nth-child(3) { top: 3%; width: 90px; height: 38px; animation-duration: 75s; animation-delay: -40s; opacity: 0.85; }
+.clouds-z svg:nth-child(4) { top: 22%; width: 140px; height: 58px; animation-duration: 105s; animation-delay: -88s; opacity: 0.8; }
+.clouds-z svg:nth-child(5) { top: 10%; width: 110px; height: 46px; animation-duration: 95s; animation-delay: -20s; opacity: 0.75; }
+:root[data-skin="zug"][data-mode="nacht"] .clouds-z svg, :root[data-skin="zug"][data-theme="dark"] .clouds-z svg { fill: #3a4656; filter: none; }
+.sky-night {
+  inset: 0; opacity: var(--dusk);
+  background:
+    radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.9) 0.8px, transparent 1.3px) 0 0 / 53px 47px,
+    radial-gradient(circle at 1px 1px, rgb(255 255 240 / 0.7) 1px, transparent 1.6px) 21px 13px / 97px 83px,
+    linear-gradient(180deg, #0b1830, #14233d 50%, transparent 82%);
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 85%); mask-image: linear-gradient(180deg, #000 55%, transparent 85%);
+  animation: stars-twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes stars-twinkle { to { filter: brightness(1.35); } }
+.moon-z { position: absolute; right: 12%; top: 7%; width: 46px; height: 46px; border-radius: 50%; box-shadow: inset -12px 4px 0 0 #f4f1d0; filter: drop-shadow(0 0 10px rgb(244 241 208 / 0.6)); animation: sun-z 240s ease-in-out infinite alternate; }
+
 /* Landschaft in Ebenen wie aus dem Zugfenster: ferne Alpen langsam, nahe Berge, Hügel, Tannen,
  * Masten und Schwellen immer schneller. Nur im laufenden Fokus, in den Pausen steht der Zug im Bahnhof. */
 .sky-z { inset: 0; opacity: 0; transition: opacity 1.6s; background: linear-gradient(180deg, color-mix(in srgb, #f4a261 30%, transparent), transparent 60%); }
-:root[data-phase="long"] .sky-z { opacity: 1; }
+:root[data-phase="long"] .sky-z { opacity: calc(1 - var(--dusk) * 0.6); }
 .alps, .peaks, .hills, .firs { left: 0; width: 200%; animation: drift 70s linear infinite paused; }
 .alps { bottom: 58px; height: 120px; fill: color-mix(in srgb, #7d8fa3 40%, var(--surface)); }
 .alps .snow { fill: #ffffff; opacity: calc(1 - var(--dusk) * 0.5); }

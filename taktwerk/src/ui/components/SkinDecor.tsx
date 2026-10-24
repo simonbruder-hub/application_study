@@ -11,6 +11,7 @@ import { Mascot, type DialKnob } from './Dial';
 import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
+import { ScopeCursors, ScopeTrace } from './Scope';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -56,16 +57,16 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
       );
     case 'technik':
       return (
-        <div class="deco" aria-hidden="true">
-          <div class="scanlines" />
-          <svg class="scope-wave" viewBox="0 0 800 60" preserveAspectRatio="none">
-            <path class="ghost" d={WAVE[v.phase]} />
-            <path d={WAVE[v.phase]} />
-          </svg>
-          <div class="fft">{many(28)}</div>
-          <span class="scope-state">{v.running ? 'Run' : 'Stop'}</span>
-          <span class="scope-trig">T▸</span>
-        </div>
+        <>
+          <div class="deco" aria-hidden="true">
+            <div class="scanlines" />
+            <ScopeTrace phase={v.phase} running={v.running} />
+            <div class="fft">{many(28)}</div>
+            <span class="scope-state">{v.running ? 'Run' : 'Stop'}</span>
+            <span class="scope-trig">T▸</span>
+          </div>
+          <ScopeCursors />
+        </>
       );
     case 'barock':
       return (
@@ -207,22 +208,6 @@ export function PhaseCutIn({ skin, phase, late = false }: { skin: Skin; phase: T
 const SFX: Record<TimerView['phase'], string> = { focus: 'ドキドキ', short_break: 'ふわ〜', long_break: 'すやすや' };
 const OFFICE: Record<TimerView['phase'], string> = { focus: 'In Bearbeitung', short_break: 'Kaffeepause', long_break: 'Mittagspause' };
 
-/* Oszilloskop: Sinus (CH1 Fokus), Rechteck (CH2 kurze Pause), Dreieck (CH3 lange Pause). Zwei gleiche
- * Hälften, damit die Spur nahtlos weiterläuft. */
-const sampled = (fn: (x: number) => number) => {
-  const pts: string[] = [];
-  for (let x = 0; x <= 800; x += 4) pts.push(`${x},${fn(x).toFixed(1)}`);
-  return `M${pts.join(' L')}`;
-};
-const WAVE: Record<TimerView['phase'], string> = {
-  focus: sampled((x) => 30 - 22 * Math.sin((x / 100) * 2 * Math.PI)),
-  short_break: (() => {
-    let d = 'M0 52';
-    for (let x = 0; x < 800; x += 100) d += ` H${x + 10} V8 H${x + 60} V52 H${x + 100}`;
-    return d;
-  })(),
-  long_break: sampled((x) => { const t = (x % 100) / 100; return 52 - 44 * (t < 0.5 ? t * 2 : 2 - t * 2); }),
-};
 /* XY-Modus: Lissajous-Figur 3:2 */
 const LISSAJOUS = (() => {
   const pts: string[] = [];

@@ -101,7 +101,7 @@ body::after { background: var(--scene-long, none); }
 :root[data-motion="aus"] :is(.celebration .p, .cel-bloom, .phase-wave) { display: none; }
 :root[data-motion="aus"] :is(.clock .ch, .cel-text) { animation: none !important; }
 :root[data-motion="aus"] .timer-card > .deco.cutin { display: none; }
-:root:not([data-motion="lebendig"]) :is(.trees, .speedlines, .mf, .weed, .alps, .peaks, .hills, .firs, .sleepers, .z-wheel, .z-body, .dial-track, .vine, .vine-rose, .wreath-turn, .wr-bloom, .stars-a, .stars-b) { animation: none !important; }
+:root:not([data-motion="lebendig"]) :is(.trees, .speedlines, .mf, .weed, .alps, .peaks, .hills, .firs, .sleepers, .z-wheel, .z-body, .clouds-z svg, .sun-z, .moon-z, .sky-night, .dial-track, .vine, .vine-rose, .wreath-turn, .wr-bloom, .stars-a, .stars-b) { animation: none !important; }
 /* Aus: alles steht still */
 :root[data-motion="aus"] :is(.deco, .dial-fx) * { animation: none !important; }
 :root[data-motion="aus"] .dial-wrap::after { display: none; }

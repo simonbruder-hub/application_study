@@ -233,6 +233,7 @@ const tile = (pts: readonly (readonly [number, number])[], base: number) => {
 const ALPS = tile([[0, 60], [40, 30], [70, 44], [110, 12], [150, 40], [190, 22], [230, 46], [270, 18], [310, 38], [350, 24], [400, 60]], 80);
 const SNOW = 'M100 21 L110 12 L120 21 L113 19 L107 23 Z M260 27 L270 18 L280 27 L273 25 L267 29 Z M500 21 L510 12 L520 21 L513 19 L507 23 Z M660 27 L670 18 L680 27 L673 25 L667 29 Z';
 const PEAKS = tile([[0, 70], [30, 48], [55, 58], [95, 26], [130, 52], [165, 38], [205, 64], [245, 30], [285, 54], [320, 42], [360, 62], [400, 70]], 80);
+const CLOUD = 'M14 44 C2 44 0 30 12 28 C10 16 26 10 34 18 C38 6 58 4 64 16 C72 8 90 12 90 26 C104 24 112 36 104 44 Z';
 const HILLS = 'M0 66 Q100 40 200 66 T400 66 T600 66 T800 66 V80 H0 Z';
 /** Tannen in Reihe: Höhe je Baum leicht verschieden, Periode 400 */
 const FIRS = [0, 400].flatMap((o) => Array.from({ length: 16 }, (_, i) => {
@@ -316,6 +317,10 @@ function MainStation() {
 export function ZugScene({ station }: { station: string }) {
   return (
     <Deco>
+      <div class="sky-day" />
+      <div class="sun-z"><i /></div>
+      <div class="clouds-z">{[0, 1, 2, 3, 4].map((i) => <svg key={i} viewBox="0 0 120 50"><path d={CLOUD} /></svg>)}</div>
+      <div class="sky-night"><i class="moon-z" /></div>
       <div class="sky-z" />
       <svg class="alps" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={ALPS} /><path class="snow" d={SNOW} /></svg>
       <svg class="peaks" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={PEAKS} /></svg>
