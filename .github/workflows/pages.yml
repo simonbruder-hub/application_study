@@ -32,9 +32,12 @@ jobs:
         run: npm ci
       - name: Taktwerk bauen (PWA und Einzeldatei)
         working-directory: taktwerk
+        # Supabase-Verbindung der veröffentlichten App. Der Publishable key ist absichtlich öffentlich,
+        # die Daten schützt Row-Level-Security (siehe taktwerk/supabase/README.md). GitHub-Variablen
+        # mit denselben Namen haben Vorrang.
         env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://xlbddpaxwjgseqxaicuf.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_HawYMwgitp0Jo9CmA31oIA_tA3Hd-ik' }}
         run: |
           npm run build
           npm run build:single
