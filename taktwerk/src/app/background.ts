@@ -10,7 +10,7 @@ import { prefs } from './prefs';
 import { timerState } from './store';
 import type { PhaseCompleteInfo } from './timer/controller';
 import { syncMediaSession } from './timer/signals';
-import { flashMood, PHASE_ATTR, readTimer } from './timer/view';
+import { celebration, flashMood, PHASE_ATTR, readTimer } from './timer/view';
 
 export function initBackground(): () => void {
   let lastKey = '';
@@ -49,15 +49,19 @@ export function initBackground(): () => void {
   const onComplete = (e: Event) => {
     const info = (e as CustomEvent<PhaseCompleteInfo>).detail;
     toast(info.message, { timeout: 7000 });
-    if (info.phase === 'focus' && info.loggedSeconds) {
-      flashMood.value = 'yay';
-      if (yayTimer) clearTimeout(yayTimer);
-      yayTimer = setTimeout(() => { flashMood.value = null; }, 8000);
-    }
   };
+  // Jede gespeicherte Session (Pomodoro geschafft, «Fertig & speichern», Stechuhr gestoppt) wird gefeiert
+  const onLogged = () => {
+    flashMood.value = 'yay';
+    celebration.value += 1;
+    if (yayTimer) clearTimeout(yayTimer);
+    yayTimer = setTimeout(() => { flashMood.value = null; }, 8000);
+  };
+  phaseEvents.addEventListener('logged', onLogged);
   phaseEvents.addEventListener('complete', onComplete);
   return () => {
     disposeTitle();
     phaseEvents.removeEventListener('complete', onComplete);
+    phaseEvents.removeEventListener('logged', onLogged);
   };
 }

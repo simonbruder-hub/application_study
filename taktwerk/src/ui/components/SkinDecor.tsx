@@ -2,6 +2,7 @@
  * Stil-Deko der Timer-Karte: Hintergrund-Effekte, Anzeige über der Uhr, Begleiter unter dem
  * Zifferblatt und eine kleine Feier nach einem geschafften Pomodoro. Rein dekorativ (aria-hidden).
  */
+import { useState } from 'preact/hooks';
 import type { UserSettings } from '../../data/types';
 import type { Skin } from '../skins';
 import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../app/timer/view';
@@ -74,6 +75,7 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
           <svg class="trees trees-far" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice"><path d={TREES_FAR} /></svg>
           <svg class="trees trees-near" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice"><path d={TREES_NEAR} /></svg>
           <div class="petals leaves">{many(6)}</div>
+          <div class="butterflies">{[0, 1, 2].map((i) => <span key={i}><i /><i /></span>)}</div>
           <div class="fireflies">{many(7)}</div>
         </div>
       );
@@ -82,7 +84,7 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
         <div class="deco" aria-hidden="true">
           <div class="form-head">
             <span>Formular TW-1 · Zeiterfassung</span>
-            <span class="form-state">{v.paused ? 'Pendent' : !v.active ? 'Eingang' : v.kind === 'stopwatch' ? 'In Bearbeitung' : OFFICE[v.phase]}</span>
+            <FormState text={v.paused ? 'Pendent' : !v.active ? 'Eingang' : v.kind === 'stopwatch' ? 'In Bearbeitung' : OFFICE[v.phase]} />
             <span>Nr. {String(cycle + 1).padStart(3, '0')}</span>
           </div>
           {v.paused && <span class="stamp-pending">Pendent</span>}
@@ -102,6 +104,12 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
       return <div class="dial-fx" aria-hidden="true"><div class="aura" /></div>;
     case 'technik':
       return <div class="dial-fx" aria-hidden="true"><svg class="lissajous" viewBox="0 0 300 300"><path class="ghost" d={LISSAJOUS} /><path d={LISSAJOUS} /></svg></div>;
+    case 'barock':
+      return (
+        <div class="dial-fx" aria-hidden="true">
+          <Pendulum />
+        </div>
+      );
     case 'amtlich':
       return (
         <div class="dial-fx" aria-hidden="true">
@@ -115,6 +123,41 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
     default:
       return null;
   }
+}
+
+/** Pendel hinter der Uhr; der Takt wird einmal beim Einblenden auf die echten Sekunden gelegt */
+function Pendulum() {
+  const [delay] = useState(() => SECOND_SYNC());
+  return <div class="pendulum" style={{ animationDelay: delay }}><i class="rod" /><i class="bob" /></div>;
+}
+
+/** Status im Formularkopf, wird bei jedem Wechsel neu «getippt» */
+const FormState = ({ text }: { text: string }) => (
+  <span class="form-state"><span key={text} class="typed" style={{ '--chars': text.length }}>{text}</span></span>
+);
+
+/** Negative Verzögerung, damit Pendel und Sekundenpunkt im Takt der echten Sekunden laufen */
+export const SECOND_SYNC = (period = 2000): string => `${-((Date.now() % period) / 1000).toFixed(3)}s`;
+
+/* ---------- Einblendung beim Phasenwechsel ---------- */
+
+const CUT_IN: Record<Skin, Record<TimerView['phase'], [string, string]>> = {
+  klassisch: { focus: ['Fokus', 'Konzentriert bleiben'], short_break: ['Kurze Pause', 'Durchatmen'], long_break: ['Lange Pause', 'Gut gemacht'] },
+  anime: { focus: ['集中モード!', 'Fokus'], short_break: ['休憩タイム!', 'Kurze Pause'], long_break: ['おやすみ〜', 'Lange Pause'] },
+  technik: { focus: ['TRIG CH1', 'Fokus · Sinus'], short_break: ['TRIG CH2', 'Pause · Rechteck'], long_break: ['XY-MODUS', 'Lange Pause · Lissajous'] },
+  barock: { focus: ['Allegro', 'Fokus'], short_break: ['Intermezzo', 'Kurze Pause'], long_break: ['Adagio', 'Lange Pause'] },
+  natur: { focus: ['Wachsen', 'Fokus'], short_break: ['Durchatmen', 'Kurze Pause'], long_break: ['Abendruhe', 'Lange Pause'] },
+  amtlich: { focus: ['Antrag: Fokus', 'In Bearbeitung'], short_break: ['Bewilligt', 'Kaffeepause'], long_break: ['Bewilligt', 'Mittagspause'] },
+};
+
+/** Welle durchs Zifferblatt und Banner im Stil; wird über key bei jedem Wechsel neu abgespielt */
+export function PhaseCutIn({ skin, phase, late = false }: { skin: Skin; phase: TimerView['phase']; late?: boolean }) {
+  const [title, sub] = CUT_IN[skin][phase];
+  return (
+    <div class={`deco cutin cutin-${skin}`} aria-hidden="true" style={late ? { '--cut-delay': '3.8s' } : undefined}>
+      <div class="cutin-band"><b>{title}</b><small>{sub}</small></div>
+    </div>
+  );
 }
 
 const SFX: Record<TimerView['phase'], string> = { focus: 'ドキドキ', short_break: 'ふわ〜', long_break: 'すやすや' };
@@ -200,13 +243,9 @@ export function SkinCompanion({ skin, v, say, set, yay }: { skin: Skin; v: Timer
       return <ScopeReadout v={v} set={set} />;
     case 'barock':
       return (
-        <div class="pendulum-wrap" aria-hidden="true">
+        <div class="baroque-row" aria-hidden="true">
           <Candle />
-          <svg class={`pendulum${v.running ? ' is-swinging' : ''}`} viewBox="0 0 60 92">
-            <g class="p-arm"><line x1="30" y1="5" x2="30" y2="66" /><circle cx="30" cy="74" r="13" /><circle cx="30" cy="74" r="6" class="p-inner" /></g>
-            <circle cx="30" cy="5" r="4" class="p-pin" />
-          </svg>
-          <p class="motto">{yay ? MOTTO.yay : MOTTO[v.mood]}</p>
+          <p class="motto baroque-motto">{yay ? MOTTO.yay : MOTTO[v.mood]}</p>
           <Candle />
         </div>
       );
@@ -231,8 +270,8 @@ export function SkinCompanion({ skin, v, say, set, yay }: { skin: Skin; v: Timer
   }
 }
 
-/** Kerze mit flackernder Flamme */
-const Candle = () => <span class="candle"><i class="flame" /><i class="wax" /></span>;
+/** Kerze: Docht, Flamme mit blauem Kern, Lichthof */
+const Candle = () => <span class="candle"><i class="glow" /><i class="flame" /><i class="wax" /></span>;
 
 /** Kennwerte wie am Messgerät: Periode, Frequenz und Tastgrad des Pomodoro-Takts */
 function ScopeReadout({ v, set }: { v: TimerView; set: UserSettings }) {
@@ -268,23 +307,4 @@ function Sprout({ growth, bloom }: { growth: number; bloom: boolean }) {
       <rect class="sp-rim" x="19" y="74" width="42" height="7" rx="2" />
     </svg>
   );
-}
-
-/* ---------- Feier nach einem geschafften Pomodoro ---------- */
-
-export function Celebrate({ skin }: { skin: Skin }) {
-  switch (skin) {
-    case 'klassisch':
-      return <div class="celebrate confetti" aria-hidden="true">{many(14)}</div>;
-    case 'anime':
-      return <div class="celebrate burst" aria-hidden="true"><span>やった!</span></div>;
-    case 'technik':
-      return <div class="celebrate pass" aria-hidden="true"><span>PASS ✓</span></div>;
-    case 'barock':
-      return <div class="celebrate bravo" aria-hidden="true"><span>Bravissimo!</span></div>;
-    case 'natur':
-      return <div class="celebrate bloom" aria-hidden="true">{many(10)}</div>;
-    case 'amtlich':
-      return <div class="celebrate stamp" aria-hidden="true"><span>Erledigt</span></div>;
-  }
 }

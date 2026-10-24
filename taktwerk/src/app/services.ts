@@ -86,6 +86,7 @@ export async function bootstrap(): Promise<AppServices> {
     getPrefs: () => prefs.value,
     onPhaseComplete: (info: PhaseCompleteInfo) => phaseEvents.dispatchEvent(new CustomEvent('complete', { detail: info })),
     onUserStart: askNotifyOnce,
+    onLogged: (seconds: number) => phaseEvents.dispatchEvent(new CustomEvent('logged', { detail: seconds })),
   });
 
   watchDatabase(db);

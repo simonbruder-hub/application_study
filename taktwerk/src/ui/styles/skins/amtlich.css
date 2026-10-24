@@ -71,14 +71,12 @@
 .visum b { color: var(--ink); font-weight: 500; margin-left: 6px; }
 
 /* Stempel */
-.stamp span, .stamp-pending {
+.stamp-pending {
   font: 800 30px/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.14em; color: var(--tomato);
   padding: 10px 18px; border: 4px double currentColor; transform: rotate(-12deg); opacity: 0.88;
   background: color-mix(in srgb, var(--surface) 70%, transparent);
 }
-.stamp span { animation: stamp 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
 .stamp-pending { position: absolute; right: 8%; top: 64px; font-size: 14px; padding: 5px 9px; border-width: 3px; color: var(--indigo); transform: rotate(8deg); }
-@keyframes stamp { from { opacity: 0; transform: rotate(-12deg) scale(2.2); } }
 
 /* Status im Formularkopf: blinkender Punkt, solange der Timer läuft */
 .form-state { color: var(--ink); font-weight: 600; }
@@ -110,3 +108,16 @@
 .planes svg:nth-child(2) { top: 52%; width: 26px; animation-delay: -5s; animation-duration: 14s; }
 :root[data-run="1"] .planes svg { animation-play-state: running; }
 .planes path { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+
+/* Status im Formularkopf wird getippt */
+.form-state .typed {
+  display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; width: calc(var(--chars) * 1ch);
+  border-right: 2px solid transparent; animation: type 0.9s steps(var(--chars)) both, caret 0.45s step-end 5;
+}
+@keyframes type { from { width: 0; } }
+@keyframes caret { 50% { border-right-color: var(--ink); } }
+
+/* Einblendung: Stempel knallt aufs Formular */
+.cutin-amtlich .cutin-band { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 5px double var(--tomato); border-radius: 0; transform: rotate(-6deg); animation-name: cut-stamp; box-shadow: none; }
+.cutin-amtlich .cutin-band b { color: var(--tomato); text-transform: uppercase; letter-spacing: 0.1em; font-size: 28px; }
+@keyframes cut-stamp { 0% { opacity: 0; transform: rotate(-6deg) scale(2.4); } 9% { opacity: 1; transform: rotate(-6deg) scale(1); } 78% { opacity: 1; } 100% { opacity: 0; transform: rotate(-6deg) scale(1); } }

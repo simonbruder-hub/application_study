@@ -33,7 +33,7 @@ export const SKINS: readonly SkinInfo[] = [
     fonts: 'Share+Tech+Mono',
   },
   {
-    id: 'barock', label: 'Barock', hint: 'Kerzen, Pendel, Tafelmusik und Feuerwerk',
+    id: 'barock', label: 'Barock', hint: 'Gold, römische Ziffern, Tafelmusik, Feuerwerk',
     swatch: ['#f6efe1', '#8e1b2c', '#b0862f'], bar: ['#f6efe1', '#140d0a'],
     fonts: 'Playfair+Display:ital,wght@0,600;0,800;1,600&family=EB+Garamond:ital,wght@0,400;0,600;1,400',
   },

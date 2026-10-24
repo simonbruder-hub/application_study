@@ -13,7 +13,8 @@ test.describe('Stile', () => {
       await expect(page.locator('html')).toHaveAttribute('data-skin', skin);
       await page.locator('.btn-start').click();
       await page.clock.fastForward('25:02');
-      await expect(page.locator('.timer-card .celebrate')).toBeVisible();
+      await expect(page.locator('.celebration')).toBeVisible();
+      await expect(page.locator('.celebration .cel-text')).toBeVisible();
       await expect(page.locator('.phase-tab.is-on')).toContainText('Kurze Pause');
       expect(errors).toEqual([]);
     });

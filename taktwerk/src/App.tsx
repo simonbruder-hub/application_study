@@ -7,6 +7,7 @@ import { loaded } from './app/store';
 import { expand, minimize, pipOpen } from './app/pip';
 import { ModeSwitch, SideTimer, SyncIndicator } from './ui/components/Chrome';
 import { Dock, dockVisible, MiniPlayer } from './ui/components/Mini';
+import { CelebrationLayer } from './ui/components/Celebration';
 import { DialogHost } from './ui/dialog';
 import { Icon, Logo } from './ui/Icon';
 import { isDark, toggleDayNight } from './ui/theme';
@@ -116,6 +117,7 @@ export function App() {
           <MiniPlayer onExpand={expand} />
         </div>
       )}
+      <CelebrationLayer />
       <DialogHost />
       <ToastHost />
     </>

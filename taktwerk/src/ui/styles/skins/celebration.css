@@ -1,0 +1,135 @@
+/* Feier über die ganze App nach einer gespeicherten Session (Celebration.tsx).
+ * Teilchen fliegen auf Wurfparabeln: .throw bewegt waagrecht gleichförmig, das innere <i> senkrecht
+ * erst bremsend nach oben, dann beschleunigt nach unten. .ray fliegt strahlenförmig aus einem Punkt. */
+
+.celebration { position: fixed; inset: 0; z-index: 950; pointer-events: none; overflow: hidden; }
+.celebration .p { position: absolute; left: 0; top: 0; }
+
+.p.throw { animation: c-x var(--t, 3s) linear var(--d, 0s) both; }
+.p.throw > i { display: block; animation: c-y var(--t, 3s) var(--d, 0s) both; }
+@keyframes c-x { from { transform: translateX(0); } to { transform: translateX(var(--dx)); } }
+@keyframes c-y {
+  0% { transform: translateY(0) rotate(0) rotateY(0); opacity: 1; animation-timing-function: cubic-bezier(0.15, 0.75, 0.35, 1); }
+  38% { transform: translateY(var(--up)) rotate(calc(var(--rot) * 0.4)) rotateY(360deg); animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.45); }
+  85% { opacity: 1; }
+  100% { transform: translateY(var(--fall)) rotate(var(--rot)) rotateY(900deg); opacity: 0; }
+}
+
+.p.ray { transform: rotate(var(--a)); }
+.p.ray > i { display: block; animation: ray-out 1.6s cubic-bezier(0.08, 0.8, 0.25, 1) var(--d, 0s) both; }
+@keyframes ray-out { 0% { transform: translateX(0) scale(0.3); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateX(var(--r)) scale(1); opacity: 0; } }
+
+/* Kurzer Lichtblitz zu Beginn */
+.cel-flash { position: absolute; inset: 0; background: #ffffff; opacity: 0; animation: cel-flash 0.6s ease-out both; }
+@keyframes cel-flash { 0% { opacity: 0.45; } 100% { opacity: 0; } }
+
+/* Schriftzug in der Mitte */
+.cel-text {
+  position: absolute; left: 50%; top: 42%; display: grid; justify-items: center; gap: 8px; text-align: center;
+  translate: -50% -50%; animation: cel-text 4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.cel-text b { font: 800 clamp(44px, 10vw, 76px)/1 var(--font-display); color: var(--phase); text-shadow: 0 6px 30px color-mix(in srgb, var(--phase) 45%, transparent); white-space: nowrap; }
+.cel-text small { font: 700 13px/1 var(--font-body); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 80%, transparent); }
+@keyframes cel-text { 0% { transform: scale(0.3); opacity: 0; } 12% { transform: scale(1.08); opacity: 1; } 18% { transform: scale(1); } 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-24px); } }
+
+/* ---------- Klassisch: Konfetti-Kanonen ---------- */
+.cel-klassisch .cel-flash { display: none; }
+.cel-klassisch .p i { width: 10px; height: 14px; border-radius: 2px; background: var(--c); }
+.cel-klassisch .p i.k1 { width: 9px; height: 9px; border-radius: 50%; }
+.cel-klassisch .p i.k2 { width: 5px; height: 20px; }
+.cel-klassisch .cel-text b { background: linear-gradient(90deg, var(--tomato), #eda100 50%, var(--sage)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 6px 18px rgb(0 0 0 / 0.18)); }
+
+/* ---------- Anime: Explosion aus Sternen, Blüten und Funken ---------- */
+.cel-anime .p.ray { left: 50%; top: 42%; }
+.cel-anime .p i.s0 { width: 26px; height: 26px; background: var(--c); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.cel-anime .p i.s1 { width: 16px; height: 11px; border-radius: 12px 0 12px 0; background: var(--c); }
+.cel-anime .p i.s2 { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 10px 3px var(--c); }
+.cel-speed {
+  position: absolute; inset: -20%; opacity: 0; animation: cel-speed 1.6s ease-out both;
+  background: repeating-conic-gradient(from 0deg at 50% 46%, color-mix(in srgb, var(--ink) 18%, transparent) 0deg 1.2deg, transparent 1.2deg 6deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent 18%, #000 50%);
+  mask-image: radial-gradient(circle at 50% 46%, transparent 18%, #000 50%);
+}
+@keyframes cel-speed { 0% { opacity: 1; transform: scale(0.9); } 100% { opacity: 0; transform: scale(1.15); } }
+.cel-anime .cel-text b {
+  display: grid; place-items: center; width: 240px; height: 240px; font-weight: 400; color: var(--ink); background: #ffd23f; text-shadow: none;
+  -webkit-text-stroke: 1.5px var(--outline);
+  clip-path: polygon(50% 0, 61% 26%, 90% 10%, 76% 40%, 100% 50%, 76% 60%, 90% 90%, 61% 74%, 50% 100%, 39% 74%, 10% 90%, 24% 60%, 0 50%, 24% 40%, 10% 10%, 39% 26%);
+  font-size: 44px;
+}
+
+/* ---------- Technik: Funkenregen, Bildlauf, Messergebnis ---------- */
+.cel-technik .cel-flash { background: color-mix(in srgb, var(--good) 60%, #ffffff); }
+.cel-technik .p i { width: 4px; height: 4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px 2px var(--c), 0 0 16px 2px color-mix(in srgb, var(--c) 50%, transparent); }
+.cel-scan { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--good); box-shadow: 0 0 18px 4px var(--good); animation: cel-scan 1.1s cubic-bezier(0.4, 0, 0.6, 1) both; }
+@keyframes cel-scan { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100vh); opacity: 0.2; } }
+.cel-grid {
+  position: absolute; inset: 0; opacity: 0; animation: cel-grid 1.8s ease-out both;
+  background: linear-gradient(color-mix(in srgb, var(--good) 30%, transparent) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, color-mix(in srgb, var(--good) 30%, transparent) 1px, transparent 1px) 0 0 / 48px 48px;
+}
+@keyframes cel-grid { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+.cel-technik .cel-text b {
+  font: 400 clamp(46px, 11vw, 80px)/1 var(--font-lcd, var(--font-mono)); color: var(--good); padding: 14px 26px; border: 3px solid currentColor; border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); text-shadow: 0 0 14px var(--good);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--good) 45%, transparent), inset 0 0 20px color-mix(in srgb, var(--good) 20%, transparent);
+}
+
+/* ---------- Barock: Königliches Feuerwerk ---------- */
+.cel-barock .cel-flash { background: #ffd27a; animation-name: cel-flash-soft; }
+@keyframes cel-flash-soft { 0% { opacity: 0.2; } 100% { opacity: 0; } }
+.p.rocket {
+  top: 100vh; width: 3px; height: 26px; margin-left: -1.5px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(#ffffff, #ffd27a 40%, transparent);
+  box-shadow: 0 0 10px #ffd27a; animation: rocket 0.75s cubic-bezier(0.3, 0.6, 0.45, 1) var(--d) both;
+}
+@keyframes rocket { 0% { transform: translateY(0); opacity: 1; } 92% { opacity: 1; } 100% { transform: translateY(calc(var(--y) - 100vh)); opacity: 0; } }
+.shell { position: absolute; width: 0; height: 0; animation: droop 2.4s cubic-bezier(0.4, 0, 0.9, 0.6) var(--d) both; }
+@keyframes droop { from { transform: translateY(0); } to { transform: translateY(70px); } }
+.cel-barock .p.ray > i {
+  width: 30px; height: 3px; border-radius: 3px; animation-duration: 2s;
+  background: linear-gradient(90deg, transparent, var(--c)); box-shadow: 4px 0 8px var(--c);
+}
+.cel-barock .cel-text b { font-style: italic; color: var(--gold, #d9ac4f); text-shadow: 0 2px 0 color-mix(in srgb, var(--ink) 40%, transparent), 0 0 30px rgb(255 200 100 / 0.45); }
+.cel-barock .cel-text b::before { content: "☙ "; font-size: 0.5em; vertical-align: middle; }
+.cel-barock .cel-text b::after { content: " ❧"; font-size: 0.5em; vertical-align: middle; }
+.cel-barock .cel-text { animation-delay: 0.6s; }
+
+/* ---------- Natur: Blüte öffnet sich, Blütenregen, Schmetterlinge fliegen davon ---------- */
+.cel-natur .cel-flash { display: none; }
+.cel-bloom { position: absolute; left: 50%; top: 42%; }
+.cel-bloom i {
+  position: absolute; left: -36px; top: -130px; width: 72px; height: 130px; transform-origin: 50% 100%;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; opacity: 0.92;
+  background: radial-gradient(ellipse at 50% 30%, #fff1f5, #f3a6bd 72%);
+  animation: bloom-open 2.8s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.cel-bloom::after { content: ""; position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #ffe08a, #f0b429); animation: bloom-core 2.8s ease both; }
+@keyframes bloom-open { 0% { transform: rotate(var(--a)) scale(0); opacity: 0; } 30% { transform: rotate(var(--a)) scale(1.05); opacity: 0.95; } 75% { transform: rotate(var(--a)) scale(1); opacity: 0.9; } 100% { transform: rotate(calc(var(--a) + 20deg)) scale(1.15); opacity: 0; } }
+@keyframes bloom-core { 0% { transform: scale(0); } 30% { transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: scale(1.2); } }
+.cel-natur .p i.petal { width: 14px; height: 18px; border-radius: 60% 10% 60% 10%; background: var(--c); }
+.cel-natur .p i.leaf { width: 16px; height: 11px; border-radius: 0 100% 0 100%; background: var(--leaf); }
+.p.fly { left: 50%; top: 42%; animation: fly-away 3.8s cubic-bezier(0.3, 0.1, 0.4, 1) var(--d) both; }
+.p.fly b { display: flex; animation: bob 0.6s ease-in-out infinite; }
+.p.fly i { width: 13px; height: 17px; background: radial-gradient(circle at 60% 40%, #ffd27a, #f08a24 70%); border: 1px solid #7a3b10; animation: flap 0.2s ease-in-out infinite alternate; }
+.p.fly i:first-child { border-radius: 70% 20% 50% 60%; transform-origin: 100% 50%; }
+.p.fly i:last-child { border-radius: 20% 70% 60% 50%; transform-origin: 0 50%; }
+@keyframes fly-away { 0% { transform: translate(0, 0) scale(0.4); opacity: 0; } 12% { opacity: 1; transform: translate(0, -20px) scale(1); } 100% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; } }
+.cel-natur .cel-text { top: 66%; }
+.cel-natur .cel-text b { color: var(--leaf); }
+
+/* ---------- Amtlich: Stempel knallt aufs Formular, Akten fliegen ---------- */
+.cel-amtlich { animation: shake 0.42s 0.25s both; }
+@keyframes shake { 20% { transform: translate(-6px, 3px); } 40% { transform: translate(5px, -4px); } 60% { transform: translate(-3px, 2px); } 80% { transform: translate(2px, -1px); } }
+.cel-amtlich .cel-flash { display: none; }
+.cel-amtlich .p i.sheet {
+  width: 34px; height: 44px; background: #ffffff; border: 1px solid #b8b8b8; box-shadow: 0 4px 10px rgb(0 0 0 / 0.18);
+  background-image: repeating-linear-gradient(180deg, transparent 0 7px, #d6d6d6 7px 8px); background-position: 0 8px; background-size: 100% calc(100% - 14px); background-repeat: no-repeat;
+}
+.cel-amtlich .cel-text { animation-name: cel-stamp; }
+.cel-amtlich .cel-text b {
+  font-size: clamp(42px, 10vw, 72px); text-transform: uppercase; letter-spacing: 0.12em; color: var(--tomato);
+  padding: 10px 26px; border: 6px double currentColor; transform: rotate(-10deg); text-shadow: none;
+  background: color-mix(in srgb, var(--surface) 75%, transparent); mix-blend-mode: normal;
+}
+@keyframes cel-stamp { 0% { transform: scale(2.6); opacity: 0; } 8% { transform: scale(1); opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }

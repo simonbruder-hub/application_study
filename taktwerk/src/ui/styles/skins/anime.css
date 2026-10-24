@@ -34,14 +34,6 @@
   animation: bob 0.9s ease-in-out infinite;
 }
 
-/* «やった!» im Stern */
-.burst span {
-  display: grid; place-items: center; width: 190px; height: 190px; background: #ffd23f; color: var(--ink);
-  font: 400 30px/1 var(--font-display); -webkit-text-stroke: 1px var(--outline);
-  clip-path: polygon(50% 0, 61% 26%, 90% 10%, 76% 40%, 100% 50%, 76% 60%, 90% 90%, 61% 74%, 50% 100%, 39% 74%, 10% 90%, 24% 60%, 0 50%, 24% 40%, 10% 10%, 39% 26%);
-  filter: drop-shadow(4px 4px 0 var(--outline));
-}
-
 /* ---------- Szenen je Phase ---------- */
 :root[data-skin="anime"] {
   --scene-short:
@@ -117,3 +109,14 @@
 .shooting i:nth-child(1) { left: 6%; top: 8%; }
 .shooting i:nth-child(2) { left: 42%; top: 4%; animation-delay: -1.8s; animation-duration: 6.5s; }
 .shooting i:nth-child(3) { left: 20%; top: 26%; animation-delay: -3.6s; animation-duration: 7.5s; }
+
+/* Einblendung: Manga-Banner schneidet diagonal durchs Bild */
+.cutin-anime .cutin-band {
+  width: 150%; padding: 18px 0; border-radius: 0; transform: rotate(-8deg); backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: repeating-linear-gradient(90deg, var(--tomato) 0 40px, color-mix(in srgb, var(--tomato) 85%, #ffffff) 40px 48px);
+  border-block: 4px solid var(--outline); box-shadow: 0 10px 0 color-mix(in srgb, var(--outline) 30%, transparent);
+  animation-name: anime-cut;
+}
+.cutin-anime .cutin-band b { font-weight: 400; font-size: 40px; color: #ffffff; -webkit-text-stroke: 1.5px var(--outline); paint-order: stroke fill; }
+.cutin-anime .cutin-band small { color: #ffffff; }
+@keyframes anime-cut { 0% { transform: rotate(-8deg) translateX(-110%); } 12% { transform: rotate(-8deg) translateX(0); } 76% { transform: rotate(-8deg) translateX(0); opacity: 1; } 100% { transform: rotate(-8deg) translateX(110%); opacity: 1; } }

@@ -149,16 +149,22 @@
   background: var(--surface-2); border: 1px solid var(--line-strong);
 }
 .scope-readout span:first-child { color: var(--phase); border-color: currentColor; }
-/* Prüfung bestanden */
-.pass span {
-  font: 400 34px/1 var(--font-lcd); color: var(--good); padding: 10px 18px; border: 2px solid currentColor; border-radius: 6px;
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-  box-shadow: 0 0 calc(8px + var(--glow, 0) * 18px) color-mix(in srgb, var(--good) 50%, transparent);
-}
-
 @media (forced-colors: active) {
   [data-skin="technik"] .timer-card { background-image: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dial-wrap.is-running .scope-ch::before { animation: none; }
 }
+
+/* Signal fällt beim Anhalten auf eine flache Linie zusammen und baut sich beim Start wieder auf */
+.scope-wave path { transform-box: fill-box; transform-origin: center; transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.3, 1); }
+:root[data-run="0"] .scope-wave path { transform: scaleY(0.1); }
+/* Kathodenstrahl: heller Punkt am vorderen Ende der Spur */
+.scope-trig { animation: trig 1s steps(2) infinite; }
+@keyframes trig { 50% { opacity: 0.35; } }
+
+/* Einblendung: Trigger mit Glitch */
+.cutin-technik .cutin-band { border: 1px solid var(--phase); border-radius: 4px; background: color-mix(in srgb, var(--surface) 92%, transparent); }
+.cutin-technik .cutin-band b { font: 400 34px/1 var(--font-lcd, var(--font-mono)); letter-spacing: 0.06em; text-shadow: 2px 0 #ff2fd0, -2px 0 #35e0ff; animation: glitch 0.5s steps(3) 3; }
+.cutin-technik .cutin-band small { font-family: var(--font-mono); }
+@keyframes glitch { 0% { transform: translate(0); } 33% { transform: translate(-3px, 1px) skewX(-8deg); } 66% { transform: translate(3px, -1px) skewX(6deg); } 100% { transform: translate(0); } }

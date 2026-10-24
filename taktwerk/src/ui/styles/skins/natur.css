@@ -98,24 +98,6 @@
 .sp-rim { fill: #9a552f; }
 [data-skin="natur"] .motto { font-style: normal; font-weight: 500; }
 
-/* Aufgeblüht: Blütenblätter fliegen auseinander */
-.bloom i {
-  position: absolute; left: 50%; top: 46%; width: 12px; height: 18px; border-radius: 50% 50% 50% 0; background: #f3a6bd;
-  animation: confetti 1.8s cubic-bezier(0.1, 0.7, 0.3, 1) both;
-}
-.bloom i:nth-child(2n) { background: #f0b429; }
-.bloom i:nth-child(3n) { background: var(--leaf); border-radius: 0 100% 0 100%; }
-.bloom i:nth-child(1) { --dx: -120px; --dy: -120px; }
-.bloom i:nth-child(2) { --dx: 120px; --dy: -110px; }
-.bloom i:nth-child(3) { --dx: -160px; --dy: 20px; }
-.bloom i:nth-child(4) { --dx: 160px; --dy: 30px; }
-.bloom i:nth-child(5) { --dx: 0px; --dy: -170px; }
-.bloom i:nth-child(6) { --dx: -90px; --dy: 140px; }
-.bloom i:nth-child(7) { --dx: 100px; --dy: 130px; }
-.bloom i:nth-child(8) { --dx: -60px; --dy: -160px; }
-.bloom i:nth-child(9) { --dx: 60px; --dy: -160px; }
-.bloom i:nth-child(10) { --dx: 170px; --dy: -60px; }
-
 /* ---------- Landschaft ---------- */
 /* Himmel: in der langen Pause Sonnenuntergang */
 .sky { inset: 0; opacity: 0; transition: opacity 1.6s;
@@ -158,3 +140,41 @@
 /* Im Fokus ruhiger Wald: nur leichtes Atmen, wenn der Timer läuft */
 :root[data-phase="focus"][data-run="1"] .trees-near { animation: sway 6s ease-in-out infinite alternate; }
 [data-skin="natur"] .timer-card { padding-bottom: 40px; }
+
+/* ---------- Mehr Leben ---------- */
+/* Blätter flattern dreidimensional zu Boden */
+.leaves i { animation-name: leaf-fall; transform-style: preserve-3d; }
+@keyframes leaf-fall {
+  0% { transform: translate(0, 0) rotateX(0) rotateY(0) rotate(0); }
+  25% { transform: translate(34px, 26cqh) rotateX(160deg) rotateY(40deg) rotate(80deg); }
+  50% { transform: translate(-12px, 52cqh) rotateX(320deg) rotateY(100deg) rotate(170deg); }
+  75% { transform: translate(28px, 78cqh) rotateX(500deg) rotateY(140deg) rotate(250deg); }
+  100% { transform: translate(4px, 106cqh) rotateX(700deg) rotateY(200deg) rotate(330deg); opacity: 0; }
+}
+/* Schmetterlinge in der kurzen Pause */
+.butterflies { inset: 0; display: none; }
+:root[data-phase="short"] .butterflies { display: block; }
+.butterflies span { position: absolute; display: flex; left: 0; top: 0; animation: flutter-a 16s ease-in-out infinite; }
+.butterflies span:nth-child(2) { animation-name: flutter-b; animation-duration: 19s; animation-delay: -6s; }
+.butterflies span:nth-child(3) { animation-name: flutter-c; animation-duration: 22s; animation-delay: -11s; }
+.butterflies i { width: 11px; height: 14px; border: 1px solid #6b3a12; background: radial-gradient(circle at 60% 40%, #ffd27a, #f08a24 70%); animation: flap 0.22s ease-in-out infinite alternate; }
+.butterflies span:nth-child(2) i { background: radial-gradient(circle at 60% 40%, #d8ecff, #6fa8dc 70%); border-color: #284a6b; }
+.butterflies i:first-child { border-radius: 70% 20% 50% 60%; transform-origin: 100% 50%; }
+.butterflies i:last-child { border-radius: 20% 70% 60% 50%; transform-origin: 0 50%; }
+@keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(0.2); } }
+@keyframes flutter-a { 0% { transform: translate(-8cqw, 60cqh); } 25% { transform: translate(25cqw, 30cqh); } 50% { transform: translate(55cqw, 48cqh); } 75% { transform: translate(80cqw, 22cqh); } 100% { transform: translate(110cqw, 40cqh); } }
+@keyframes flutter-b { 0% { transform: translate(108cqw, 35cqh); } 30% { transform: translate(70cqw, 58cqh); } 60% { transform: translate(35cqw, 28cqh); } 100% { transform: translate(-10cqw, 50cqh); } }
+@keyframes flutter-c { 0% { transform: translate(20cqw, 105cqh); } 35% { transform: translate(40cqw, 62cqh); } 70% { transform: translate(15cqw, 38cqh); } 100% { transform: translate(60cqw, -8cqh); } }
+/* Sonnenstrahlen drehen sich langsam (nachts: Mondschein ohne Strahlen) */
+.sun::before {
+  content: ""; position: absolute; inset: -22px; border-radius: 50%; opacity: calc(1 - var(--night, 0));
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--sun) 45%, transparent) 0 8deg, transparent 8deg 30deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 40%, #000 46%, transparent 72%);
+  mask-image: radial-gradient(circle, transparent 40%, #000 46%, transparent 72%);
+  animation: spin 40s linear infinite;
+}
+
+/* Einblendung: weich mit Blatt */
+.cutin-natur .cutin-band { border-radius: 26px 18px 28px 16px; }
+.cutin-natur .cutin-band b { color: var(--leaf); font-weight: 700; }
+.cutin-natur .cutin-band b::before { content: ""; display: inline-block; width: 0.55em; height: 0.4em; margin-right: 0.3em; background: var(--leaf); border-radius: 0 100% 0 100%; vertical-align: 0.1em; }

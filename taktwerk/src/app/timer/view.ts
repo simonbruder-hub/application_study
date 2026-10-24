@@ -24,6 +24,8 @@ export const PHASE_LATIN: Record<TimerPhase, string> = { focus: 'Labor', short_b
 
 /** Kurz nach einem geschafften Pomodoro jubelt das Maskottchen */
 export const flashMood = signal<Mood | null>(null);
+/** Zähler je gespeicherter Session: startet die Feier (Overlay über die ganze App) */
+export const celebration = signal(0);
 
 export interface TimerView {
   kind: TimerKind;

@@ -1,5 +1,5 @@
 /** Ansicht «Fokus»: Pomodoro oder Stechuhr, Zuordnung, heutige Aufgaben und Tagesbilanz */
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { TimerKind, TimerPhase } from '../data/types';
 import { createTask } from '../app/actions';
 import { prefs, setPrefs } from '../app/prefs';
@@ -12,7 +12,7 @@ import { settings, timerState, workspaceData } from '../app/store';
 import { minimize } from '../app/pip';
 import { PHASE_LABEL } from '../app/timer/controller';
 import { flashMood, PHASE_ATTR, readTimer } from '../app/timer/view';
-import { Celebrate, DIAL_STYLE, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
+import { DIAL_STYLE, PhaseCutIn, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
 import { Dial, MOOD_LINES } from '../ui/components/Dial';
 import {
   Meter, PomoDots, ProjectChip, Seg, WORKSPACE_ICON, WORKSPACE_LABEL,
@@ -73,6 +73,15 @@ function TimerCard() {
   const { timer } = app();
   const skin = prefs.value.skin;
   const yay = flashMood.value === 'yay';
+  // Phasenwechsel: Welle durchs Zifferblatt und Einblendung (nicht beim ersten Anzeigen)
+  const lastPhase = useRef(v.phase);
+  const [cut, setCut] = useState<{ phase: TimerPhase; n: number; late: boolean } | null>(null);
+  useEffect(() => {
+    if (lastPhase.current === v.phase) return;
+    lastPhase.current = v.phase;
+    // Läuft gerade die Feier (Pomodoro geschafft), kommt die Einblendung erst danach
+    setCut((c) => ({ phase: v.phase, n: (c?.n ?? 0) + 1, late: flashMood.peek() === 'yay' }));
+  }, [v.phase]);
   const every = Math.max(1, set.long_break_every);
   const inRound = s.cycle % every;
   const otherWs = v.active && s.workspace !== ws;
@@ -93,6 +102,7 @@ function TimerCard() {
   return (
     <div class="card timer-card">
       <SkinBackdrop skin={skin} v={v} cycle={s.cycle} />
+      {cut && <PhaseCutIn key={cut.n} skin={skin} phase={cut.phase} late={cut.late} />}
       <div class="kind-row">
         <Seg
           label="Timer-Art" value={v.kind} options={KIND_OPTIONS} disabled={v.active}
@@ -116,13 +126,13 @@ function TimerCard() {
       )}
       <div class={`dial-wrap${v.running ? ' is-running' : ''}`}>
         <SkinDialFx skin={skin} />
-        <Dial frac={v.frac} {...DIAL_STYLE[skin]} />
+        <Dial frac={v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
         <div class="dial-center">
           <SkinBadge skin={skin} v={v} />
-          <div class="clock mono" role="timer" aria-live="off">{v.clock}</div>
+          <div class="clock mono" role="timer" aria-live="off">{v.clock.split('').map((ch, i) => <span key={`${i}-${ch}`} class="ch">{ch}</span>)}</div>
           <div class="dial-sub">{v.statusLabel}</div>
         </div>
-        {yay && <Celebrate skin={skin} />}
+        {cut && <div key={cut.n} class="phase-wave" aria-hidden="true" />}
       </div>
       <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} />
       {otherWs && <p class="ws-note">Dieser Timer läuft im Modus {WORKSPACE_LABEL[s.workspace]}.</p>}

@@ -23,6 +23,8 @@ export interface DevicePrefs {
   mode: 'auto' | 'tag' | 'nacht';
   /** Stil */
   skin: Skin;
+  /** Animationen der Stile: aus, dezent (nur ruhige Effekte) oder lebendig (alle Szenen) */
+  motion: 'aus' | 'dezent' | 'lebendig';
   /** Timer-Art je Modus (Lernmodus standardmässig Pomodoro) */
   timerKind: Record<Workspace, TimerKind>;
   sound: boolean;
@@ -54,6 +56,7 @@ const DEFAULTS: DevicePrefs = {
   workspace: 'study',
   mode: 'auto',
   skin: 'klassisch',
+  motion: 'lebendig',
   timerKind: { study: 'pomodoro', work: 'pomodoro' },
   sound: true,
   volume: 0.7,

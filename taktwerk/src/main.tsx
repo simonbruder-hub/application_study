@@ -9,6 +9,7 @@ import './ui/styles/skins/technik.css';
 import './ui/styles/skins/barock.css';
 import './ui/styles/skins/natur.css';
 import './ui/styles/skins/amtlich.css';
+import './ui/styles/skins/celebration.css';
 import { App } from './App';
 import { initBackground } from './app/background';
 import { initKeyboard } from './app/keyboard';

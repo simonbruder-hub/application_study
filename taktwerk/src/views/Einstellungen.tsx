@@ -101,6 +101,13 @@ function LookCard() {
         <Seg label="Darstellung" value={p.mode} wide onChange={(mode) => setPrefs({ mode })}
           options={[{ value: 'auto', label: 'Automatisch', icon: 'auto' }, { value: 'tag', label: 'Tag', icon: 'sun' }, { value: 'nacht', label: 'Nacht', icon: 'moon' }]} />
       </div>
+      <div class="field" style={{ marginTop: '12px' }}><span class="field-label">Bewegung</span>
+        <Seg label="Bewegung" value={p.motion} wide onChange={(motion) => setPrefs({ motion })}
+          options={[{ value: 'aus', label: 'Aus' }, { value: 'dezent', label: 'Dezent' }, { value: 'lebendig', label: 'Lebendig' }]} />
+        <p class="small muted" style={{ margin: '6px 0 0' }}>
+          {p.motion === 'aus' ? 'Keine Animationen, nur ruhige Farben.' : p.motion === 'dezent' ? 'Ruhige Effekte, die nicht vom Fokus ablenken.' : 'Alle Szenen: Blitze, Laternen, Feuerwerk, fliegende Blätter und mehr.'}
+        </p>
+      </div>
       <div class="field" style={{ marginTop: '12px' }}><span class="field-label">Stil</span>
         <div class="skin-grid" role="radiogroup" aria-label="Stil">
           {SKINS.map((k) => (

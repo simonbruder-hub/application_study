@@ -5,22 +5,45 @@
 :root[data-skin="klassisch"] {
   --scene-short: radial-gradient(ellipse 80% 70% at 50% 30%, color-mix(in srgb, var(--sage) 20%, transparent), transparent 75%);
   --scene-long: radial-gradient(ellipse 80% 70% at 50% 30%, color-mix(in srgb, var(--indigo) 22%, transparent), transparent 75%), radial-gradient(circle at 80% 90%, color-mix(in srgb, var(--indigo) 14%, transparent), transparent 40%);
+  --glass-hi: rgb(255 255 255 / 0.6);
   --bg-layers:
-    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(198 58 41 / 0.1), transparent 70%),
-    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(33 122 111 / 0.12), transparent 70%);
+    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(198 58 41 / 0.13), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 92% 8%, rgb(72 89 189 / 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(33 122 111 / 0.15), transparent 70%),
+    linear-gradient(160deg, #f4f6f4, #e8eeec);
 }
 @media (prefers-color-scheme: dark) {
   :root[data-skin="klassisch"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    --glass-hi: rgb(255 255 255 / 0.06);
     --bg-layers:
-      radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.12), transparent 70%),
-      radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.12), transparent 70%);
+      radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.14), transparent 70%),
+      radial-gradient(ellipse 45% 40% at 92% 8%, rgb(141 154 239 / 0.1), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.13), transparent 70%);
   }
 }
 :root[data-skin="klassisch"][data-theme="dark"]:not([data-mode="tag"]),
 :root[data-skin="klassisch"][data-mode="nacht"] {
+  --glass-hi: rgb(255 255 255 / 0.06);
   --bg-layers:
-    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.12), transparent 70%),
-    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.12), transparent 70%);
+    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.14), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 92% 8%, rgb(141 154 239 / 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.13), transparent 70%);
+}
+
+/* Glas: Karten leicht durchscheinend; Unschärfe nur auf grossen Bildschirmen (schont schwache Handys) */
+[data-skin="klassisch"] .card {
+  background-color: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-color: color-mix(in srgb, var(--line) 75%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow);
+}
+@media (min-width: 900px) {
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    [data-skin="klassisch"] .card {
+      background-color: color-mix(in srgb, var(--surface) 70%, transparent);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      backdrop-filter: blur(18px) saturate(1.4);
+    }
+  }
 }
 
 [data-skin="klassisch"] .view-head h1 {
@@ -48,29 +71,6 @@
   background: linear-gradient(135deg, color-mix(in srgb, var(--phase) 78%, #ffffff), var(--phase) 60%);
   box-shadow: 0 14px 28px -12px var(--phase), inset 0 1px 0 rgb(255 255 255 / 0.3);
 }
-
-/* Konfetti */
-.confetti i {
-  position: absolute; left: 50%; top: 46%; width: 9px; height: 14px; border-radius: 2px; background: var(--tomato);
-  animation: confetti 1.6s cubic-bezier(0.1, 0.7, 0.3, 1) both;
-}
-.confetti i:nth-child(3n) { background: var(--sage); }
-.confetti i:nth-child(3n + 1) { background: var(--indigo); width: 7px; height: 7px; border-radius: 50%; }
-.confetti i:nth-child(4n) { background: #eda100; }
-.confetti i:nth-child(1) { --dx: -130px; --dy: -110px; }
-.confetti i:nth-child(2) { --dx: 120px; --dy: -120px; animation-delay: 0.05s; }
-.confetti i:nth-child(3) { --dx: -160px; --dy: 10px; animation-delay: 0.1s; }
-.confetti i:nth-child(4) { --dx: 150px; --dy: 30px; }
-.confetti i:nth-child(5) { --dx: -80px; --dy: -160px; animation-delay: 0.15s; }
-.confetti i:nth-child(6) { --dx: 70px; --dy: -170px; }
-.confetti i:nth-child(7) { --dx: -120px; --dy: 120px; animation-delay: 0.08s; }
-.confetti i:nth-child(8) { --dx: 130px; --dy: 110px; animation-delay: 0.12s; }
-.confetti i:nth-child(9) { --dx: 0px; --dy: -180px; }
-.confetti i:nth-child(10) { --dx: -170px; --dy: -60px; animation-delay: 0.2s; }
-.confetti i:nth-child(11) { --dx: 175px; --dy: -50px; animation-delay: 0.18s; }
-.confetti i:nth-child(12) { --dx: 40px; --dy: 160px; }
-.confetti i:nth-child(13) { --dx: -40px; --dy: 170px; animation-delay: 0.1s; }
-.confetti i:nth-child(14) { --dx: 100px; --dy: -60px; animation-delay: 0.25s; }
 
 /* Atemkreis in den Pausen */
 .breath { position: absolute; inset: 0; display: none; }
@@ -108,3 +108,6 @@
 .bubbles i:nth-child(8) { left: 90%; animation-delay: -10s; }
 .bubbles i:nth-child(9) { left: 12%; width: 14px; height: 14px; animation-delay: -12s; animation-duration: 12s; }
 .bubbles i:nth-child(10) { left: 64%; width: 16px; height: 16px; animation-delay: -5.5s; }
+
+/* Einblendung: ruhige Glas-Plakette */
+.cutin-klassisch .cutin-band { border: 1px solid color-mix(in srgb, var(--phase) 40%, transparent); }

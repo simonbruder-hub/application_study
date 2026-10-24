@@ -1,3 +1,4 @@
+import { useState } from 'preact/hooks';
 import { clamp } from '../format';
 
 /** Zifferblatt wie bei einer Küchenuhr: 60 Striche, Bogen = verbleibender (bzw. erreichter) Anteil */
@@ -24,8 +25,25 @@ const KNOB_PATH: Record<Exclude<DialKnob, 'dot'>, string> = {
   gem: 'M0 -12 L8 0 L0 12 L-8 0 Z',
 };
 
-export function Dial({ frac, numerals = false, knob = 'dot' }: { frac: number; numerals?: boolean; knob?: DialKnob }) {
+/** Kometenschweif: kurze Bogenstücke hinter dem Zeiger, nach aussen blasser */
+const TAIL_STEPS = 8;
+const TAIL_STEP = 0.011;
+
+export function Dial({ frac, numerals = false, knob = 'dot', trail = 1 }: { frac: number; numerals?: boolean; knob?: DialKnob; trail?: 1 | -1 }) {
   const f = clamp(frac, 0, 1);
+  // Sekundenpunkt: einmal beim Einblenden auf die echten Sekunden gelegt, danach reine CSS-Animation
+  const [secDelay] = useState(() => `${-((Date.now() % 60000) / 1000).toFixed(3)}s`);
+  const tail = Array.from({ length: TAIL_STEPS }, (_, k) => {
+    const start = trail > 0 ? f + k * TAIL_STEP : f - (k + 1) * TAIL_STEP;
+    if (start < 0 || start + TAIL_STEP > 1) return null;
+    return (
+      <circle
+        key={k} class="dial-tail" cx="160" cy="160" r={R} transform="rotate(-90 160 160)"
+        stroke-dasharray={`${(TAIL_STEP * C).toFixed(2)} ${C.toFixed(2)}`} stroke-dashoffset={(-start * C).toFixed(2)}
+        style={{ opacity: (0.6 * (1 - k / TAIL_STEPS)).toFixed(2) }}
+      />
+    );
+  });
   const th = (f * 360 - 90) * (Math.PI / 180);
   const kx = (160 + R * Math.cos(th)).toFixed(2);
   const ky = (160 + R * Math.sin(th)).toFixed(2);
@@ -46,6 +64,8 @@ export function Dial({ frac, numerals = false, knob = 'dot' }: { frac: number; n
         stroke-dasharray={C.toFixed(2)} stroke-dashoffset={(C * (1 - f)).toFixed(2)}
         transform="rotate(-90 160 160)"
       />
+      <g class="dial-tails">{tail}</g>
+      <g class="sec-orbit" style={{ animationDelay: secDelay }}><circle cx="160" cy="14" r="3.6" /></g>
       {knob === 'dot'
         ? <circle class="dial-knob" cx={kx} cy={ky} r="8" />
         : <path class={`dial-knob dial-knob-${knob}`} d={KNOB_PATH[knob]} transform={`translate(${kx} ${ky}) rotate(${(f * 360).toFixed(1)})`} />}

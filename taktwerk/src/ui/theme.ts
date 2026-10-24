@@ -37,6 +37,7 @@ export function applyThemeTo(doc: Document): void {
   if (p.mode === 'auto') delete root.dataset.mode;
   else root.dataset.mode = p.mode;
   root.dataset.skin = p.skin;
+  root.dataset.motion = p.motion;
   loadSkinFonts(doc, p.skin);
 }
 
