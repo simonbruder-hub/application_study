@@ -13,7 +13,7 @@ import { app } from './services';
 import { entities, timerState } from './store';
 import { prefs, setPrefs } from './prefs';
 
-export const PROJECT_COLORS: readonly string[] = [...V1_COLOR_HEX, '#5f7076'];
+export const PROJECT_COLORS: readonly string[] = [...V1_COLOR_HEX, '#0f9fb5', '#8b5e3c', '#c2185b', '#5f7076'];
 
 const nextOrder = (rows: readonly { sort_order: number }[]): number =>
   rows.reduce((m, r) => Math.max(m, r.sort_order), 0) + 1;
@@ -30,6 +30,7 @@ export interface ProjectDraft {
   start_date?: string | null;
   end_date?: string | null;
   notes?: string;
+  tags?: string[];
 }
 
 /** Freier Projektcode (eindeutig unter nicht gelöschten Projekten, ohne Gross-/Kleinschreibung) */
@@ -56,6 +57,7 @@ export async function createProject(d: ProjectDraft): Promise<Project> {
     end_date: d.end_date ?? null,
     notes: d.notes ?? '',
     sort_order: nextOrder(all),
+    tags: d.tags ?? [],
   };
   const p = await app().repo.create('projects', input);
   setPrefs({ lastProject: { ...prefs.value.lastProject, [p.mode]: p.id } });

@@ -111,4 +111,26 @@ test.describe('Timer', () => {
     await page.clock.fastForward('01:00');
     await expect(clock(page)).toHaveText('22:00');
   });
+
+  test('Zeiger ziehen ändert die Restzeit (auf ganze Minuten)', async ({ page }) => {
+    await openApp(page);
+    const wrap = await page.locator('.dial-wrap').boundingBox();
+    const handle = await page.locator('.dial-handle').boundingBox();
+    if (!wrap || !handle) throw new Error('Zifferblatt fehlt');
+    const cx = wrap.x + wrap.width / 2;
+    const cy = wrap.y + wrap.height / 2;
+    const r = wrap.width * 0.39;
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+    await page.mouse.down();
+    // gegen den Uhrzeigersinn von 12 Uhr nach 9 Uhr: drei Viertel von 25 Minuten = 19 Minuten
+    for (const a of [350, 330, 310, 290, 270]) {
+      const rad = (a * Math.PI) / 180;
+      await page.mouse.move(cx + r * Math.sin(rad), cy - r * Math.cos(rad));
+    }
+    await expect(clock(page)).toHaveText('19:00');
+    await page.mouse.up();
+    await expect(clock(page)).toHaveText('19:00');
+    await page.locator('.dial-handle').press('ArrowUp');
+    await expect(clock(page)).toHaveText('20:00');
+  });
 });

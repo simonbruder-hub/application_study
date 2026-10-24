@@ -14,7 +14,7 @@ import {
   thresholdsFromSettings, type HealthOptions, type MilestoneHealthStatus, type PlanStatus,
 } from '../domain/health';
 import { milestoneMetrics, projectMetrics, workPackageMetrics } from '../domain/metrics';
-import { Empty, Meter, WORKSPACE_ICON, WORKSPACE_LABEL } from '../ui/components/bits';
+import { Empty, Meter, TagChips, WORKSPACE_ICON, WORKSPACE_LABEL } from '../ui/components/bits';
 import { switchWorkspace } from '../ui/components/Chrome';
 import { openLogDialog } from '../ui/components/LogDialog';
 import { openProjectDialog } from '../ui/components/ProjectDialog';
@@ -182,6 +182,7 @@ function ProjectCard({ project: p }: { project: Project }) {
         {p.status !== 'archived' && p.end_date && <Deadline end={p.end_date} />}
       </span>
       <span class="pc-name">{p.name}</span>
+      <TagChips tags={p.tags} small />
       <span class="pc-stats">
         <span><b>{fmtDur(sec)}</b><small>erfasst</small></span>
         <span><b>{fmtDur(f.weekSec)}</b><small>diese Woche</small></span>
@@ -271,6 +272,7 @@ function Detail({ project: p }: { project: Project }) {
             {p.status !== 'active' && <span class="badge">{STATUS_LABEL[p.status]}</span>}
             {p.status !== 'archived' && p.end_date && <Deadline end={p.end_date} />}
             {range && <span class="meta muted small"><Icon name="calendar" />{range}</span>}
+            <TagChips tags={p.tags} />
             {health && planWorthShowing(health.plannedHours, health.status) && (
               <HealthBadge {...PLAN_HEALTH[health.status]} reason={health.reason} />
             )}

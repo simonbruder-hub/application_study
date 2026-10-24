@@ -64,6 +64,8 @@ export interface Project extends SyncFields, LocalFields {
   end_date: string | null;
   notes: string;
   sort_order: number;
+  /** Tags (Namen), z. B. ["Coding", "Lernen"]; Farben stehen in UserSettings.tag_colors */
+  tags?: string[];
 }
 
 export interface Milestone extends SyncFields, LocalFields {
@@ -188,6 +190,8 @@ export interface UserSettings {
   health_yellow_daily_hours: number;
   milestone_red_daily_hours: number;
   milestone_yellow_daily_hours: number;
+  /** Farbe je Tag-Name ('#RRGGBB') */
+  tag_colors?: Record<string, string>;
   updated_at: number;
   updated_by: string;
 }

@@ -115,3 +115,34 @@ a.brand:hover span { color: var(--tomato); }
 /* Ohne Ziffern: Zeit unsichtbar (für Screenreader weiterhin vorhanden), Phase gross */
 .dial-wrap.no-clock .clock { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .dial-wrap.no-clock .dial-sub { font-size: 17px; letter-spacing: 0.22em; color: var(--phase); }
+
+/* Zeiger ziehen: unsichtbarer Griff über dem Zeiger, mit Fokus-Ring für die Tastatur */
+.dial-handle {
+  position: absolute; z-index: 3; width: 52px; height: 52px; margin: -26px 0 0 -26px; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; cursor: grab; touch-action: none; transition: box-shadow 0.2s;
+}
+.dial-handle:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--phase) 35%, transparent); }
+.dial-handle:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.dial-handle.is-dragging { cursor: grabbing; box-shadow: 0 0 0 6px color-mix(in srgb, var(--phase) 28%, transparent); }
+.dial-wrap.is-dragging .dial-arc, .dial-wrap.is-dragging .dial-knob { transition: none; }
+.dial-wrap.is-dragging .clock { color: var(--phase); }
+.dial-wrap.is-dragging .clock .ch { animation: none; }
+
+/* Tags */
+.tag-chips { display: inline-flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.tag {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px 2px 7px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.5;
+  color: var(--ink); background: color-mix(in srgb, var(--tc) 16%, var(--surface)); border: 1px solid color-mix(in srgb, var(--tc) 45%, transparent);
+}
+.tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--tc); }
+.tag-chips.is-small .tag { font-size: 11px; padding: 1px 7px 1px 6px; }
+button.tag { cursor: pointer; opacity: 0.62; }
+button.tag.is-on { opacity: 1; box-shadow: inset 0 0 0 1px var(--tc); }
+button.tag:hover { opacity: 1; }
+.tag-picker { display: grid; gap: 8px; }
+.tag-admin { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tag-admin li { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; }
+.tag-color, .swatch-custom { position: relative; width: 28px; height: 28px; border-radius: 50%; background: var(--tc, var(--pc)); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line-strong); overflow: hidden; cursor: pointer; }
+.swatch-custom { background: conic-gradient(#e34948, #eda100, #1baf7a, #2a78d6, #6250d6, #e87ba4, #e34948); }
+.tag-color input, .swatch-custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: 0; padding: 0; }
+.tag-name { min-width: 0; }

@@ -5,16 +5,18 @@ import { useInstallPrompt } from '../app/install';
 import { prefs, saveBackendConfig, setPrefs } from '../app/prefs';
 import { viewParam } from '../app/router';
 import { app, resetLocalData } from '../app/services';
-import { now, settings, snapshot, syncStatus, timerState } from '../app/store';
+import { entities, now, settings, snapshot, syncStatus, timerState } from '../app/store';
 import { chimeNow, ensureAudio, requestNotifyPermission } from '../app/timer/signals';
 import { SOUNDS, type SoundId } from '../app/timer/sounds';
 import { sendLoginCode, signOut, verifyLoginCode } from '../sync/supabaseRemote';
 import { Seg, Stepper, Switch, WORKSPACE_LABEL } from '../ui/components/bits';
 import { confirmDialog } from '../ui/dialog';
 import { Icon } from '../ui/Icon';
-import { fmtAgo, todayKey } from '../ui/format';
+import { fmtAgo, plural, todayKey } from '../ui/format';
 import { toast } from '../ui/toast';
 import { SKINS } from '../ui/skins';
+import { allTags, deleteTag, renameTag, setTagColor, tagColor } from '../app/tags';
+import { missingSchemaColumns } from '../sync/supabaseRemote';
 
 type NumKey = 'focus_minutes' | 'short_break_minutes' | 'long_break_minutes' | 'long_break_every' | 'daily_goal_minutes';
 
@@ -44,6 +46,7 @@ export function Einstellungen() {
         <LookCard />
         <SignalCard />
         <SyncCard />
+        <TagsCard />
         <DataCard />
         <AppCard />
         <KeysCard />
@@ -190,6 +193,37 @@ function SyncStatusLine() {
   );
 }
 
+/** Tags verwalten: Farbe, umbenennen, löschen */
+function TagsCard() {
+  const tags = allTags.value;
+  const used = (t: string) => entities.value.projects.filter((p) => (p.tags ?? []).includes(t)).length;
+  return (
+    <section class="card">
+      <h2>Tags</h2>
+      {tags.length === 0 ? (
+        <p class="small muted">Noch keine Tags. Im Projekt-Dialog Tags wie «Coding», «Lernen» oder «Admin» vergeben; hier lassen sie sich danach einfärben, umbenennen und löschen.</p>
+      ) : (
+        <ul class="tag-admin">
+          {tags.map((t) => (
+            <li key={t}>
+              <label class="tag-color" style={{ '--tc': tagColor(t) }} title="Farbe ändern">
+                <input type="color" value={tagColor(t)} aria-label={`Farbe für ${t}`} onChange={(e) => void setTagColor(t, e.currentTarget.value)} />
+              </label>
+              <input class="tag-name" aria-label={`Tag ${t} umbenennen`} defaultValue={t} maxLength={30}
+                onBlur={(e) => { const v = e.currentTarget.value.trim(); if (v && v !== t) void renameTag(t, v); else e.currentTarget.value = t; }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
+              <span class="small muted">{plural(used(t), 'Projekt', 'Projekte')}</span>
+              <button type="button" class="icon-btn" aria-label={`Tag ${t} löschen`} onClick={() => void (async () => {
+                if (await confirmDialog(`Tag «${t}» aus allen Projekten entfernen?`, { ok: 'Entfernen', danger: true })) await deleteTag(t);
+              })()}><Icon name="trash" /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function SyncCard() {
   const { backend, supabase } = app();
   const st = syncStatus.value;
@@ -233,6 +267,9 @@ function SyncCard() {
     <section class="card" id="sync">
       <h2>Sync & Konto</h2>
       <SyncStatusLine />
+      {missingSchemaColumns().length > 0 && (
+        <p class="small is-error">Das Supabase-Schema ist älter als die App ({missingSchemaColumns().join(', ')} fehlt). Im Supabase-SQL-Editor <code>schema.sql</code> erneut ausführen, siehe Anleitung. Bis dahin werden diese Angaben nicht synchronisiert.</p>
+      )}
       {st.notices.length > 0 && (
         <>
           <ul class="notice-list">{st.notices.map((n, i) => <li key={i}>{n}</li>)}</ul>

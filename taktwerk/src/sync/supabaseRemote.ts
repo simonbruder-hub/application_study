@@ -66,6 +66,33 @@ export function mapAuthError(error: unknown): RemoteError {
   return new RemoteError('server', `Unerwarteter Fehler bei der Anmeldung: ${String(error)}`, { cause: error });
 }
 
+/* ---------- Ältere Schemas ---------- */
+
+/**
+ * Spalten, die das Supabase-Schema noch nicht kennt (schema.sql nicht neu ausgeführt). Sie werden beim Schreiben
+ * weggelassen, statt den ganzen Sync zu blockieren; die Einstellungen zeigen einen Hinweis.
+ */
+const missingColumns = new Set<string>();
+
+export const missingSchemaColumns = (): string[] => [...missingColumns];
+
+function dropMissing(table: string, row: Record<string, unknown>): Record<string, unknown> {
+  if (!missingColumns.size) return row;
+  const out = { ...row };
+  for (const k of Object.keys(out)) if (missingColumns.has(`${table}.${k}`)) delete out[k];
+  return out;
+}
+
+/** PostgREST meldet unbekannte Spalten mit PGRST204; dann einmal ohne diese Spalte wiederholen */
+function noteMissingColumn(table: string, error: { code?: string; message?: string } | null): boolean {
+  if (!error || error.code !== 'PGRST204') return false;
+  const col = /'([^']+)' column/.exec(error.message ?? '')?.[1];
+  if (!col || missingColumns.has(`${table}.${col}`)) return false;
+  missingColumns.add(`${table}.${col}`);
+  console.warn(`Supabase-Schema veraltet: Spalte ${table}.${col} fehlt. supabase/schema.sql erneut ausführen.`);
+  return true;
+}
+
 /* ---------- Umwandlung lokale Zeile ↔ Server-Zeile ---------- */
 
 /** Spalten mit numeric/integer-Typ – PostgREST/Realtime können sie als String liefern. */
@@ -380,10 +407,13 @@ export class SupabaseRemote implements RemoteStore {
   }
 
   private async upsert(table: EntityTable, rows: AnyEntity[]) {
-    return this.client
-      .from(table)
-      .upsert(rows.map((r) => toRemoteRow(table, r)), { onConflict: 'id' })
-      .select('id, updated_at, updated_by');
+    for (;;) {
+      const res = await this.client
+        .from(table)
+        .upsert(rows.map((r) => dropMissing(table, toRemoteRow(table, r))), { onConflict: 'id' })
+        .select('id, updated_at, updated_by');
+      if (!noteMissingColumn(table, res.error)) return res;
+    }
   }
 
   async pull<K extends EntityTable>(table: K, after: PullCursor | null, limit: number): Promise<PullPage<K>> {
@@ -411,10 +441,14 @@ export class SupabaseRemote implements RemoteStore {
 
   async putSettings(settings: UserSettings): Promise<void> {
     const uid = await this.requireUserId();
-    const { error, status } = await this.client
-      .from('user_settings')
-      .upsert({ ...settingsToRemote(settings), user_id: uid }, { onConflict: 'user_id' });
-    if (error) throw toRemoteError(error, status, 'user_settings');
+    for (;;) {
+      const { error, status } = await this.client
+        .from('user_settings')
+        .upsert(dropMissing('user_settings', { ...settingsToRemote(settings), user_id: uid }), { onConflict: 'user_id' });
+      if (noteMissingColumn('user_settings', error)) continue;
+      if (error) throw toRemoteError(error, status, 'user_settings');
+      return;
+    }
   }
 
   async getTimer(): Promise<ActiveTimerState | null> {

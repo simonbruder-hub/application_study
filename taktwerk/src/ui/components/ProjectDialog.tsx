@@ -9,7 +9,8 @@ import { isValidCode } from '../../excel/values';
 import { confirmDialog, DialogFrame, openDialog } from '../dialog';
 import { toast } from '../toast';
 import { Icon } from '../Icon';
-import { parseNum, Seg, WORKSPACE_ICON, WORKSPACE_LABEL } from './bits';
+import { parseNum, Seg, TagPicker, WORKSPACE_ICON, WORKSPACE_LABEL } from './bits';
+import { cleanTags } from '../../app/tags';
 
 const STATUS: readonly { value: ProjectStatus; label: string }[] = [
   { value: 'active', label: 'Aktiv' },
@@ -32,6 +33,7 @@ function ProjectForm({ project, close, onCreated }: { project: Project | null; c
   const [start, setStart] = useState(project?.start_date ?? '');
   const [end, setEnd] = useState(project?.end_date ?? '');
   const [notes, setNotes] = useState(project?.notes ?? '');
+  const [tags, setTags] = useState<string[]>(project?.tags ?? []);
   const [busy, setBusy] = useState(false);
 
   const shownCode = codeTouched ? code : (name.trim() ? suggestProjectCode(name, project?.id) : '');
@@ -54,6 +56,7 @@ function ProjectForm({ project, close, onCreated }: { project: Project | null; c
         start_date: start || null,
         end_date: end || null,
         notes,
+        tags: cleanTags(tags),
       };
       if (project) await updateProject(project.id, fields);
       else onCreated?.(await createProject(fields));
@@ -124,8 +127,15 @@ function ProjectForm({ project, close, onCreated }: { project: Project | null; c
               <span class="sr-only">{c}</span>
             </label>
           ))}
+          <label class="swatch swatch-custom" title="Eigene Farbe" style={{ '--pc': color }}>
+            <input type="color" value={color} onInput={(e) => setColor(e.currentTarget.value)} aria-label="Eigene Farbe wählen" />
+          </label>
         </div>
       </fieldset>
+      <div class="field">
+        <span class="field-label">Tags</span>
+        <TagPicker value={tags} onChange={setTags} />
+      </div>
       <div class="field-row">
         <div class="field field-s">
           <label for="pHours">Budget (Std.)</label>

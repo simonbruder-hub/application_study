@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { clamp } from '../format';
 
 /** Zifferblatt wie bei einer Küchenuhr: 60 Striche, Bogen = verbleibender (bzw. erreichter) Anteil */
@@ -119,3 +119,77 @@ export const MOOD_LINES: Record<Mood, readonly string[]> = {
   idle: ['Bereit? Leertaste drücken!', 'Los geht’s!'],
   yay: ['Yatta! Geschafft! ✦', 'Super gemacht!'],
 };
+
+/* ---------- Zeiger ziehen ---------- */
+
+const RING = (R / 320) * 100; // Radius des Bogens in % der Zifferblatt-Breite
+
+/** Winkel des Zeigers (0 oben, im Uhrzeigersinn) aus einer Bildschirmposition, als Anteil einer Umdrehung */
+function fracAt(el: HTMLElement, x: number, y: number): number {
+  const r = el.getBoundingClientRect();
+  const a = Math.atan2(x - (r.left + r.width / 2), -(y - (r.top + r.height / 2)));
+  return (a < 0 ? a + 2 * Math.PI : a) / (2 * Math.PI);
+}
+
+/**
+ * Unsichtbarer Griff über dem Zeiger: mit Maus oder Finger ziehen (auch über eine volle Umdrehung hinaus),
+ * mit Pfeiltasten in Minuten, Bild auf/ab in 5 Minuten. Liefert den neuen Anteil (kann > 1 sein).
+ */
+export function DialHandle(props: {
+  frac: number;
+  label: string;
+  valueText: string;
+  minutes: number;
+  onDrag: (frac: number | null) => void;
+  onCommit: (frac: number) => void;
+  onStep: (minutes: number) => void;
+}) {
+  const drag = useRef<{ start: number; last: number; acc: number } | null>(null);
+  const [active, setActive] = useState(false);
+  const f = ((props.frac % 1) + 1) % 1;
+  const th = f * 2 * Math.PI;
+  const wrap = (e: Event) => (e.currentTarget as HTMLElement).parentElement!;
+  const current = () => drag.current ? drag.current.start + drag.current.acc : props.frac;
+
+  return (
+    <button
+      type="button" role="slider" class={`dial-handle${active ? ' is-dragging' : ''}`}
+      style={{ left: `${50 + RING * Math.sin(th)}%`, top: `${50 - RING * Math.cos(th)}%` }}
+      aria-label={props.label} aria-valuetext={props.valueText} aria-valuenow={props.minutes} aria-valuemin={1}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        const at = fracAt(wrap(e), e.clientX, e.clientY);
+        drag.current = { start: props.frac, last: at, acc: 0 };
+        setActive(true);
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d) return;
+        const at = fracAt(wrap(e), e.clientX, e.clientY);
+        let step = at - d.last;
+        if (step > 0.5) step -= 1;
+        if (step < -0.5) step += 1;
+        d.last = at;
+        d.acc += step;
+        props.onDrag(current());
+      }}
+      onPointerUp={() => {
+        if (!drag.current) return;
+        const end = current();
+        drag.current = null;
+        setActive(false);
+        props.onDrag(null);
+        props.onCommit(end);
+      }}
+      onPointerCancel={() => { drag.current = null; setActive(false); props.onDrag(null); }}
+      onKeyDown={(e) => {
+        const step = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 5, PageDown: -5 }[e.key];
+        if (step === undefined) return;
+        e.preventDefault();
+        e.stopPropagation();
+        props.onStep(step);
+      }}
+    />
+  );
+}

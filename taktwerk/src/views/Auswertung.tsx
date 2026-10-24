@@ -2,6 +2,7 @@
 import { useState } from 'preact/hooks';
 import type { TimeLog } from '../data/types';
 import { go } from '../app/router';
+import { tagColor } from '../app/tags';
 import { projectsById, tasksById, today } from '../app/selectors';
 import { entities, workspaceData } from '../app/store';
 import { prefs } from '../app/prefs';
@@ -119,6 +120,16 @@ export function Auswertung() {
   const projects = [...byProject.entries()].sort((a, b) => b[1] - a[1]);
   const maxProject = projects[0]?.[1] ?? 0;
 
+  // Nach Tag: ein Eintrag zählt für jeden Tag seines Projekts (Summe kann über 100 % liegen)
+  const byTag = new Map<string, number>();
+  for (const l of logs) {
+    const tags = projectsById.value.get(l.project_id ?? '')?.tags ?? [];
+    for (const tag of tags.length ? tags : ['']) byTag.set(tag, (byTag.get(tag) ?? 0) + l.duration_seconds);
+  }
+  const tagRows = [...byTag.entries()].sort((a, b) => b[1] - a[1]);
+  const maxTag = tagRows[0]?.[1] ?? 0;
+  const anyTags = tagRows.some(([t]) => t !== '');
+
   const days = new Map<string, TimeLog[]>();
   for (const l of logs) {
     const k = dateKey(l.start_time);
@@ -172,6 +183,22 @@ export function Auswertung() {
         <div class="card-head"><h2>Verlauf</h2></div>
         {total > 0 ? <Chart buckets={p.buckets} logs={logs} /> : <p class="empty-line">Keine Einträge in diesem Zeitraum.</p>}
       </div>
+
+      {anyTags && (
+        <div class="card" style={{ marginBottom: '20px' }}>
+          <div class="card-head"><h2>Nach Tag</h2></div>
+          <ul class="pb-list">
+            {tagRows.map(([tag, sec]) => (
+              <li key={tag} class="pb-row">
+                <span class="pb-name">{tag ? <span class="tag" style={{ '--tc': tagColor(tag) }}>{tag}</span> : 'Ohne Tag'}</span>
+                <span class="pb-bar"><i style={{ width: `${(sec / maxTag) * 100}%`, background: tag ? tagColor(tag) : 'var(--pc-0)' }} /></span>
+                <span class="pb-val mono">{fmtHM(sec)}</span>
+                <span class="pb-pct mono muted">{pct(sec, total)} %</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div class="two-col">
         <div class="card">

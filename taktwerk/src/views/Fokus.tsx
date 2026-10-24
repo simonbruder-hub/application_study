@@ -13,7 +13,7 @@ import { minimize } from '../app/pip';
 import { PHASE_LABEL } from '../app/timer/controller';
 import { flashMood, PHASE_ATTR, readTimer } from '../app/timer/view';
 import { DIAL_STYLE, PhaseCutIn, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
-import { Dial, MOOD_LINES } from '../ui/components/Dial';
+import { Dial, DialHandle, MOOD_LINES } from '../ui/components/Dial';
 import {
   Meter, PomoDots, ProjectChip, Seg, WORKSPACE_ICON, WORKSPACE_LABEL,
 } from '../ui/components/bits';
@@ -22,7 +22,7 @@ import { openProjectDialog } from '../ui/components/ProjectDialog';
 import { TaskRow } from '../ui/components/TaskRow';
 import { confirmDialog } from '../ui/dialog';
 import { Icon } from '../ui/Icon';
-import { atTime, fmtDayLong, fmtDur, fmtHM, fmtTime, pct, plural } from '../ui/format';
+import { atTime, fmtClock, fmtDayLong, fmtDur, fmtHM, fmtTime, pct, plural } from '../ui/format';
 import { toast } from '../ui/toast';
 
 const KIND_OPTIONS: readonly { value: TimerKind; label: string; icon: 'timer' | 'stopwatch' }[] = [
@@ -82,6 +82,14 @@ function TimerCard() {
     // Läuft gerade die Feier (Pomodoro geschafft), kommt die Einblendung erst danach
     setCut((c) => ({ phase: v.phase, n: (c?.n ?? 0) + 1, late: flashMood.peek() === 'yay' }));
   }, [v.phase]);
+  // Zeiger ziehen (nur Pomodoro): Vorschau während des Ziehens, beim Loslassen auf ganze Minuten
+  const [dragFrac, setDragFrac] = useState<number | null>(null);
+  const planned = v.plannedSec ?? 0;
+  const restSec = v.frac * planned;
+  /** Neue Restzeit für einen Zeiger-Anteil: ganze Minuten, mindestens 1, höchstens 3 Stunden */
+  const restFor = (f: number) => Math.min(180, Math.max(1, Math.round((f * planned) / 60))) * 60;
+  const dragRest = dragFrac !== null ? restFor(dragFrac) : null;
+  const shownClock = dragRest !== null ? fmtClock(dragRest) : v.clock;
   const every = Math.max(1, set.long_break_every);
   const inRound = s.cycle % every;
   const otherWs = v.active && s.workspace !== ws;
@@ -124,12 +132,21 @@ function TimerCard() {
           })}
         </div>
       )}
-      <div class={`dial-wrap${v.running ? ' is-running' : ''}${prefs.value.showClock ? '' : ' no-clock'}`}>
+      <div class={`dial-wrap${v.running ? ' is-running' : ''}${prefs.value.showClock && dragFrac === null ? '' : dragFrac !== null ? ' is-dragging' : ' no-clock'}`}>
         <SkinDialFx skin={skin} />
-        <Dial frac={v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
+        <Dial frac={dragFrac !== null ? Math.min(1, dragFrac) : v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
+        {v.kind === 'pomodoro' && planned > 0 && (
+          <DialHandle
+            frac={dragFrac ?? v.frac} minutes={Math.round(restSec / 60)}
+            label="Restzeit: Zeiger ziehen oder mit Pfeiltasten in Minuten ändern" valueText={`${Math.round(restSec / 60)} Minuten`}
+            onDrag={setDragFrac}
+            onCommit={(f) => { const target = restFor(f); if (Math.abs(target - restSec) >= 1) void timer.adjust((target - restSec) / 60); }}
+            onStep={(m) => void timer.adjust(m)}
+          />
+        )}
         <div class="dial-center">
           <SkinBadge skin={skin} v={v} />
-          <div class="clock mono" role="timer" aria-live="off">{v.clock.split('').map((ch, i) => <span key={`${i}-${ch}`} class="ch">{ch}</span>)}</div>
+          <div class="clock mono" role="timer" aria-live="off">{shownClock.split('').map((ch, i) => <span key={`${i}-${ch}`} class="ch">{ch}</span>)}</div>
           <div class="dial-sub">{v.statusLabel}</div>
         </div>
         {cut && <div key={cut.n} class="phase-wave" aria-hidden="true" />}

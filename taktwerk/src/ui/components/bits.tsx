@@ -1,4 +1,6 @@
 import type { ComponentChildren } from 'preact';
+import { useState } from 'preact/hooks';
+import { allTags, cleanTags, TAG_SUGGESTIONS, tagColor } from '../../app/tags';
 import type { Project, Workspace } from '../../data/types';
 import { Icon, type IconName } from '../Icon';
 import { clamp } from '../format';
@@ -106,4 +108,39 @@ export function parseNum(v: string): number | null {
   if (!t) return null;
   const n = Number(t);
   return Number.isFinite(n) ? n : null;
+}
+
+/** Tags als kleine farbige Marken */
+export function TagChips({ tags, small = false }: { tags: readonly string[] | undefined; small?: boolean }) {
+  if (!tags?.length) return null;
+  return (
+    <span class={`tag-chips${small ? ' is-small' : ''}`}>
+      {tags.map((t) => <span key={t} class="tag" style={{ '--tc': tagColor(t) }}>{t}</span>)}
+    </span>
+  );
+}
+
+/** Tags wählen: bestehende antippen, neue eintippen (Enter oder Komma) */
+export function TagPicker({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
+  const [text, setText] = useState('');
+  const known = allTags.value;
+  const options = cleanTags([...known, ...(known.length ? [] : TAG_SUGGESTIONS), ...value]);
+  const has = (t: string) => value.some((v) => v.toLocaleLowerCase('de-CH') === t.toLocaleLowerCase('de-CH'));
+  const toggle = (t: string) => onChange(has(t) ? value.filter((v) => v.toLocaleLowerCase('de-CH') !== t.toLocaleLowerCase('de-CH')) : cleanTags([...value, t]));
+  const add = () => { if (text.trim()) onChange(cleanTags([...value, ...text.split(',')])); setText(''); };
+  return (
+    <div class="tag-picker">
+      <div class="tag-chips">
+        {options.map((t) => (
+          <button key={t} type="button" class={`tag${has(t) ? ' is-on' : ''}`} style={{ '--tc': tagColor(t) }} aria-pressed={has(t)} onClick={() => toggle(t)}>{t}</button>
+        ))}
+      </div>
+      <input
+        aria-label="Neuer Tag" placeholder="Neuer Tag, Enter zum Hinzufügen" maxLength={30} value={text}
+        onInput={(e) => setText(e.currentTarget.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(); } }}
+        onBlur={add}
+      />
+    </div>
+  );
 }

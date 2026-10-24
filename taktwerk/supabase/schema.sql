@@ -367,6 +367,14 @@ comment on table public.user_settings      is 'Einstellungen, eine Zeile je Nutz
 
 -- -----------------------------------------------------------------------------
 -- 3. Indizes
+
+-- -----------------------------------------------------------------------------
+-- Ergänzungen (idempotent, für bestehende Projekte beim erneuten Ausführen)
+-- -----------------------------------------------------------------------------
+-- Taktwerk 1.1: Tags als Namen am Projekt, Tag-Farben in den Einstellungen
+alter table public.projects add column if not exists tags text[] not null default '{}';
+alter table public.user_settings add column if not exists tag_colors jsonb not null default '{}'::jsonb;
+
 -- -----------------------------------------------------------------------------
 
 -- Eindeutige lesbare Codes: ohne Beachtung der Gross-/Kleinschreibung und nur unter
