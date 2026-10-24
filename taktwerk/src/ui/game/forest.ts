@@ -3,6 +3,7 @@
  * Zapfen mit der Schleuder. Getroffene Tiere flüchten mit Sternchen. Wanderer, Igel und Vogelhaus nicht treffen.
  * 8 Zapfen im Korb, nachladen mit R, Rechtsklick oder Antippen des Korbs. Eine Runde dauert 90 Sekunden.
  */
+import * as art from './forestArt';
 import { drawBanner, drawFloats, type Engine, type Float, type Input, moveFloats, type Pt } from './types';
 
 const W = 360;
@@ -53,12 +54,12 @@ export interface Forest {
 
 /** Wo Eichhörnchen hinter Stämmen hervorschauen: Stamm-Mitte, Höhe, Tiefe */
 const TRUNKS: { x: number; y: number; z: number; w: number }[] = [
-  { x: 70, y: 300, z: 0.75, w: 26 }, { x: 70, y: 220, z: 0.75, w: 26 },
-  { x: 190, y: 270, z: 0.6, w: 18 }, { x: 290, y: 320, z: 0.8, w: 28 }, { x: 290, y: 240, z: 0.8, w: 28 },
-  { x: 140, y: 330, z: 0.55, w: 16 }, { x: 240, y: 300, z: 0.55, w: 16 },
+  { x: 70, y: 398, z: 0.75, w: 26 },
+  { x: 190, y: 374, z: 0.6, w: 18 }, { x: 290, y: 402, z: 0.8, w: 28 }, { x: 290, y: 440, z: 0.8, w: 28 },
+  { x: 140, y: 376, z: 0.55, w: 16 }, { x: 240, y: 379, z: 0.55, w: 16 },
 ];
-/** Vogelhaus an einem Baum (nicht treffen) */
-export const HOUSE = { x: 290, y: 190, w: 30, h: 30 };
+/** Vogelhaus am linken Baum unter der Krone (nicht treffen) */
+export const HOUSE = { x: 70, y: 354, w: 30, h: 30 };
 /** Bodenlinien: hinten, Mitte, vorne */
 const LANES = [{ y: 395, z: 0.55 }, { y: 440, z: 0.75 }, { y: 505, z: 1 }];
 
@@ -214,130 +215,37 @@ export function stepForest(g: Forest, dt: number, input: Input): string[] {
 
 /* ---------- Zeichnen ---------- */
 
-function tree(ctx: CanvasRenderingContext2D, x: number, base: number, w: number, h: number, dark: string, crown: string): void {
-  ctx.fillStyle = dark;
-  ctx.fillRect(x - w / 2, base - h, w, h);
-  ctx.fillStyle = crown;
-  for (let i = 0; i < 4; i++) {
-    const cy = base - h - 10 + i * 34;
-    ctx.beginPath(); ctx.moveTo(x - w * 2.6 + i * 6, cy + 46); ctx.lineTo(x, cy - 30); ctx.lineTo(x + w * 2.6 - i * 6, cy + 46); ctx.fill();
-  }
-}
+/* Bäume nach Tiefe: Krone hinter, Stamm vor den Tieren derselben Ebene, damit Tiere teils verdeckt werden */
+const TREES = TRUNKS.filter((t, i) => TRUNKS.findIndex((u) => u.x === t.x) === i).map((t) => {
+  const base = t.z < 0.6 ? 400 : t.z < 0.78 ? 445 : 470;
+  const h = t.z < 0.6 ? 150 : 280;
+  return { ...t, base, h, back: t.z < 0.6 };
+});
 
-function scenery(ctx: CanvasRenderingContext2D, g: Forest): void {
-  const sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, '#bfe3d0');
-  sky.addColorStop(0.55, '#e8f0d8');
-  sky.addColorStop(1, '#c9d7a8');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, H);
-  // ferne Hügel mit Tannen
-  ctx.fillStyle = '#9cc3a6';
-  ctx.beginPath(); ctx.moveTo(0, 330); ctx.quadraticCurveTo(90, 260, 180, 320); ctx.quadraticCurveTo(270, 270, 360, 315); ctx.lineTo(360, 400); ctx.lineTo(0, 400); ctx.fill();
-  ctx.fillStyle = '#7fae8c';
-  for (let x = 6; x < W; x += 22) { const h = 26 + ((x * 7) % 18); ctx.beginPath(); ctx.moveTo(x - 9, 360); ctx.lineTo(x, 360 - h); ctx.lineTo(x + 9, 360); ctx.fill(); }
-  // Boden in drei Ebenen
-  ctx.fillStyle = '#8fb069'; ctx.fillRect(0, 380, W, 40);
-  ctx.fillStyle = '#7a9d55'; ctx.fillRect(0, 418, W, 50);
-  ctx.fillStyle = '#5f8341'; ctx.fillRect(0, 466, W, H - 466);
-  // Bäume, hinter denen Eichhörnchen hervorschauen
-  for (const t of TRUNKS) {
-    if (t.y < 260) continue;
-    const back = t.z < 0.6;
-    tree(ctx, t.x, t.z < 0.6 ? 400 : t.z < 0.78 ? 445 : 470, t.w, t.z < 0.6 ? 150 : 280, back ? '#6b5a44' : '#5a4330', back ? '#4f7d55' : '#2f6b3a');
-  }
-  // Vogelhaus am rechten Baum
-  ctx.save();
-  ctx.translate(HOUSE.x, HOUSE.y);
-  if (g.houseHit > 0) ctx.rotate(Math.sin(g.houseHit * 40) * 0.12);
-  ctx.fillStyle = '#c0843b'; ctx.fillRect(-12, -8, 24, 22);
-  ctx.fillStyle = '#9c2f2f'; ctx.beginPath(); ctx.moveTo(-17, -6); ctx.lineTo(0, -20); ctx.lineTo(17, -6); ctx.fill();
-  ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(0, 2, 4.5, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#5a4330'; ctx.fillRect(-1.5, 14, 3, 8);
-  ctx.restore();
-}
-
-function bushes(ctx: CanvasRenderingContext2D): void {
-  ctx.fillStyle = '#3f6b2f';
-  for (const [x, y, r] of [[30, 545, 34], [110, 556, 30], [205, 552, 36], [330, 548, 30], [-6, 470, 22], [360, 470, 22]] as const) {
-    ctx.beginPath(); ctx.arc(x, y, r, Math.PI, 0); ctx.arc(x + r * 0.8, y + 4, r * 0.7, Math.PI, 0); ctx.fill();
-  }
+/** Hintergrund und Vordergrund einmal pro Massstab zeichnen und wiederverwenden */
+const cache: { k: number; bg: HTMLCanvasElement | null; fg: HTMLCanvasElement | null } = { k: 0, bg: null, fg: null };
+function layer(k: number, paint: (c: CanvasRenderingContext2D) => void): HTMLCanvasElement {
+  const el = document.createElement('canvas');
+  el.width = Math.round(W * k);
+  el.height = Math.round(H * k);
+  const c = el.getContext('2d')!;
+  c.scale(k, k);
+  paint(c);
+  return el;
 }
 
 function critter(ctx: CanvasRenderingContext2D, c: Critter): void {
   ctx.save();
   ctx.translate(c.x, c.y);
-  const s = c.z;
-  ctx.scale(s * c.dir, s);
-  const leg = Math.sin(c.t * (c.kind === 'boar' ? 22 : 9)) * 4;
+  ctx.scale(c.z * c.dir, c.z);
   if (c.state === 'flee' && c.kind !== 'acorn') ctx.globalAlpha = Math.min(1, c.peek * 1.5);
   switch (c.kind) {
-    case 'squirrel': {
-      // schaut seitlich hinter dem Stamm hervor
-      ctx.translate(-14 + c.peek * 14, 0);
-      ctx.fillStyle = '#b5541c';
-      ctx.beginPath(); ctx.ellipse(-10, -8, 9, 18, -0.4, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#c8682a';
-      ctx.beginPath(); ctx.ellipse(4, 0, 9, 12, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(8, -14, 7, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(5, -19); ctx.lineTo(6, -27); ctx.lineTo(10, -20); ctx.fill();
-      ctx.fillStyle = '#f3d6b0'; ctx.beginPath(); ctx.ellipse(7, 2, 4, 7, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(11, -15, 1.6, 0, Math.PI * 2); ctx.fill();
-      break;
-    }
-    case 'boar': {
-      ctx.fillStyle = '#4a3326';
-      for (const lx of [-16, -6, 8, 18]) ctx.fillRect(lx, -6, 5, 10 + (lx % 2 ? leg : -leg) * 0.5);
-      ctx.beginPath(); ctx.ellipse(0, -16, 30, 15, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#3a271c';
-      ctx.beginPath(); ctx.moveTo(-18, -30); for (let i = 0; i < 8; i++) ctx.lineTo(-16 + i * 4, i % 2 ? -36 : -29); ctx.lineTo(14, -28); ctx.fill();
-      ctx.fillStyle = '#4a3326'; ctx.beginPath(); ctx.ellipse(28, -14, 12, 9, 0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8a6a5a'; ctx.beginPath(); ctx.ellipse(39, -11, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(34, -8); ctx.quadraticCurveTo(38, -16, 33, -18); ctx.stroke();
-      ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(29, -18, 1.6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(22, -22); ctx.lineTo(24, -30); ctx.lineTo(27, -22); ctx.fill();
-      break;
-    }
-    case 'deer': {
-      ctx.fillStyle = '#9a6233';
-      ctx.fillRect(-18, -34, 4, 34 + leg); ctx.fillRect(-10, -34, 4, 34 - leg); ctx.fillRect(10, -34, 4, 34 + leg); ctx.fillRect(17, -34, 4, 34 - leg);
-      ctx.beginPath(); ctx.ellipse(0, -40, 26, 12, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(16, -46); ctx.lineTo(26, -70); ctx.lineTo(33, -66); ctx.lineTo(26, -42); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(32, -70, 9, 6, 0.3, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(-25, -44, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.moveTo(28, -75); ctx.lineTo(22, -92); ctx.moveTo(25, -84); ctx.lineTo(16, -88); ctx.moveTo(23, -89); ctx.lineTo(26, -98);
-      ctx.moveTo(32, -76); ctx.lineTo(36, -94); ctx.moveTo(35, -86); ctx.lineTo(43, -90);
-      ctx.stroke();
-      ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(34, -72, 1.6, 0, Math.PI * 2); ctx.fill();
-      break;
-    }
-    case 'hiker': {
-      ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(-4 + leg, 0); ctx.moveTo(0, -30); ctx.lineTo(4 - leg, 0); ctx.stroke();
-      ctx.fillStyle = '#e63946'; ctx.fillRect(-9, -58, 18, 30);
-      ctx.fillStyle = '#2a9d8f'; ctx.fillRect(-17, -56, 9, 22);
-      ctx.fillStyle = '#f1c27d'; ctx.beginPath(); ctx.arc(0, -66, 7, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#264653'; ctx.fillRect(-9, -74, 18, 4); ctx.fillRect(-5, -78, 10, 5);
-      ctx.strokeStyle = '#7a5634'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(12, -46); ctx.lineTo(16, 0); ctx.stroke();
-      break;
-    }
-    case 'hedgehog': {
-      ctx.fillStyle = '#6b4f3a';
-      ctx.beginPath(); ctx.moveTo(-16, -2);
-      for (let i = 0; i <= 10; i++) { const a = Math.PI + (i / 10) * Math.PI; const r = i % 2 ? 18 : 13; ctx.lineTo(Math.cos(a) * r, -2 + Math.sin(a) * r * 0.75); }
-      ctx.fill();
-      ctx.fillStyle = '#d9b48a'; ctx.beginPath(); ctx.ellipse(15, -4, 7, 5, 0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(21, -4, 1.6, 0, Math.PI * 2); ctx.arc(15, -7, 1.2, 0, Math.PI * 2); ctx.fill();
-      break;
-    }
-    case 'acorn': {
-      ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 14;
-      ctx.fillStyle = '#e0a526'; ctx.beginPath(); ctx.ellipse(0, 3, 9, 11, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8a5a2b'; ctx.beginPath(); ctx.ellipse(0, -6, 11, 6, 0, Math.PI, 0); ctx.fill(); ctx.fillRect(-1.5, -16, 3, 6);
-      break;
-    }
+    case 'squirrel': ctx.translate(-14 + c.peek * 14, 0); art.squirrel(ctx); break;
+    case 'boar': art.boar(ctx, c.t); break;
+    case 'deer': art.deer(ctx, c.t, !(Math.sin(c.t * 0.9) > 0.85)); break;
+    case 'hiker': art.hiker(ctx, c.t); break;
+    case 'hedgehog': art.hedgehog(ctx, c.t); break;
+    case 'acorn': art.acorn(ctx, c.t); break;
   }
   ctx.restore();
   // Sternchen über getroffenen Tieren
@@ -364,18 +272,32 @@ function star(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): v
 }
 
 export function drawForest(ctx: CanvasRenderingContext2D, g: Forest): void {
-  scenery(ctx, g);
-  // hinten zuerst, damit vorne verdeckt
-  const sorted = [...g.critters].sort((a, b) => a.z - b.z);
-  for (const c of sorted) {
-    critter(ctx, c);
-    // Stamm vor dem Eichhörnchen, damit es dahinter hervorschaut
-    if (c.kind === 'squirrel') {
-      const tr = TRUNKS.find((t) => Math.abs(t.x - (c.x - c.dir * t.w * 0.5)) < 1 && t.y === c.y);
-      if (tr) { ctx.fillStyle = tr.z < 0.6 ? '#6b5a44' : '#5a4330'; ctx.fillRect(tr.x - tr.w / 2, tr.y - 40 * tr.z, tr.w, 60 * tr.z); }
-    }
+  const k = ctx.getTransform().a || 1;
+  if (cache.k !== k || !cache.bg || !cache.fg) {
+    cache.k = k;
+    cache.bg = layer(k, (c) => art.backdrop(c));
+    cache.fg = layer(k, (c) => art.foreground(c));
   }
-  bushes(ctx);
+  ctx.drawImage(cache.bg, 0, 0, W, H);
+  // Tiefe: Tiere, Kronen (etwas weiter hinten) und Stämme (etwas weiter vorn) gemeinsam sortiert
+  type Item = { z: number; draw: () => void };
+  const items: Item[] = g.critters.map((c) => ({ z: c.z, draw: () => critter(ctx, c) }));
+  for (const t of TREES) {
+    items.push({ z: t.z - 0.02, draw: () => art.crown(ctx, t.x, t.base, t.h, t.w, t.back) });
+    items.push({ z: t.z + 0.01, draw: () => art.tree(ctx, t.x, t.base, t.h, t.w, t.back) });
+  }
+  items.push({
+    z: 0.765, draw: () => {
+      ctx.save();
+      ctx.translate(HOUSE.x, HOUSE.y);
+      if (g.houseHit > 0) ctx.rotate(Math.sin(g.houseHit * 40) * 0.12);
+      art.birdhouse(ctx);
+      ctx.restore();
+    },
+  });
+  items.sort((a, b) => a.z - b.z);
+  for (const it of items) it.draw();
+  ctx.drawImage(cache.fg, 0, 0, W, H);
   for (const p of g.puffs) {
     ctx.save();
     ctx.globalAlpha = 1 - p.t / 0.6;
