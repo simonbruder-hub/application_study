@@ -1,6 +1,6 @@
 # Supabase einrichten – Synchronisation zwischen Laptop und Handy
 
-Der Pomodoro-Planer speichert alles zuerst lokal auf dem Gerät und funktioniert auch ohne Internet.
+Taktwerk speichert alles zuerst lokal auf dem Gerät und funktioniert auch ohne Internet.
 Damit Laptop und Handy dieselben Daten sehen und der laufende Timer auf beiden Geräten erscheint,
 synchronisiert die App mit einem eigenen, kostenlosen Supabase-Projekt (PostgreSQL-Datenbank,
 Anmeldung und Realtime).
@@ -21,10 +21,10 @@ Einmaliger Aufwand: etwa 15 Minuten. Du brauchst ein GitHub- oder E-Mail-Konto f
 
 1. Auf [supabase.com](https://supabase.com) mit «Start your project» ein Konto anlegen.
 2. **New project** wählen:
-   - **Name:** z. B. `pomodoro-planer`
+   - **Name:** z. B. `taktwerk`
    - **Database Password:** «Generate a password» und in deinem Passwort-Manager speichern.
      Die App braucht es nicht, du aber für spätere Wartung.
-   - **Region:** möglichst nah, z. B. *Central EU (Zurich)* oder *Central EU (Frankfurt)*.
+   - **Region:** *Central EU (Zurich)*, sonst *Central EU (Frankfurt)*.
    - **Plan:** *Free*.
 3. **Create new project** – nach ein bis zwei Minuten ist die Datenbank bereit.
 
@@ -66,11 +66,11 @@ allerersten Anmeldung «Confirm signup» und danach «Magic Link»:
 Entscheidend ist der Platzhalter `{{ .Token }}` – nur dann enthält die Mail einen Code statt
 nur eines Links. Vorschlag für beide Vorlagen:
 
-*Subject:* `Dein Anmeldecode für den Pomodoro-Planer`
+*Subject:* `Dein Anmeldecode für Taktwerk`
 
 ```html
 <h2>Dein Anmeldecode</h2>
-<p>Gib diesen Code in der Pomodoro-Planer-App ein:</p>
+<p>Gib diesen Code in der Taktwerk-App ein:</p>
 <p style="font-size:32px;font-weight:bold;letter-spacing:6px;font-family:monospace">{{ .Token }}</p>
 <p>Der Code ist eine Stunde gültig und kann nur einmal verwendet werden.</p>
 <p>Falls du dich nicht anmelden wolltest, kannst du diese E-Mail ignorieren.</p>
@@ -100,10 +100,10 @@ Technisch: `supabase.auth.signInWithOtp({ email })` und danach
 
 **Authentication → URL Configuration**
 
-- **Site URL:** `https://simonbruder-hub.github.io/application_study/pomodoro-planer/`
+- **Site URL:** `https://simonbruder-hub.github.io/application_study/taktwerk/app/`
 - **Redirect URLs** (mit «Add URL»):
-  - `https://simonbruder-hub.github.io/application_study/pomodoro-planer/**`
-  - für die Entwicklung zusätzlich `http://localhost:5173/**` (Vite) und `http://localhost:8080/**`
+  - `https://simonbruder-hub.github.io/application_study/taktwerk/**`
+  - für die Entwicklung zusätzlich `http://localhost:5173/**` (Vite) und `http://localhost:4173/**` (Vorschau)
 
 Mit Codes werden diese Adressen kaum gebraucht. Supabase lehnt aber Anfragen ab, deren
 Rücksprungadresse nicht in dieser Liste steht, deshalb sollten sie trotzdem stimmen.
@@ -114,10 +114,10 @@ Rücksprungadresse nicht in dieser Liste steht, deshalb sollten sie trotzdem sti
 
 | Wert | Beispiel | Wo eintragen |
 |---|---|---|
-| **Project URL** | `https://abcdefghijkl.supabase.co` | App → Einstellungen → Synchronisation, Feld «Projekt-URL» |
-| **anon public key** (oder neuer *Publishable key* `sb_publishable_…`) | `eyJhbGciOi…` | App → Einstellungen → Synchronisation, Feld «anon key» |
+| **Project URL** | `https://abcdefghijkl.supabase.co` | App → Einstellungen → Sync & Konto, Feld «Supabase-URL» |
+| **Publishable key** `sb_publishable_…` (oder älterer *anon public key* `eyJhbGciOi…`) | `sb_publishable_…` | App → Einstellungen → Sync & Konto, Feld «Anon-Key (public)» |
 
-Beim Selbst-Bauen der App können die Werte stattdessen in `pomodoro-planer/.env.local` stehen:
+Besser: als GitHub-Variablen `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` hinterlegen (Repository → Settings → Secrets and variables → Actions → Variables). Dann ist die Verbindung in der veröffentlichten App auf allen Geräten schon vorbelegt. Beim Selbst-Bauen können die Werte auch in `taktwerk/.env.local` stehen:
 
 ```
 VITE_SUPABASE_URL=https://abcdefghijkl.supabase.co
@@ -227,7 +227,7 @@ Abschnitt 3) und sieht dann nur seine eigenen, leeren Tabellen. Geheim bleiben m
 
 - **Aktualisieren:** Neue Fassung von `schema.sql` einfach erneut im SQL-Editor ausführen.
 - **Lokal testen** (ohne Supabase, ohne Internet): Mit installiertem PostgreSQL 16
-  (`sudo apt install postgresql-16`) im Ordner `pomodoro-planer/`
+  (`sudo apt install postgresql-16`) im Ordner `taktwerk/`
 
   ```bash
   npm run db:test        # entspricht: bash supabase/test/run.sh
