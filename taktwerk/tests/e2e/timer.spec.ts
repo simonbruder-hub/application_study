@@ -112,7 +112,7 @@ test.describe('Timer', () => {
     await expect(clock(page)).toHaveText('22:00');
   });
 
-  test('Zeiger ziehen ändert die Restzeit (auf ganze Minuten)', async ({ page }) => {
+  test('Zeiger ziehen ändert die Restzeit auf die Sekunde, auch unter 1 Minute', async ({ page }) => {
     await openApp(page);
     const wrap = await page.locator('.dial-wrap').boundingBox();
     const handle = await page.locator('.dial-handle').boundingBox();
@@ -122,15 +122,23 @@ test.describe('Timer', () => {
     const r = wrap.width * 0.39;
     await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
     await page.mouse.down();
-    // gegen den Uhrzeigersinn von 12 Uhr nach 9 Uhr: drei Viertel von 25 Minuten = 19 Minuten
-    for (const a of [350, 330, 310, 290, 270]) {
-      const rad = (a * Math.PI) / 180;
-      await page.mouse.move(cx + r * Math.sin(rad), cy - r * Math.cos(rad));
-    }
-    await expect(clock(page)).toHaveText('19:00');
+    const to = async (angles: number[]) => {
+      for (const a of angles) {
+        const rad = (a * Math.PI) / 180;
+        await page.mouse.move(cx + r * Math.sin(rad), cy - r * Math.cos(rad));
+      }
+    };
+    // gegen den Uhrzeigersinn von 12 Uhr nach 9 Uhr: drei Viertel von 25 Minuten = 18:45
+    await to([350, 330, 310, 290, 270]);
+    await expect(clock(page)).toHaveText(/^18:4\d$/);
+    // weiter bis kurz vor 12 Uhr: wenige Sekunden
+    await to([200, 120, 40, 4]);
+    await expect(clock(page)).toHaveText(/^00:[12]\d$/);
     await page.mouse.up();
-    await expect(clock(page)).toHaveText('19:00');
+    await expect(clock(page)).toHaveText(/^00:[12]\d$/);
     await page.locator('.dial-handle').press('ArrowUp');
-    await expect(clock(page)).toHaveText('20:00');
+    await expect(clock(page)).toHaveText(/^01:[12]\d$/);
+    await page.locator('.dial-handle').press('Shift+ArrowDown');
+    await expect(clock(page)).toHaveText(/^01:[01]\d$/);
   });
 });

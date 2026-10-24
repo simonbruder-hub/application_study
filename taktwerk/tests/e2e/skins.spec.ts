@@ -26,4 +26,32 @@ test.describe('Stile', () => {
     await expect(page.locator('html')).toHaveAttribute('data-skin', 'barock');
     await expect(page.locator('.skin-opt.is-on')).toContainText('Barock');
   });
+
+  test('Sci-Fi: Space Rider in der Pause spielen, Tasten gehen nicht an den Timer', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'scifi', notifyAsked: true })));
+    await page.clock.install();
+    await openApp(page);
+    await expect(page.locator('.sr-open')).toHaveCount(0);
+    await page.locator('.phase-tab', { hasText: 'Kurze Pause' }).click();
+    await page.locator('.btn-start').click();
+    await page.locator('.sr-open').click();
+    await expect(page.locator('.sr-layer')).toBeVisible();
+    await page.locator('.sr-go').click();
+    await expect(page.locator('.sr-screen')).toHaveCount(0);
+    await page.keyboard.down('ArrowRight');
+    await page.keyboard.press(' ');
+    await page.keyboard.up('ArrowRight');
+    await expect(page.locator('html')).toHaveAttribute('data-run', '1');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.sr-screen h2')).toHaveText('Pausiert');
+    await page.keyboard.press('p');
+    await expect(page.locator('.sr-screen')).toHaveCount(0);
+    // Pause vorbei: das Spiel hält an und schickt zurück an die Arbeit
+    await page.clock.fastForward('05:02');
+    await expect(page.locator('.sr-screen h2')).toHaveText('Pause vorbei');
+    await page.locator('.sr-go').click();
+    await expect(page.locator('.sr-layer')).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
 });

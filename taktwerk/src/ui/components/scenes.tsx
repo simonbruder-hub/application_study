@@ -62,22 +62,79 @@ export function MeerScene() {
 
 /* ---------- Flora ---------- */
 
-function MeadowFlower({ x, h, c, kind }: { x: number; h: number; c: string; kind: number }) {
+function MeadowFlower({ x, h, c, kind, back }: { x: number; h: number; c: string; kind: number; back?: boolean }) {
   const y = 80 - h;
+  const ring = (n: number, rx: number, ry: number, d: number) =>
+    Array.from({ length: n }, (_, k) => <ellipse key={k} class="mf-petal" cx={x} cy={y - d} rx={rx} ry={ry} transform={`rotate(${(360 / n) * k} ${x} ${y})`} />);
   return (
-    <g class="mf" style={{ '--c': c, transformOrigin: `${x}px 80px` }}>
+    <g class={back ? 'mf back' : 'mf'} style={{ '--c': c, transformOrigin: `${x}px 80px` }}>
       <path class="mf-stem" d={`M${x} 80 Q${x - 3} ${80 - h / 2} ${x} ${y}`} />
+      {h > 26 && <ellipse class="mf-leaf" cx={x + 4} cy={80 - h * 0.35} rx="4" ry="1.8" transform={`rotate(-30 ${x + 4} ${80 - h * 0.35})`} />}
       {kind === 0 && <path class="mf-tulip" d={`M${x - 6} ${y} Q${x - 7} ${y - 12} ${x - 3} ${y - 13} L${x} ${y - 8} L${x + 3} ${y - 13} Q${x + 7} ${y - 12} ${x + 6} ${y} Q${x} ${y + 4} ${x - 6} ${y} Z`} />}
-      {kind === 1 && <g>{[0, 60, 120, 180, 240, 300].map((a) => <ellipse key={a} class="mf-petal" cx={x} cy={y - 6} rx="2.6" ry="6" transform={`rotate(${a} ${x} ${y})`} />)}<circle class="mf-core" cx={x} cy={y} r="2.8" /></g>}
-      {kind === 2 && <g>{[0, 1, 2, 3].map((k) => <circle key={k} class="mf-bell" cx={x + (k % 2 ? 3 : -3)} cy={y - k * 4} r="2.8" />)}</g>}
+      {kind === 1 && <g>{ring(6, 2.6, 6, 6)}<circle class="mf-core" cx={x} cy={y} r="2.8" /></g>}
+      {kind === 2 && <g>{[0, 1, 2, 3, 4].map((k) => <circle key={k} class="mf-bell" cx={x + (k % 2 ? 2.6 : -2.6)} cy={y - k * 3.6} r={2.9 - k * 0.3} />)}</g>}
+      {kind === 3 && <g class="mf-sun">{ring(12, 2.2, 6.5, 7)}<circle class="mf-seed" cx={x} cy={y} r="4.4" /></g>}
+      {kind === 4 && <g>{ring(4, 5, 5.4, 4)}<circle class="mf-eye" cx={x} cy={y} r="2" /></g>}
+      {kind === 5 && <g class="mf-rose"><circle cx={x} cy={y} r="6" /><path d={`M${x - 3} ${y} a3 3 0 1 1 3 3 a4.5 4.5 0 1 1 4.5 -4.5`} /></g>}
+      {kind === 6 && <g class="mf-puff"><circle cx={x} cy={y} r="6.5" /><circle class="mf-core" cx={x} cy={y} r="1.4" /></g>}
     </g>
   );
 }
 
-const MEADOW: [number, number, string, number][] = [
-  [14, 34, '#e63946', 0], [34, 26, '#ffffff', 1], [52, 40, '#c77dff', 2], [74, 30, '#ffb703', 1], [96, 22, '#ff8fab', 0],
-  [300, 28, '#ff8fab', 1], [320, 38, '#e63946', 0], [342, 24, '#ffffff', 1], [362, 36, '#c77dff', 2], [384, 30, '#ffb703', 0],
-];
+/** Deterministische Zufallszahl 0..1 für die Wiese (gleich bei jedem Laden) */
+const rnd = (i: number) => ((i * 9301 + 49297) % 233280) / 233280;
+const BLOOM = ['#e63946', '#ffffff', '#c77dff', '#ffb703', '#ff8fab', '#4cc9f0', '#ff6d00', '#f72585'];
+/** Wiese über die ganze Breite: hintere Reihe klein und blass, vordere Reihe gross; Arten 0 bis 6 */
+const MEADOW_BACK: [number, number, string, number][] = Array.from({ length: 26 }, (_, i) =>
+  [8 + i * 15 + rnd(i) * 6, 12 + rnd(i + 40) * 8, BLOOM[i % BLOOM.length]!, [1, 2, 4, 1, 6][i % 5]!]);
+const MEADOW: [number, number, string, number][] = Array.from({ length: 30 }, (_, i) => {
+  const kind = Math.floor(rnd(i + 7) * 7);
+  return [4 + i * 13.2 + rnd(i + 3) * 5, 20 + rnd(i + 11) * 16, kind === 3 ? '#ffc300' : kind === 4 ? '#d00000' : kind === 5 ? '#e5383b' : BLOOM[(i * 3) % BLOOM.length]!, kind];
+});
+
+/** Kletterrosen in den oberen Ecken der Karte */
+function Vine({ side }: { side: 'l' | 'r' }) {
+  return (
+    <svg class={`vine vine-${side}`} viewBox="0 0 120 120">
+      <path class="vine-stem" d="M0 4 C30 10 46 24 52 46 S70 84 66 116 M0 30 C18 34 26 46 24 62 M20 0 C38 18 64 18 84 8" />
+      {[[16, 9, 30], [40, 24, -40], [30, 48, 20], [58, 66, -30], [70, 15, 40], [62, 98, 10], [10, 34, -10]].map(([x, y, a], i) => (
+        <ellipse key={i} class="vine-leaf" cx={x} cy={y} rx="7" ry="3.2" transform={`rotate(${a} ${x} ${y})`} />
+      ))}
+      {[[52, 46, 8, '#e63946'], [24, 62, 6, '#ff8fab'], [84, 8, 7, '#ff8fab'], [66, 84, 6.5, '#e63946'], [6, 12, 5, '#ffffff']].map(([x, y, r, c], i) => (
+        <g key={i} class="vine-rose" style={{ '--c': c, '--i': i }}>
+          <circle cx={x} cy={y} r={r} />
+          <path d={`M${(x as number) - (r as number) / 2} ${y} a${(r as number) / 2} ${(r as number) / 2} 0 1 1 ${(r as number) / 2} ${(r as number) / 2} a${(r as number) * 0.75} ${(r as number) * 0.75} 0 1 1 ${(r as number) * 0.75} ${-(r as number) * 0.75}`} />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** Blütenkranz hinter dem Zifferblatt (Flora): Blüten wechseln Farbe, der Kranz dreht sich langsam beim Lauf */
+export function FloraWreath() {
+  return (
+    <svg class="wreath" viewBox="0 0 320 320">
+      <g class="wreath-turn">
+        {Array.from({ length: 18 }, (_, i) => {
+          const a = (i / 18) * 2 * Math.PI;
+          const x = 160 + 146 * Math.sin(a);
+          const y = 160 - 146 * Math.cos(a);
+          const lx = 160 + 146 * Math.sin(a + Math.PI / 18);
+          const ly = 160 - 146 * Math.cos(a + Math.PI / 18);
+          return (
+            <g key={i}>
+              <ellipse class="wr-leaf" cx={lx} cy={ly} rx="7" ry="3" transform={`rotate(${(i + 0.5) * 20} ${lx} ${ly})`} />
+              <g class="wr-bloom" style={{ '--c': BLOOM[i % BLOOM.length], '--i': i }}>
+                {[0, 72, 144, 216, 288].map((r) => <ellipse key={r} cx={x} cy={y - 5} rx="3.6" ry="5.4" transform={`rotate(${r} ${x} ${y})`} />)}
+                <circle class="wr-core" cx={x} cy={y} r="2.6" />
+              </g>
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  );
+}
 
 function Bee() {
   return <span class="bee"><i class="bee-w" /><i class="bee-w" /></span>;
@@ -87,14 +144,17 @@ export function FloraScene() {
   return (
     <Deco>
       <div class="pollen">{many(10)}</div>
+      <Vine side="l" /><Vine side="r" />
       <svg class="meadow" viewBox="0 0 400 80" preserveAspectRatio="xMidYMax slice">
+        <path class="grass-back" d="M0 80 V62 Q30 56 60 62 T120 60 T180 62 T240 58 T300 62 T360 58 T400 60 V80 Z" />
+        {MEADOW_BACK.map(([x, h, c, k]) => <MeadowFlower key={`b${x}`} x={x} h={h + 6} c={c} kind={k} back />)}
         <path class="grass" d="M0 80 V70 Q20 62 40 70 T80 68 T120 70 T160 66 T200 70 T240 66 T280 70 T320 66 T360 70 T400 66 V80 Z" />
         {MEADOW.map(([x, h, c, k]) => <MeadowFlower key={x} x={x} h={h} c={c} kind={k} />)}
       </svg>
       <div class="bees"><Bee /><Bee /><Bee /></div>
       <span class="ladybug"><i /></span>
       <span class="beetle"><i /></span>
-      <div class="petals flora-petals">{many(6)}</div>
+      <div class="petals flora-petals">{many(12)}</div>
       <div class="butterflies flora-butterflies">{[0, 1].map((i) => <span key={i}><i /><i /></span>)}</div>
       <div class="fireflies">{many(7)}</div>
     </Deco>
@@ -112,6 +172,20 @@ export function ScifiScene() {
       <div class="radar"><i /></div>
       <div class="planet"><i class="ring" /></div>
       <div class="comets">{many(2)}</div>
+      <div class="dogfight">
+        {[0, 1, 2].map((k) => (
+          <div key={k} class="df-lane">
+            <span class="df-ship">
+              <svg viewBox="0 0 44 22"><path d="M44 11 L26 4 L14 1 L8 6 L0 8 L0 14 L8 16 L14 21 L26 18 Z" /><path class="df-cockpit" d="M30 9 L37 11 L30 13 Z" /></svg>
+              <i class="df-flame" /><i class="df-laser" /><i class="df-laser" />
+            </span>
+            <span class="df-enemy">
+              <svg viewBox="0 0 32 22"><path d="M0 11 L12 2 L32 6 L24 11 L32 16 L12 20 Z" /><circle cx="13" cy="11" r="3" /></svg>
+              <i class="df-boom" />
+            </span>
+          </div>
+        ))}
+      </div>
     </Deco>
   );
 }
@@ -151,21 +225,108 @@ export function ElementMarks() {
 
 /* ---------- Zug ---------- */
 
-const ALPS = 'M0 60 L40 30 L70 44 L110 12 L150 40 L190 22 L230 46 L270 18 L310 38 L350 24 L400 60 L440 30 L470 44 L510 12 L550 40 L590 22 L630 46 L670 18 L710 38 L750 24 L800 60 V80 H0 Z';
+/** Landschaft, die sich nahtlos wiederholt: eine Periode von 400 Einheiten, zweimal gezeichnet (Breite 800) */
+const tile = (pts: readonly (readonly [number, number])[], base: number) => {
+  const line = [0, 400].flatMap((o) => pts.map(([x, y]) => `${x + o} ${y}`)).join(' L');
+  return `M0 ${base} L${line} L800 ${base} Z`;
+};
+const ALPS = tile([[0, 60], [40, 30], [70, 44], [110, 12], [150, 40], [190, 22], [230, 46], [270, 18], [310, 38], [350, 24], [400, 60]], 80);
 const SNOW = 'M100 21 L110 12 L120 21 L113 19 L107 23 Z M260 27 L270 18 L280 27 L273 25 L267 29 Z M500 21 L510 12 L520 21 L513 19 L507 23 Z M660 27 L670 18 L680 27 L673 25 L667 29 Z';
-const HILLS = 'M0 70 Q100 40 200 66 T400 62 T600 66 T800 62 V80 H0 Z';
+const PEAKS = tile([[0, 70], [30, 48], [55, 58], [95, 26], [130, 52], [165, 38], [205, 64], [245, 30], [285, 54], [320, 42], [360, 62], [400, 70]], 80);
+const HILLS = 'M0 66 Q100 40 200 66 T400 66 T600 66 T800 66 V80 H0 Z';
+/** Tannen in Reihe: Höhe je Baum leicht verschieden, Periode 400 */
+const FIRS = [0, 400].flatMap((o) => Array.from({ length: 16 }, (_, i) => {
+  const x = o + i * 25 + (i % 3) * 4;
+  const h = 16 + ((i * 7) % 5) * 4;
+  return `M${x - 7} 40 L${x} ${40 - h} L${x + 7} 40 Z`;
+})).join(' ');
 
-export function ZugScene() {
+/** Zug auf dem Gleis unten: zwei Wagen und eine Lok, Räder drehen sich während der Fahrt */
+function Train() {
+  const wheels = [10, 26, 44, 60, 82, 98, 116, 132, 152, 168, 192, 208];
+  return (
+    <svg class="z-train" viewBox="0 0 222 46">
+      <g class="z-body">
+        {[0, 72].map((x) => (
+          <g key={x}>
+            <rect class="z-car" x={x} y="10" width="68" height="26" rx="4" />
+            <rect class="z-band" x={x} y="27" width="68" height="3" />
+            {[0, 1, 2, 3, 4].map((i) => <rect key={i} class="z-win" x={x + 5 + i * 12.4} y="14" width="9" height="9" rx="1.5" />)}
+          </g>
+        ))}
+        <path class="z-car z-loco" d="M144 10 H194 Q213 12 218 30 V36 H144 Z" />
+        <path class="z-win" d="M198 14 Q209 16 213 26 H198 Z" />
+        <rect class="z-band" x="144" y="27" width="72" height="3" />
+        <rect class="z-door" x="182" y="14" width="9" height="16" rx="1" />
+        <path class="z-panto" d="M158 10 L168 2 L178 10 M162 2 H176" />
+        <circle class="z-lamp" cx="215" cy="31" r="1.6" />
+      </g>
+      {wheels.map((x) => (
+        <g key={x} transform={`translate(${x} 39)`}>
+          <g class="z-wheel"><circle r="5" /><path d="M-3.5 0 H3.5 M0 -3.5 V3.5" /></g>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** Kleiner Bahnhof (kurze Pause): Haus, Bahnsteig, Ortsschild, Bahnhofsuhr */
+function Station({ name }: { name: string }) {
+  return (
+    <div class="station">
+      <svg class="st-house" viewBox="0 0 120 70">
+        <path class="st-roof" d="M2 26 L60 4 L118 26 Z" />
+        <rect class="st-wall" x="10" y="26" width="100" height="40" />
+        <rect class="st-door" x="52" y="44" width="16" height="22" />
+        {[18, 32, 76, 90].map((x) => <rect key={x} class="st-window" x={x} y="46" width="10" height="11" />)}
+        <rect class="st-platform" x="0" y="64" width="120" height="6" />
+      </svg>
+      <span class="st-sign">{name}</span>
+      <span class="clock-z"><i /></span>
+    </div>
+  );
+}
+
+/** Hauptbahnhof (lange Pause): Glasdach über die ganze Karte, Säulen, Bahnhofsuhr und Abfahrtstafel */
+const HB_ARCH = (lift: number) => `M-10 ${110 + lift} Q200 ${-70 + lift} 410 ${110 + lift}`;
+/** Höhe des äussersten Bogens bei x (quadratische Bézierkurve, x läuft linear) */
+const archY = (x: number) => { const t = (x + 10) / 420; return 110 * (1 - t) ** 2 - 140 * (1 - t) * t + 110 * t ** 2; };
+function MainStation() {
+  return (
+    <div class="hb">
+      <svg class="hb-hall" viewBox="0 0 400 300" preserveAspectRatio="none">
+        <path class="hb-glass" d={`${HB_ARCH(0)} V300 H-10 Z`} />
+        {[40, 80, 120, 160, 200, 240, 280, 320, 360].map((x) => <path key={x} class="hb-rib" d={`M${x} ${archY(x)} V300`} />)}
+        {[0, 34, 68].map((l) => <path key={l} class={l ? 'hb-rib' : 'hb-arch'} d={HB_ARCH(l)} />)}
+        <rect class="hb-pillar" x="0" y="100" width="7" height="200" />
+        <rect class="hb-pillar" x="393" y="100" width="7" height="200" />
+      </svg>
+      <span class="clock-z hb-clock"><i /></span>
+      <div class="hb-board">
+        <b>Zürich HB<small>Abfahrt</small></b>
+        <span><i>IC 1</i>Genève-Aéroport<em>7</em></span>
+        <span><i>IR 70</i>Luzern<em>12</em></span>
+        <span><i>EC</i>Milano Centrale<em>9</em></span>
+      </div>
+    </div>
+  );
+}
+
+/** Zug: Fahrt durch die Alpen im Fokus, Halt an einem Bahnhof (kurze Pause) oder im Hauptbahnhof (lange Pause) */
+export function ZugScene({ station }: { station: string }) {
   return (
     <Deco>
       <div class="sky-z" />
       <svg class="alps" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={ALPS} /><path class="snow" d={SNOW} /></svg>
+      <svg class="peaks" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={PEAKS} /></svg>
       <svg class="hills" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={HILLS} /></svg>
+      <svg class="firs" viewBox="0 0 800 40" preserveAspectRatio="none"><path d={FIRS} /></svg>
       <div class="poles">{many(3)}</div>
-      <div class="rails" />
+      <Station name={station} />
+      <MainStation />
+      <div class="rails"><i class="sleepers" /><i class="rail" /><i class="rail" /></div>
+      <Train />
       <div class="steam">{many(6)}</div>
-      <div class="platform"><span class="sign">Gleis 3</span><span class="clock-z"><i /></span></div>
-      <div class="tunnel-lights">{many(6)}</div>
     </Deco>
   );
 }

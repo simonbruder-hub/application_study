@@ -13,6 +13,9 @@ import {
 import { cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, scheduleChime, type ChimeKind } from './signals';
 import type { DevicePrefs } from '../prefs';
 
+/** Kürzeste Restzeit beim Anpassen (Zeiger ziehen, −5): einige Sekunden, damit die Phase nicht sofort endet */
+const MIN_REST_S = 5;
+
 const chimeFor = (phase: TimerPhase): ChimeKind => (phase === 'focus' ? 'focusEnd' : phase === 'short_break' ? 'shortEnd' : 'longEnd');
 
 export const PHASE_LABEL: Record<TimerPhase, string> = {
@@ -173,7 +176,7 @@ export class TimerController {
   }
 
   /**
-   * Pomodoro: geplante Dauer anpassen (±Minuten), auch im Ruhezustand.
+   * Pomodoro: geplante Dauer anpassen (±Minuten, auch Bruchteile), auch im Ruhezustand.
    * Stechuhr: erfasste Zeit korrigieren (z. B. zu spät gestartet → +5).
    */
   async adjust(minutes: number): Promise<void> {
@@ -182,13 +185,22 @@ export class TimerController {
       if (s.kind !== 'pomodoro') return s;
       if (s.status === 'idle') {
         const base = s.planned_seconds ?? this.phaseSeconds(s.phase);
-        return { ...s, planned_seconds: Math.max(60, base + minutes * 60) };
+        return { ...s, planned_seconds: Math.max(MIN_REST_S, Math.round(base + minutes * 60)) };
       }
-      // laufende Phase: Restzeit darf nicht unter 1 Minute fallen
-      const now = this.now();
-      const rest = remainingMs(s, now) ?? 0;
-      const delta = Math.max(minutes * 60, Math.ceil((60_000 - rest) / 1000));
-      return adjustPlannedSeconds(s, delta);
+      // laufende Phase: Restzeit darf nicht unter MIN_REST_S fallen
+      const rest = remainingMs(s, this.now()) ?? 0;
+      return adjustPlannedSeconds(s, Math.max(minutes * 60, (MIN_REST_S * 1000 - rest) / 1000));
+    });
+  }
+
+  /** Pomodoro: Restzeit auf genau so viele Sekunden setzen (Zeiger ziehen); im Ruhezustand die ganze Dauer */
+  async setRest(seconds: number): Promise<void> {
+    const target = Math.max(MIN_REST_S, Math.round(seconds));
+    await this.o.timerSync.transition((s) => {
+      if (s.kind !== 'pomodoro') return s;
+      if (s.status === 'idle') return { ...s, planned_seconds: target };
+      const rest = remainingMs(s, this.now()) ?? 0;
+      return adjustPlannedSeconds(s, target - rest / 1000);
     });
   }
 

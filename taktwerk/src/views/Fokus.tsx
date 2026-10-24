@@ -82,12 +82,12 @@ function TimerCard() {
     // Läuft gerade die Feier (Pomodoro geschafft), kommt die Einblendung erst danach
     setCut((c) => ({ phase: v.phase, n: (c?.n ?? 0) + 1, late: flashMood.peek() === 'yay' }));
   }, [v.phase]);
-  // Zeiger ziehen (nur Pomodoro): Vorschau während des Ziehens, beim Loslassen auf ganze Minuten
+  // Zeiger ziehen (nur Pomodoro): Vorschau während des Ziehens, beim Loslassen auf die Sekunde genau
   const [dragFrac, setDragFrac] = useState<number | null>(null);
   const planned = v.plannedSec ?? 0;
   const restSec = v.frac * planned;
-  /** Neue Restzeit für einen Zeiger-Anteil: ganze Minuten, mindestens 1, höchstens 3 Stunden */
-  const restFor = (f: number) => Math.min(180, Math.max(1, Math.round((f * planned) / 60))) * 60;
+  /** Neue Restzeit für einen Zeiger-Anteil: ganze Sekunden, mindestens 5 s, höchstens 3 Stunden */
+  const restFor = (f: number) => Math.min(180 * 60, Math.max(5, Math.round(f * planned)));
   const dragRest = dragFrac !== null ? restFor(dragFrac) : null;
   const shownClock = dragRest !== null ? fmtClock(dragRest) : v.clock;
   const every = Math.max(1, set.long_break_every);
@@ -137,10 +137,10 @@ function TimerCard() {
         <Dial frac={dragFrac !== null ? Math.min(1, dragFrac) : v.frac} trail={v.kind === 'stopwatch' ? -1 : 1} {...DIAL_STYLE[skin]} />
         {v.kind === 'pomodoro' && planned > 0 && (
           <DialHandle
-            frac={dragFrac ?? v.frac} minutes={Math.round(restSec / 60)}
-            label="Restzeit: Zeiger ziehen oder mit Pfeiltasten in Minuten ändern" valueText={`${Math.round(restSec / 60)} Minuten`}
+            frac={dragFrac ?? v.frac} seconds={Math.round(restSec)}
+            label="Restzeit: Zeiger ziehen, Pfeiltasten ändern um 1 Minute, mit Umschalt um 10 Sekunden" valueText={fmtClock(restSec)}
             onDrag={setDragFrac}
-            onCommit={(f) => { const target = restFor(f); if (Math.abs(target - restSec) >= 1) void timer.adjust((target - restSec) / 60); }}
+            onCommit={(f) => { const target = restFor(f); if (Math.abs(target - restSec) >= 1) void timer.setRest(target); }}
             onStep={(m) => void timer.adjust(m)}
           />
         )}

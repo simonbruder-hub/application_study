@@ -1,5 +1,5 @@
-/* Zug: Bahnfahrt durch die Alpen. Fokus = Fahrt (Landschaft zieht vorbei), kurze Pause = Halt am Bahnsteig,
- * lange Pause = Abend und Tunnel. Zeiger: eine Lokomotive auf dem Gleisring. */
+/* Zug: Bahnfahrt durch die Alpen. Fokus = Fahrt (Landschaft zieht vorbei), kurze Pause = Halt an einem Bahnhof,
+ * lange Pause = Halt im Hauptbahnhof am Abend. Zeiger: eine Lokomotive auf dem Gleisring. */
 :root[data-skin="zug"] {
   --bg: #eef1f4;
   --bg-layers: linear-gradient(180deg, #e4ecf3, #f3f5f7 60%, #e9ece6);
@@ -35,42 +35,100 @@
 [data-skin="zug"] .dial-knob { fill: var(--phase); stroke: #161b22; stroke-width: 1.2; }
 [data-skin="zug"] .theme-badge { border-radius: 4px; background: var(--phase); color: #ffffff; letter-spacing: 0.12em; }
 
-/* Landschaft in Ebenen: Berge langsam, Hügel schneller, Masten am schnellsten (nur während der Fahrt) */
+/* Landschaft in Ebenen wie aus dem Zugfenster: ferne Alpen langsam, nahe Berge, Hügel, Tannen,
+ * Masten und Schwellen immer schneller. Nur im laufenden Fokus, in den Pausen steht der Zug im Bahnhof. */
 .sky-z { inset: 0; opacity: 0; transition: opacity 1.6s; background: linear-gradient(180deg, color-mix(in srgb, #f4a261 30%, transparent), transparent 60%); }
 :root[data-phase="long"] .sky-z { opacity: 1; }
-.alps, .hills { left: 0; width: 200%; animation: drift 80s linear infinite paused; }
-.alps { bottom: 46px; height: 90px; fill: color-mix(in srgb, #6c7a89 45%, var(--surface)); }
+.alps, .peaks, .hills, .firs { left: 0; width: 200%; animation: drift 70s linear infinite paused; }
+.alps { bottom: 58px; height: 120px; fill: color-mix(in srgb, #7d8fa3 40%, var(--surface)); }
 .alps .snow { fill: #ffffff; opacity: calc(1 - var(--dusk) * 0.5); }
-.hills { bottom: 26px; height: 60px; fill: color-mix(in srgb, #2a9d8f 40%, var(--surface)); animation-duration: 30s; }
-:root[data-phase="focus"][data-run="1"] :is(.alps, .hills) { animation-play-state: running; }
-.poles { left: 0; right: 0; bottom: 26px; height: 70px; display: none; }
+.peaks { bottom: 40px; height: 92px; fill: color-mix(in srgb, #4f6272 55%, var(--surface)); animation-duration: 30s; }
+.hills { bottom: 24px; height: 64px; fill: color-mix(in srgb, #2a9d8f 45%, var(--surface)); animation-duration: 14s; }
+.firs { bottom: 24px; height: 34px; fill: color-mix(in srgb, #1f5e4a 75%, var(--surface)); animation-duration: 7s; }
+:root[data-skin="zug"][data-phase="focus"][data-run="1"] :is(.alps, .peaks, .hills, .firs) { animation-play-state: running; }
+.poles { left: 0; right: 0; bottom: 24px; height: 74px; display: none; }
 :root[data-phase="focus"][data-run="1"] .poles { display: block; }
-.poles i { position: absolute; left: 0; bottom: 0; width: 3px; height: 64px; background: #4a3a2a; animation: across 2.4s linear infinite; }
-.poles i::before { content: ""; position: absolute; left: -9px; top: 6px; width: 21px; height: 3px; background: #4a3a2a; }
-.poles i:nth-child(2) { animation-delay: -0.8s; } .poles i:nth-child(3) { animation-delay: -1.6s; }
-.rails { left: 0; right: 0; bottom: 0; height: 26px; background: repeating-linear-gradient(90deg, #7a5634 0 8px, transparent 8px 22px) 0 6px / 100% 12px no-repeat, linear-gradient(#8d99a6, #8d99a6) 0 7px / 100% 2px no-repeat, linear-gradient(#8d99a6, #8d99a6) 0 15px / 100% 2px no-repeat, color-mix(in srgb, #b9a88a 40%, var(--surface)); }
-:root[data-phase="focus"][data-run="1"] .rails { animation: rails 0.4s linear infinite; }
-@keyframes rails { to { background-position: -22px 6px, 0 7px, 0 15px, 0 0; } }
-/* Dampfwolken der Lok */
-.steam { left: 18%; bottom: 120px; width: 0; height: 0; display: none; }
-:root[data-run="1"] .steam { display: block; }
-.steam i { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: color-mix(in srgb, #ffffff 80%, var(--surface-3)); opacity: 0; animation: puff 2.4s ease-out infinite; }
+.poles i { position: absolute; left: 0; bottom: 0; width: 4px; height: 70px; background: #4a3a2a; animation: across 1.5s linear infinite; }
+.poles i::before { content: ""; position: absolute; left: -10px; top: 6px; width: 24px; height: 3px; background: #4a3a2a; }
+.poles i:nth-child(2) { animation-delay: -0.5s; } .poles i:nth-child(3) { animation-delay: -1s; }
+/* Gleis: Schotter, Schwellen ziehen schnell durch, darüber die Schienen */
+.rails { left: 0; right: 0; bottom: 0; height: 24px; background: color-mix(in srgb, #b9a88a 45%, var(--surface)); }
+.rails i { position: absolute; left: 0; right: 0; }
+.rails .sleepers { top: 5px; height: 14px; background: repeating-linear-gradient(90deg, #7a5634 0 9px, transparent 9px 24px); }
+.rails .rail { height: 3px; background: linear-gradient(#c4ccd5, #6f7a86); top: 7px; }
+.rails .rail + .rail { top: 14px; }
+:root[data-skin="zug"][data-phase="focus"][data-run="1"] .sleepers { animation: sleepers 0.16s linear infinite; }
+@keyframes sleepers { to { background-position: -24px 0; } }
+/* Gleisring um die Uhr: die Schwellen laufen unter der Lok durch */
+:root[data-skin="zug"][data-phase="focus"][data-run="1"] .dial-track { animation: ring-sleepers 0.9s linear infinite; }
+@keyframes ring-sleepers { to { stroke-dashoffset: -10; } }
+[data-skin="zug"] .timer-card { padding-bottom: 92px; }
+/* Der Zug auf dem Gleis: steht still, Räder drehen und Wagen wippen nur während der Fahrt */
+.z-train { left: 5%; bottom: 10px; width: clamp(150px, 40cqw, 210px); height: auto; overflow: visible; }
+.z-car { fill: #c1121f; stroke: #5c0a10; stroke-width: 1; }
+.z-loco { fill: #d62828; }
+.z-band { fill: #ffffff; opacity: 0.9; }
+.z-win { fill: color-mix(in srgb, #bde0fe 70%, var(--surface)); stroke: #5c0a10; stroke-width: 0.6; }
+.z-door { fill: #9b0f19; }
+.z-panto { fill: none; stroke: #3a3a3a; stroke-width: 1.4; }
+.z-lamp { fill: #fff3b0; }
+:root[data-phase="long"] .z-lamp { filter: drop-shadow(0 0 4px #ffd166); }
+.z-wheel circle { fill: #2b2b2b; stroke: #7a7a7a; stroke-width: 1.2; }
+.z-wheel path { stroke: #bdbdbd; stroke-width: 1; }
+.z-wheel { animation: orbit 0.5s linear infinite paused; }
+.z-body { animation: z-bob 0.36s ease-in-out infinite alternate paused; }
+:root[data-skin="zug"][data-phase="focus"][data-run="1"] :is(.z-wheel, .z-body) { animation-play-state: running; }
+@keyframes z-bob { to { transform: translateY(-0.8px); } }
+/* Dampf aus der Lok: kräftig während der Fahrt, leise beim Halt */
+.steam { left: calc(5% + clamp(150px, 40cqw, 210px) * 0.8); bottom: 46px; width: 0; height: 0; display: none; }
+:root[data-skin="zug"][data-run="1"] .steam { display: block; }
+.steam i { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: color-mix(in srgb, #ffffff 80%, var(--surface-3)); opacity: 0; animation: puff 2.4s ease-out infinite; }
 .steam i:nth-child(2) { animation-delay: -0.4s; } .steam i:nth-child(3) { animation-delay: -0.8s; } .steam i:nth-child(4) { animation-delay: -1.2s; } .steam i:nth-child(5) { animation-delay: -1.6s; } .steam i:nth-child(6) { animation-delay: -2s; }
-@keyframes puff { from { transform: translate(0, 0) scale(0.4); opacity: 0.9; } to { transform: translate(-90px, -50px) scale(2.4); opacity: 0; } }
-/* Halt am Bahnsteig (kurze Pause): Schild und Bahnhofsuhr */
-.platform { right: 16px; top: 56px; display: none; gap: 8px; align-items: center; }
-:root[data-phase="short"] .platform { display: flex; }
-.platform .sign { font: 800 13px/1 var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; color: #ffffff; background: #1d3557; padding: 6px 10px; border-radius: 3px; }
-.clock-z { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; border: 3px solid #161b22; }
+:root:not([data-phase="focus"]) .steam i { animation-name: puff-idle; animation-duration: 4s; }
+@keyframes puff { from { transform: translate(0, 0) scale(0.4); opacity: 0.9; } to { transform: translate(-110px, -40px) scale(2.4); opacity: 0; } }
+@keyframes puff-idle { from { transform: translate(0, 0) scale(0.4); opacity: 0.7; } to { transform: translate(-6px, -46px) scale(1.8); opacity: 0; } }
+/* Einfahrt: der Bahnhof gleitet heran und bleibt stehen, als bremse der Zug */
+.station, .hb { display: none; animation: arrive 2.8s cubic-bezier(0.12, 0.75, 0.25, 1) both; }
+:root[data-phase="short"] .station, :root[data-phase="long"] .hb { display: block; }
+@keyframes arrive { from { transform: translateX(75cqw); } }
+/* Kleiner Bahnhof (kurze Pause) */
+.station { right: 6%; bottom: 24px; width: clamp(110px, 28cqw, 128px); }
+.st-house { display: block; width: 100%; height: auto; }
+.st-roof { fill: #9c3d2b; }
+.st-wall { fill: #f1e3c8; stroke: #8a6a44; stroke-width: 1; }
+.st-door { fill: #6b4a2b; }
+.st-window { fill: #bde0fe; stroke: #6b4a2b; stroke-width: 1; }
+.st-platform { fill: #9aa3ad; }
+.st-sign {
+  position: absolute; left: 50%; top: 36%; translate: -50% 0; white-space: nowrap;
+  font: 800 13px/1 var(--font-display); letter-spacing: 0.04em; color: #ffffff; background: #1d3557; padding: 5px 10px; border-radius: 3px; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #1d3557;
+}
+.station .clock-z { position: absolute; right: -16px; top: 8px; }
+/* Hauptbahnhof (lange Pause): Glasdach über die ganze Karte, Tafel und Uhr */
+.hb { inset: 0; }
+.hb-hall { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hb-glass { fill: color-mix(in srgb, #bde0fe 16%, transparent); }
+.hb-arch { fill: none; stroke: #46525f; stroke-width: 4; vector-effect: non-scaling-stroke; opacity: 0.7; }
+.hb-rib { fill: none; stroke: #46525f; stroke-width: 1.2; vector-effect: non-scaling-stroke; opacity: 0.35; }
+.hb-pillar { fill: #46525f; opacity: 0.8; }
+.hb-board {
+  position: absolute; right: 4%; bottom: 26px; display: grid; gap: 2px; padding: 6px 8px; min-width: 150px; border-radius: 4px;
+  background: #0d1b2a; color: #ffffff; font: 600 10px/1.25 var(--font-display); letter-spacing: 0.02em; box-shadow: 0 4px 10px -4px rgb(0 0 0 / 0.5);
+}
+.hb-board b { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: #ffffff; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.hb-board small { color: #ffd166; font-size: 9px; }
+.hb-board span { display: grid; grid-template-columns: 30px 1fr auto; gap: 6px; }
+.hb-board i { font-style: normal; color: #ff6b6b; }
+.hb-board em { font-style: normal; color: #ffd166; }
+.hb-board span:nth-child(2) { animation: board-flip 6s steps(1) infinite; }
+@keyframes board-flip { 92% { opacity: 1; } 94% { opacity: 0.2; } 96% { opacity: 1; } }
+.hb .hb-clock { position: absolute; right: 16px; top: 22px; width: 38px; height: 38px; }
+.hb .hb-clock::after { content: ""; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 22px; margin-left: -1px; background: #46525f; }
+/* Bahnhofsuhr: Minutenzeiger fest, Sekundenzeiger springt */
+.clock-z { display: inline-block; position: relative; width: 30px; height: 30px; border-radius: 50%; background: #ffffff; border: 3px solid #161b22; }
 .clock-z::before, .clock-z i { content: ""; position: absolute; left: 50%; bottom: 50%; width: 2px; margin-left: -1px; transform-origin: 50% 100%; background: #161b22; }
-.clock-z::before { height: 9px; transform: rotate(60deg); }
-.clock-z i { height: 13px; animation: spin 60s steps(60) infinite; }
-/* Abend und Tunnellichter (lange Pause) */
-.tunnel-lights { inset: 0; display: none; }
-:root[data-phase="long"] .tunnel-lights { display: block; }
-.tunnel-lights i { position: absolute; top: 18%; left: 0; width: 10px; height: 10px; border-radius: 50%; background: #ffd166; box-shadow: 0 0 14px 4px rgb(255 209 102 / 0.6); animation: across 3.2s linear infinite; }
-.tunnel-lights i:nth-child(2) { animation-delay: -0.53s; } .tunnel-lights i:nth-child(3) { animation-delay: -1.07s; } .tunnel-lights i:nth-child(4) { animation-delay: -1.6s; }
-.tunnel-lights i:nth-child(5) { animation-delay: -2.13s; } .tunnel-lights i:nth-child(6) { animation-delay: -2.67s; }
+.clock-z::before { height: 36%; transform: rotate(60deg); }
+.clock-z i { height: 44%; background: #c1121f; animation: spin 60s steps(60) infinite; }
 .cutin-zug .cutin-band { border-radius: 4px; background: #1d3557; }
 .cutin-zug .cutin-band b, .cutin-zug .cutin-band small { color: #ffffff; text-transform: uppercase; }
 /* Feier: Dampf und Konfetti am Ziel */

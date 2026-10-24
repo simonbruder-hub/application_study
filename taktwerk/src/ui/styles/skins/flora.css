@@ -33,7 +33,7 @@
 [data-skin="flora"] .dial-arc { stroke-width: 10; }
 [data-skin="flora"] .dial-knob { fill: #ffc300; stroke: #3b2a00; stroke-width: 1; }
 [data-skin="flora"] .dial .tk-major { stroke: var(--tomato); }
-[data-skin="flora"] .timer-card { padding-bottom: 46px; }
+[data-skin="flora"] .timer-card { padding-bottom: 60px; }
 
 /* Wiese unten, Blumen wiegen sich */
 .meadow { left: 0; bottom: 0; width: 100%; height: 92px; }
@@ -44,6 +44,35 @@
 .mf-tulip, .mf-petal, .mf-bell { fill: var(--c); }
 .mf-petal { stroke: color-mix(in srgb, var(--c) 70%, #999999); stroke-width: 0.4; }
 .mf-core { fill: #ffd166; }
+.mf-leaf { fill: #2d9d6a; }
+.mf-seed { fill: #6b3e1f; stroke: #3b2410; stroke-width: 0.6; stroke-dasharray: 1 1.2; }
+.mf-eye { fill: #1b1b1b; }
+.mf-rose circle { fill: var(--c); }
+.mf-rose path { fill: none; stroke: color-mix(in srgb, var(--c) 55%, #000000); stroke-width: 0.9; }
+.mf-puff circle:first-child { fill: rgb(255 255 255 / 0.75); stroke: rgb(255 255 255 / 0.95); stroke-width: 0.8; stroke-dasharray: 0.6 1.4; }
+.mf.back { opacity: 0.6; }
+.grass-back { fill: color-mix(in srgb, var(--leaf) 30%, var(--surface)); }
+/* Kletterrosen in den Ecken */
+.vine { top: 0; width: clamp(80px, 22cqw, 130px); height: auto; aspect-ratio: 1; animation: vine-sway 7s ease-in-out infinite alternate; }
+.vine-l { left: 0; transform-origin: 0 0; }
+.vine-r { right: 0; transform-origin: 50% 0; scale: -1 1; }
+.vine-stem { fill: none; stroke: #3f7d4f; stroke-width: 2; stroke-linecap: round; }
+.vine-leaf { fill: color-mix(in srgb, var(--leaf) 85%, #1f5e3a); }
+.vine-rose circle { fill: var(--c); }
+.vine-rose path { fill: none; stroke: color-mix(in srgb, var(--c) 50%, #000000); stroke-width: 1; }
+.vine-rose { transform-box: fill-box; transform-origin: 50% 50%; animation: rose-pulse 4s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.8s); }
+@keyframes vine-sway { from { rotate: -1.5deg; } to { rotate: 1.5deg; } }
+@keyframes rose-pulse { from { transform: scale(0.88); } to { transform: scale(1.08); } }
+/* Blütenkranz um das Zifferblatt */
+.wreath { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.wreath-turn { transform-box: view-box; transform-origin: 160px 160px; animation: orbit 240s linear infinite paused; }
+:root[data-run="1"] .wreath-turn { animation-play-state: running; }
+.wr-leaf { fill: color-mix(in srgb, var(--leaf) 80%, var(--surface)); }
+.wr-bloom ellipse { fill: var(--c); stroke: color-mix(in srgb, var(--c) 70%, #8a7a5a); stroke-width: 0.5; }
+.wr-core { fill: #ffd166; }
+.wr-bloom { transform-box: fill-box; transform-origin: 50% 50%; animation: bloom-breathe 5s ease-in-out infinite; animation-delay: calc(var(--i) * -0.28s); }
+@keyframes bloom-breathe { 0%, 100% { transform: scale(0.72) rotate(0deg); } 50% { transform: scale(1.08) rotate(36deg); } }
+:root[data-phase="short"] .wr-bloom { animation-duration: 2.6s; }
 @keyframes mf-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 :root[data-phase="short"] .mf { animation-duration: 1.8s; }
 /* Pollen schweben */
@@ -81,8 +110,17 @@
 .ladybug::after, .beetle::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -3px; height: 3px; background: repeating-linear-gradient(90deg, #111 0 1px, transparent 1px 4px); animation: legs 0.25s steps(2) infinite; }
 @keyframes crawl { from { transform: translateX(-30px); } 50% { translate: 0 -2px; } to { transform: translateX(calc(100cqw + 30px)); } }
 @keyframes legs { to { background-position: 2px 0; } }
+[data-skin="flora"] .flora-petals { display: block; }
 .flora-petals i { background: #ff8fab; }
 .flora-petals i:nth-child(2n) { background: #ffffff; }
+.flora-petals i:nth-child(3n) { background: #ffd166; }
+.flora-petals i:nth-child(5n) { background: #c77dff; }
+.flora-petals i:nth-child(7) { left: 14%; animation-delay: -5s; animation-duration: 14s; }
+.flora-petals i:nth-child(8) { left: 33%; animation-delay: -9s; animation-duration: 11s; }
+.flora-petals i:nth-child(9) { left: 52%; animation-delay: -1.5s; animation-duration: 12s; }
+.flora-petals i:nth-child(10) { left: 71%; animation-delay: -7s; animation-duration: 10s; }
+.flora-petals i:nth-child(11) { left: 87%; animation-delay: -3.5s; animation-duration: 15s; }
+.flora-petals i:nth-child(12) { left: 47%; animation-delay: -11s; animation-duration: 13s; }
 .flora-butterflies span:nth-child(1) i { background: radial-gradient(circle at 60% 40%, #fff3b0, #e09f3e 70%); }
 [data-skin="flora"] .fireflies { opacity: var(--night); }
 .cutin-flora .cutin-band b::before { content: "✿ "; color: var(--tomato); }

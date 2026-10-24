@@ -7,6 +7,7 @@ import { expand, minimize, pipOpen } from './app/pip';
 import { ModeSwitch, SideTimer, SyncIndicator } from './ui/components/Chrome';
 import { Dock, dockVisible, MiniPlayer } from './ui/components/Mini';
 import { CelebrationLayer } from './ui/components/Celebration';
+import { SpaceRiderLayer } from './ui/game/SpaceRider';
 import { DialogHost } from './ui/dialog';
 import { InstallButton } from './ui/components/InstallDialog';
 import { Icon, Logo } from './ui/Icon';
@@ -111,6 +112,7 @@ export function App() {
         </div>
       )}
       <CelebrationLayer />
+      <SpaceRiderLayer />
       <DialogHost />
       <ToastHost />
     </>

@@ -1,0 +1,53 @@
+/* Space Rider: Vollbild-Ebene mit Anzeige oben und Spielfeld darunter (immer dunkel, Neonfarben) */
+.sr-layer {
+  position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; gap: 8px;
+  padding: max(10px, env(safe-area-inset-top)) 12px max(10px, env(safe-area-inset-bottom));
+  background: radial-gradient(ellipse at 50% 0%, rgb(0 229 255 / 0.12), transparent 60%), rgb(3 4 12 / 0.94);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: #e6fdff; font-family: "Orbitron", system-ui, sans-serif;
+  animation: sr-in 0.35s ease-out;
+}
+@keyframes sr-in { from { opacity: 0; transform: scale(1.03); } }
+.sr-hud { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; max-width: 760px; width: 100%; margin: 0 auto; }
+.sr-stat { display: grid; gap: 2px; min-width: 52px; text-align: center; }
+.sr-stat small { font: 600 9px/1 system-ui, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: #7fa6b8; }
+.sr-stat b { font-size: 17px; font-weight: 700; color: #00e5ff; text-shadow: 0 0 8px rgb(0 229 255 / 0.6); font-variant-numeric: tabular-nums; }
+.sr-lives b { color: #ff4081; text-shadow: 0 0 8px rgb(255 64 129 / 0.6); letter-spacing: 0.1em; }
+.sr-extra b { color: #69f0ae; text-shadow: 0 0 8px rgb(105 240 174 / 0.6); font-size: 14px; }
+.sr-time b { color: #ffd740; text-shadow: 0 0 8px rgb(255 215 64 / 0.5); }
+.sr-tools { display: flex; gap: 6px; margin-left: auto; }
+.sr-btn {
+  font: 600 12px/1 system-ui, sans-serif; color: #e6fdff; background: rgb(0 229 255 / 0.08); border: 1px solid rgb(0 229 255 / 0.4);
+  border-radius: 4px; padding: 8px 10px; cursor: pointer; min-height: 34px;
+}
+.sr-btn:hover { background: rgb(0 229 255 / 0.18); }
+.sr-btn[aria-pressed="false"] { color: #7fa6b8; border-color: rgb(127 166 184 / 0.35); }
+.sr-close { font-size: 15px; width: 36px; padding: 0; }
+.sr-box { flex: 1; min-height: 0; display: grid; place-items: center; }
+.sr-stage { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgb(0 229 255 / 0.35), 0 0 40px -6px rgb(0 229 255 / 0.4); }
+.sr-canvas { display: block; touch-action: none; cursor: crosshair; }
+.sr-screen {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 20px; text-align: center;
+  background: rgb(3 4 12 / 0.72);
+}
+.sr-screen h2 { margin: 0; font-size: clamp(24px, 6vw, 34px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #00e5ff; text-shadow: 0 0 14px #00e5ff; }
+.sr-screen p { margin: 0; max-width: 300px; font: 500 13px/1.45 system-ui, sans-serif; color: #c9e9f5; }
+.sr-keys { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font: 500 12px/1.3 system-ui, sans-serif; color: #c9e9f5; }
+.sr-keys kbd { display: inline-block; min-width: 20px; padding: 2px 5px; margin: 0 1px; border-radius: 4px; border: 1px solid rgb(0 229 255 / 0.5); background: rgb(0 229 255 / 0.1); font: 700 11px/1.3 system-ui, sans-serif; color: #e6fdff; }
+.sr-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: 12px !important; }
+.sr-e1 { color: #ff4081; } .sr-e2 { color: #ea80fc; } .sr-e3 { color: #ffab00; }
+.sr-go {
+  font: 800 16px/1 "Orbitron", system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #03141a; cursor: pointer;
+  background: linear-gradient(180deg, #6ff7ff, #00b8d4); border: 0; padding: 14px 30px; min-height: 46px;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 0 24px rgb(0 229 255 / 0.6);
+}
+.sr-go:hover { filter: brightness(1.1); }
+.sr-score { font: 800 22px/1 "Orbitron", system-ui, sans-serif !important; color: #ffd740 !important; }
+.sr-best { color: #69f0ae !important; font-weight: 700 !important; animation: sr-pulse 0.8s ease-in-out infinite alternate; }
+@keyframes sr-pulse { to { transform: scale(1.08); } }
+@media (max-width: 520px) {
+  .sr-hud { gap: 4px 10px; }
+  .sr-stat { min-width: 44px; }
+  .sr-stat b { font-size: 15px; }
+  .sr-tools { width: 100%; justify-content: center; margin-left: 0; }
+}

@@ -89,10 +89,11 @@ describe('timerMath', () => {
     expect(finishesAt(s)).toBeNull();
   });
 
-  it('passt die geplante Dauer an (min. 1 Minute)', () => {
+  it('passt die geplante Dauer an (ganze Sekunden, min. 5 s)', () => {
     const s = adjustPlannedSeconds(pomodoro(), 5 * 60);
     expect(s.planned_seconds).toBe(30 * 60);
-    expect(adjustPlannedSeconds(s, -60 * 60).planned_seconds).toBe(60);
+    expect(adjustPlannedSeconds(s, -60 * 60).planned_seconds).toBe(5);
+    expect(adjustPlannedSeconds(s, 10.4).planned_seconds).toBe(30 * 60 + 10);
   });
 
   it('erzeugt den Zeiteintrag mit der Sitzungs-ID (idempotent über Geräte)', () => {

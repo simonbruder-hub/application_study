@@ -138,13 +138,13 @@ function fracAt(el: HTMLElement, x: number, y: number): number {
 
 /**
  * Unsichtbarer Griff über dem Zeiger: mit Maus oder Finger ziehen (auch über eine volle Umdrehung hinaus),
- * mit Pfeiltasten in Minuten, Bild auf/ab in 5 Minuten. Liefert den neuen Anteil (kann > 1 sein).
+ * mit Pfeiltasten in Minuten (mit Umschalt in 10 Sekunden), Bild auf/ab in 5 Minuten. Liefert den neuen Anteil (kann > 1 sein).
  */
 export function DialHandle(props: {
   frac: number;
   label: string;
   valueText: string;
-  minutes: number;
+  seconds: number;
   onDrag: (frac: number | null) => void;
   onCommit: (frac: number) => void;
   onStep: (minutes: number) => void;
@@ -160,7 +160,7 @@ export function DialHandle(props: {
     <button
       type="button" role="slider" class={`dial-handle${active ? ' is-dragging' : ''}`}
       style={{ left: `${50 + RING * Math.sin(th)}%`, top: `${50 - RING * Math.cos(th)}%` }}
-      aria-label={props.label} aria-valuetext={props.valueText} aria-valuenow={props.minutes} aria-valuemin={1}
+      aria-label={props.label} aria-valuetext={props.valueText} aria-valuenow={props.seconds} aria-valuemin={5}
       onPointerDown={(e) => {
         e.preventDefault();
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -193,7 +193,7 @@ export function DialHandle(props: {
         if (step === undefined) return;
         e.preventDefault();
         e.stopPropagation();
-        props.onStep(step);
+        props.onStep(e.shiftKey && Math.abs(step) === 1 ? step / 6 : step);
       }}
     />
   );

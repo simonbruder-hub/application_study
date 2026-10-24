@@ -142,10 +142,10 @@ export function stopTimer(s: ActiveTimerState): ActiveTimerState {
   };
 }
 
-/** Geplante Dauer der laufenden Phase ändern (z. B. −5/+5 Minuten), min. 60 s */
+/** Geplante Dauer der laufenden Phase ändern (z. B. −5/+5 Minuten), ganze Sekunden, min. 5 s */
 export function adjustPlannedSeconds(s: ActiveTimerState, deltaSeconds: number): ActiveTimerState {
   if (s.kind !== 'pomodoro' || s.planned_seconds == null) return s;
-  return { ...s, planned_seconds: Math.max(60, s.planned_seconds + deltaSeconds) };
+  return { ...s, planned_seconds: Math.max(5, Math.round(s.planned_seconds + deltaSeconds)) };
 }
 
 /**

@@ -9,7 +9,8 @@ import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../a
 import { entities } from '../../app/store';
 import { Mascot, type DialKnob } from './Dial';
 import { Bouquet, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, TomatoFill, Tree, TREE_KINDS } from './progress';
-import { ElementeScene, ElementMarks, FloraScene, MeerScene, ScifiScene, ZugScene } from './scenes';
+import { ElementeScene, ElementMarks, FloraScene, FloraWreath, MeerScene, ScifiScene, ZugScene } from './scenes';
+import { spaceRiderOpen } from '../game/SpaceRider';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -108,7 +109,7 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
     case 'flora': return <FloraScene />;
     case 'scifi': return <ScifiScene />;
     case 'elemente': return <ElementeScene />;
-    case 'zug': return <ZugScene />;
+    case 'zug': return <ZugScene station={pick(ZUG_STOPS, Math.max(0, cycle - 1))} />;
     case 'amtlich':
       return (
         <div class="deco" aria-hidden="true">
@@ -154,6 +155,8 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
       return <div class="dial-fx" aria-hidden="true"><ElementMarks /><div class="el-aura" /></div>;
     case 'scifi':
       return <div class="dial-fx" aria-hidden="true"><div class="holo"><i /><i /><i /></div></div>;
+    case 'flora':
+      return <div class="dial-fx" aria-hidden="true"><FloraWreath /></div>;
     default:
       return null;
   }
@@ -285,6 +288,8 @@ const MOTTO: Record<TimerView['mood'], string> = {
 /** Elemente-Stil: Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe und bei der Stechuhr */
 const ELEMENT_OF = (v: TimerView): number => (!v.active || v.kind === 'stopwatch' ? 3 : v.phase === 'focus' ? 0 : v.phase === 'short_break' ? 1 : 2);
 const pick = <T,>(list: readonly T[], i: number): T => list[((i % list.length) + list.length) % list.length]!;
+/** Ziele der Bahnfahrt (Zug): Fokus fährt hin, die Pause danach hält dort */
+const ZUG_STOPS = ['Bern', 'Luzern', 'Chur', 'Lugano', 'Genève', 'St. Gallen'] as const;
 
 /** Heute geschaffte Pomodoros (für den Wald im Forest-Stil) */
 function todaysPomodoros(): number {
@@ -353,11 +358,21 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every }: {
     case 'flora':
       return <Bouquet p={p} />;
     case 'scifi':
-      return <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} />;
+      return (
+        <div class="companion-stack">
+          <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} />
+          {v.kind === 'pomodoro' && v.phase !== 'focus' && (
+            <button type="button" class="btn sr-open" onClick={() => (spaceRiderOpen.value = true)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 L15 9 L21 13 L15 14 L13 20 H11 L9 14 L3 13 L9 9 Z" /></svg>
+              Space Rider spielen
+            </button>
+          )}
+        </div>
+      );
     case 'elemente':
       return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
     case 'zug':
-      return <Journey p={p} from="Zürich HB" to={pick(['Bern', 'Luzern', 'Chur', 'Lugano', 'Genève', 'St. Gallen'], cycle)} vehicle="train" stops={3} />;
+      return <Journey p={p} from="Zürich HB" to={pick(ZUG_STOPS, cycle)} vehicle="train" stops={3} />;
   }
 }
 

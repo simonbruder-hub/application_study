@@ -18,7 +18,8 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
 - **Projekte und Aufgaben** – Aufgaben gehören zu einem Projekt, mit Status, Priorität, Fälligkeit und Schätzung in Pomodoros oder Stunden. ▶ bei einer Aufgabe startet den Timer dafür; die Zeit wird ihr gutgeschrieben.
 - **Auswertung** – Woche, Monat, Jahr: Verlauf nach Projekt, Vergleich mit der Vorperiode, Protokoll, Zeit nachtragen, Zusammenfassung zum Kopieren, CSV- und Excel-Export.
 - **Sync** – Mit einem kostenlosen Supabase-Projekt erscheinen Änderungen auf allen Geräten, auch der laufende Timer: auf dem Laptop starten, auf dem Handy pausieren. Offline wird alles lokal gespeichert und später übertragen. Anzeige oben rechts: grün = synchron, gelb = offline, rot = Fehler, grau = nur lokal.
-- **Zeiger ziehen** – den Zeiger auf dem Zifferblatt mit Maus oder Finger verschieben: vorspringen oder verlängern (auch über eine volle Runde hinaus), rastet auf ganze Minuten ein; Pfeiltasten ±1, Bild auf/ab ±5 Minuten.
+- **Zeiger ziehen** – den Zeiger auf dem Zifferblatt mit Maus oder Finger verschieben: vorspringen oder verlängern (auch über eine volle Runde hinaus), auf die Sekunde genau bis hinunter auf 5 Sekunden; Pfeiltasten ±1 Minute, mit Umschalt ±10 Sekunden, Bild auf/ab ±5 Minuten.
+- **Space Rider:** kleines Weltraum-Spiel für die Pausen im Stil Sci-Fi (Knopf unter dem Zifferblatt). Pfeiltasten oder WASD steuern, Leertaste schiesst (oder Autofeuer), P oder Esc pausiert; am Handy folgt das Schiff dem Finger. Punkte, Stufen, Extras (Doppelschuss, Schild, Leben) und Rekord. Solange das Spiel offen ist, gehen Tasten nicht an den Timer; endet die Pause, hält das Spiel an.
 - **Tags und Farben** – Projekte mit Tags (z. B. «Coding», «Lernen», «Admin») und freier Farbe; Tags in Projektkarten, Auswertung «Nach Tag», Verwaltung unter Einstellungen → Tags.
 - **Signale** – sieben synthetische Töne (Glocke, Marimba, Gong, Harfe, Kristall, Vogelruf, Digital), je für Ende Fokus, kurze und lange Pause; Restzeit auf Wunsch ausblenden (nur Zifferblatt).
 - **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 13 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
@@ -31,10 +32,10 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
   - **Rennen:** Rennwagen als Zeiger, Randsteine, Startampel, Strecke bis zur Zielflagge.
   - **Flug:** Flugzeug als Zeiger, Wolken, Route ZRH → Ziel mit Flughöhe, Looping.
   - **Meer:** Fisch als Zeiger, Fischschwärme, Quallen, Oktopus, Tauchtiefe, Plankton in der Nacht.
-  - **Flora:** Biene als Zeiger, Blumenwiese, Bienen, Marienkäfer und Käfer, Blumen öffnen sich nacheinander.
-  - **Sci-Fi:** Raumschiff als Zeiger, Warp-Sprung, Radar, Planet mit Ring, HUD, Reise zum Mars.
+  - **Flora:** Biene als Zeiger, Blütenkranz um die Uhr, Kletterrosen, volle Wiese (Tulpen, Margeriten, Sonnenblumen, Mohn, Rosen, Pusteblumen), Bienen, Marienkäfer und Käfer.
+  - **Sci-Fi:** Raumschiff als Zeiger, Warp-Sprung, Raumgefecht im Hintergrund, Radar, Planet mit Ring, HUD, Reise zum Mars. In den Pausen lässt sich **Space Rider** spielen (siehe unten).
   - **Elemente:** Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe; vier Element-Kugeln.
-  - **Zug:** Lok als Zeiger auf dem Gleisring, Alpen-Parallaxe, Bahnsteig mit Uhr, Reise Zürich HB → Ziel.
+  - **Zug:** Lok als Zeiger auf dem Gleisring, ein Zug auf dem Gleis, die Landschaft zieht in Ebenen vorbei und die Schwellen laufen mit. Kurze Pause: Halt an einem Bahnhof, lange Pause: Halt im Zürich HB mit Halle, Uhr und Abfahrtstafel.
 
 ### Tastenkürzel
 

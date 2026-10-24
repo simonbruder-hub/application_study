@@ -18,6 +18,7 @@ import './ui/styles/skins/elemente.css';
 import './ui/styles/skins/zug.css';
 import './ui/styles/skins/progress.css';
 import './ui/styles/skins/celebration.css';
+import './ui/styles/game.css';
 import { App } from './App';
 import { initBackground } from './app/background';
 import { initKeyboard } from './app/keyboard';

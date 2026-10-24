@@ -29,6 +29,9 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 - 13 Stile mit Szenen je Phase, Fortschritts-Begleiter, Einblendungen und Feiern; Natur heisst jetzt Forest
   (ein Baum pro Pomodoro, jedes Mal eine andere Art). Neu: Meer, Flora, Sci-Fi, Elemente, Zug.
 - Desktop-App (Tauri) lädt die Online-Version und aktualisiert sich selbst.
+- Zeiger ziehen auf die Sekunde genau (min. 5 s), Umschalt+Pfeil ±10 s; `planned_seconds` immer ganzzahlig.
+- Flora blumiger (Blütenkranz, Kletterrosen, volle Wiese), Zug mit fahrendem Zug, Bahnhof (kurze Pause) und
+  Zürich HB (lange Pause), Sci-Fi mit Raumgefecht und dem Pausenspiel Space Rider (`src/ui/game/`).
 
 ## Offen
 
