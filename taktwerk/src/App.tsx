@@ -34,6 +34,15 @@ function ThemeButton() {
   );
 }
 
+/** Logo: führt immer zur Fokus-Ansicht. Reiner Ansichtswechsel, der Timer läuft unverändert weiter. */
+function HomeLink() {
+  return (
+    <a class="brand" href="#fokus" aria-label="Taktwerk: zur Fokus-Ansicht" onClick={(e) => { e.preventDefault(); go('fokus'); }}>
+      <Logo /><span>Taktwerk</span>
+    </a>
+  );
+}
+
 export function App() {
   const v = view.value;
   const mini = prefs.value.mini;
@@ -48,7 +57,7 @@ export function App() {
     <>
       <div class={`app${dockVisible() ? ' has-dock' : ''}`} data-view={v}>
         <aside class="sidebar" aria-label="Hauptnavigation">
-          <div class="brand"><Logo /><span>Taktwerk</span></div>
+          <HomeLink />
           <nav class="nav">
             {VIEWS.map((x, i) => (
               <button
@@ -71,7 +80,7 @@ export function App() {
 
         <div class="col">
           <header class="topbar">
-            <div class="brand"><Logo /><span>Taktwerk</span></div>
+            <HomeLink />
             <ModeSwitch />
             <span class="grow" />
             <SyncIndicator />

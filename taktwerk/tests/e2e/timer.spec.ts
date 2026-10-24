@@ -97,4 +97,18 @@ test.describe('Timer', () => {
     await expect(page.locator('.timer-card')).toBeVisible();
     await expect(page.locator('.dock')).toHaveCount(0);
   });
+
+  test('Logo führt zur Fokus-Ansicht, der Timer läuft weiter', async ({ page }) => {
+    await page.clock.install();
+    await openApp(page);
+    await page.locator('.btn-start').click();
+    await page.clock.fastForward('02:00');
+    await nav(page, 'Aufgaben');
+    await expect(page).toHaveURL(/#aufgaben$/);
+    await page.locator('a.brand:visible').first().click();
+    await expect(page).toHaveURL(/#fokus$/);
+    await expect(page.locator('.btn-start')).toContainText('Pause');
+    await page.clock.fastForward('01:00');
+    await expect(clock(page)).toHaveText('22:00');
+  });
 });
