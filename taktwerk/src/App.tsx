@@ -8,6 +8,7 @@ import { ModeSwitch, SideTimer, SyncIndicator } from './ui/components/Chrome';
 import { Dock, dockVisible, MiniPlayer } from './ui/components/Mini';
 import { CelebrationLayer } from './ui/components/Celebration';
 import { GameLayer } from './ui/game/GameLayer';
+import { SpectacleLayer } from './ui/components/Spectacle';
 import { DialogHost } from './ui/dialog';
 import { InstallButton } from './ui/components/InstallDialog';
 import { Icon, Logo } from './ui/Icon';
@@ -112,6 +113,7 @@ export function App() {
         </div>
       )}
       <CelebrationLayer />
+      <SpectacleLayer />
       <GameLayer />
       <DialogHost />
       <ToastHost />

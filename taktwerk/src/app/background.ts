@@ -3,6 +3,7 @@
  * Medien-Steuerung (Android-Benachrichtigung, Sperrbildschirm), Hinweise nach einer Phase.
  */
 import { effect } from '@preact/signals';
+import { playSpectacle } from '../ui/components/Spectacle';
 import { toast } from '../ui/toast';
 import { targetTitle } from './selectors';
 import { app, phaseEvents } from './services';
@@ -14,6 +15,8 @@ import { celebration, flashMood, PHASE_ATTR, readTimer } from './timer/view';
 
 export function initBackground(): () => void {
   let lastKey = '';
+  /** Vorheriger Stand für das Elemente-Spektakel: welches Element gerade endet */
+  let prev: { phase: string; active: boolean; kind: string } | null = null;
   const disposeTitle = effect(() => {
     const v = readTimer();
     const title = targetTitle(timerState.value);
@@ -28,6 +31,13 @@ export function initBackground(): () => void {
     root.dataset.phase = PHASE_ATTR[v.phase];
     root.dataset.run = v.running ? '1' : '0';
     root.dataset.active = v.active ? '1' : '0';
+    // Elemente: Erde endet beim Start aus der Ruhe, Wasser und Luft mit dem Ende der kurzen und langen Pause
+    if (prev) {
+      if (!prev.active && v.active) playSpectacle('earth');
+      else if (prev.active && prev.phase !== v.phase && prev.phase === 'short_break') playSpectacle('water');
+      else if (prev.active && prev.phase !== v.phase && prev.phase === 'long_break') playSpectacle('air');
+    }
+    prev = { phase: v.phase, active: v.active, kind: v.kind };
     syncMediaSession({
       enabled: p.background && v.active,
       running: v.running,
@@ -53,6 +63,8 @@ export function initBackground(): () => void {
   };
   // Jede gespeicherte Session (Pomodoro geschafft, «Fertig & speichern», Stechuhr gestoppt) wird gefeiert
   const onLogged = () => {
+    // Elemente: Feuer endet mit dem Fokus (die Stechuhr gehört zur Erde)
+    playSpectacle(prev?.kind === 'stopwatch' ? 'earth' : 'fire');
     flashMood.value = 'yay';
     celebration.value += 1;
     if (yayTimer) clearTimeout(yayTimer);

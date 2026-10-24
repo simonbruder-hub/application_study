@@ -3,6 +3,7 @@
  * (Konfetti-Kanonen, Sternen-Explosion, Funkenregen, Feuerwerk, Blütenregen, Akten und Stempel).
  * Die Teilchen sind reine CSS-Animationen; Flugbahnen kommen als CSS-Variablen je Teilchen.
  */
+import { spectacleOn } from './Spectacle';
 import { useMemo } from 'preact/hooks';
 import { prefs } from '../../app/prefs';
 import { celebration, flashMood } from '../../app/timer/view';
@@ -48,6 +49,8 @@ const TEXT: Record<Skin, [string, string]> = {
 export function CelebrationLayer() {
   const n = celebration.value;
   if (n === 0 || flashMood.value !== 'yay') return null;
+  // Elemente feiert mit dem grossen Spektakel (Spectacle.tsx)
+  if (spectacleOn()) return null;
   return <Celebration key={n} skin={prefs.value.skin} />;
 }
 

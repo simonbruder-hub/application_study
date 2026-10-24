@@ -12,9 +12,12 @@ test.describe('Stile', () => {
       await openApp(page);
       await expect(page.locator('html')).toHaveAttribute('data-skin', skin);
       await page.locator('.btn-start').click();
+      if (skin === 'elemente') await expect(page.locator('.spx-earth')).toBeAttached();
       await page.clock.fastForward('25:02');
-      await expect(page.locator('.celebration')).toBeVisible();
-      await expect(page.locator('.celebration .cel-text')).toBeVisible();
+      // Elemente feiert mit dem Feuer-Spektakel, alle anderen mit ihrer Feier
+      const party = skin === 'elemente' ? page.locator('.spx-fire') : page.locator('.celebration');
+      await expect(party).toBeVisible();
+      await expect(party.locator(skin === 'elemente' ? '.spx-text' : '.cel-text')).toBeVisible();
       await expect(page.locator('.phase-tab.is-on')).toContainText('Kurze Pause');
       expect(errors).toEqual([]);
     });

@@ -82,7 +82,7 @@ function MeadowFlower({ x, h, c, kind, back }: { x: number; h: number; c: string
 }
 
 /** Deterministische Zufallszahl 0..1 für die Wiese (gleich bei jedem Laden) */
-const rnd = (i: number) => ((i * 9301 + 49297) % 233280) / 233280;
+const rnd = (i: number) => { const v = Math.sin((i + 1) * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const BLOOM = ['#e63946', '#ffffff', '#c77dff', '#ffb703', '#ff8fab', '#4cc9f0', '#ff6d00', '#f72585'];
 /** Wiese über die ganze Breite: hintere Reihe klein und blass, vordere Reihe gross; Arten 0 bis 6 */
 const MEADOW_BACK: [number, number, string, number][] = Array.from({ length: 26 }, (_, i) =>
