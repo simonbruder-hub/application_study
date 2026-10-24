@@ -2,6 +2,8 @@
  * grünes Raster, Leuchtspur. Phasen wie Messkanäle: CH1 = Fokus, CH2 = kurze, CH3 = lange Pause. */
 
 :root[data-skin="technik"] {
+  --scene-short: radial-gradient(ellipse 70% 60% at 50% 35%, color-mix(in srgb, var(--sage) 16%, transparent), transparent 75%);
+  --scene-long: radial-gradient(ellipse 70% 60% at 50% 35%, color-mix(in srgb, var(--indigo) 16%, transparent), transparent 75%);
   --bg: #e9eff4;
   --grid: rgb(28 84 140 / 0.07);
   --grid-major: rgb(28 84 140 / 0.13);
@@ -21,6 +23,7 @@
   --radius: 6px;
   --glow: 0;
   --font-display: "Martian Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --font-lcd: "Share Tech Mono", "Martian Mono", ui-monospace, monospace;
 }
 
 /* Nacht: Oszilloskop. Drei Blöcke wie beim Anime-Stil (System, Viewer-Schalter, eigene Wahl). */
@@ -62,19 +65,29 @@
 [data-skin="technik"] .brand { font-size: 13px; }
 [data-skin="technik"] .round-dots i { border-radius: 2px; }
 
-/* Messschirm: Raster mit 8 x 8 Teilungen hinter dem Zifferblatt */
+/* Frontplatte: Schrauben in den Ecken jeder Karte */
+[data-skin="technik"] .card {
+  --screw: radial-gradient(circle, var(--line-strong) 0 3px, transparent 3.5px);
+  background-image: var(--screw), var(--screw), var(--screw), var(--screw);
+  background-size: 14px 14px;
+  background-position: 6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px), calc(100% - 6px) calc(100% - 6px);
+  background-repeat: no-repeat;
+}
+/* Messschirm: Raster mit Mittelkreuz hinter dem Zifferblatt */
 [data-skin="technik"] .timer-card {
   background-image:
+    var(--screw), var(--screw), var(--screw), var(--screw),
     linear-gradient(var(--grid-major) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-position: center center;
+  background-size: 14px 14px, 14px 14px, 14px 14px, 14px 14px, 40px 40px, 40px 40px;
+  background-position: 6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), center center, center center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
 }
 [data-skin="technik"] .dial-track { stroke-width: 10; stroke-dasharray: 2 5; stroke: var(--tick); }
 [data-skin="technik"] .dial-arc { stroke-width: 10; stroke-linecap: butt; }
 [data-skin="technik"] .dial-knob { r: 6; fill: var(--phase); stroke: var(--surface); stroke-width: 3; }
-[data-skin="technik"] .clock { letter-spacing: -0.02em; }
-[data-skin="technik"] .mini-clock { letter-spacing: -0.02em; }
+[data-skin="technik"] .clock { font-family: var(--font-lcd); font-weight: 400; letter-spacing: 0.02em; font-size: clamp(50px, 14vw, 76px); }
+[data-skin="technik"] .mini-clock { font-family: var(--font-lcd); letter-spacing: 0.02em; }
 
 /* Leuchtspur nur im Nachtmodus */
 [data-skin="technik"] .dial-arc { filter: drop-shadow(0 0 calc(var(--glow) * 5px) var(--phase)); }
@@ -87,6 +100,61 @@
   box-shadow: 0 0 calc(var(--glow, 0) * 8px) color-mix(in srgb, var(--phase) 40%, transparent);
 }
 .dial-wrap.is-running .scope-ch::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
+
+/* Messkurve quer über den Schirm: Sinus im Fokus, Rechteck in der kurzen, Dreieck in der langen Pause.
+ * Läuft immer, mit laufendem Timer schneller und heller; dahinter eine Nachleuchtspur. */
+.scope-wave {
+  left: 0; top: calc(42% - 30px); width: 200%; height: 60px; opacity: 0.3;
+  animation: drift 14s linear infinite;
+}
+:root[data-run="1"] .scope-wave { animation-duration: 4s; opacity: 0.55; }
+.scope-wave path { fill: none; stroke: var(--phase); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.scope-wave .ghost { stroke-width: 9; opacity: calc(0.12 + var(--glow, 0) * 0.18); filter: blur(3px); }
+/* Lange Pause: XY-Modus, Lissajous-Figur statt Zeitachse */
+:root[data-phase="long"] .scope-wave { display: none; }
+.lissajous { position: absolute; inset: 9%; opacity: 0; transition: opacity 0.8s; overflow: visible; }
+.lissajous path { fill: none; stroke: var(--phase); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.lissajous .ghost { stroke-width: 8; opacity: 0.25; filter: blur(3px); }
+:root[data-skin="technik"][data-phase="long"] .lissajous { opacity: 0.6; animation: spin3d 10s linear infinite; }
+:root[data-skin="technik"][data-phase="long"][data-run="1"] .lissajous { animation-duration: 5s; }
+/* Kurze Pause: Spektrum-Anzeige am unteren Rand */
+.fft { left: 14px; right: 14px; bottom: 0; height: 30%; display: none; align-items: flex-end; gap: 3px; opacity: 0.35; }
+:root[data-phase="short"] .fft { display: flex; }
+.fft i {
+  flex: 1; height: 100%; transform-origin: bottom; transform: scaleY(0.25);
+  background: linear-gradient(to top, var(--phase), color-mix(in srgb, var(--phase) 10%, transparent));
+}
+:root[data-run="1"] .fft i { animation: eq 0.9s ease-in-out infinite alternate; }
+.fft i:nth-child(3n) { animation-duration: 0.6s; }
+.fft i:nth-child(3n + 1) { animation-duration: 1.3s; animation-delay: -0.4s; }
+.fft i:nth-child(4n) { animation-duration: 0.75s; animation-delay: -0.2s; }
+.fft i:nth-child(5n) { animation-duration: 1.1s; animation-delay: -0.7s; }
+.fft i:nth-child(7n) { animation-duration: 0.5s; }
+/* Bedienfeld: RUN/STOP und Trigger-Marke */
+.scope-state {
+  top: 12px; right: 14px; font: 600 10px/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 4px 6px; border-radius: 3px; color: var(--bad); border: 1px solid currentColor;
+}
+:root[data-run="1"] .scope-state { color: var(--good); box-shadow: 0 0 calc(var(--glow, 0) * 10px) color-mix(in srgb, var(--good) 60%, transparent); }
+.scope-trig { left: 10px; top: calc(42% - 7px); font: 600 11px/1 var(--font-mono); color: var(--phase); }
+/* Röhrenbild: Zeilen im Nachtmodus */
+.scanlines {
+  inset: 0; opacity: var(--glow, 0);
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.22) 0 1px, transparent 1px 3px);
+}
+/* Kennwerte wie am Messgerät */
+.scope-readout { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: -4px 0 0; }
+.scope-readout span {
+  font: 500 12px/1 var(--font-mono); padding: 5px 8px; border-radius: 3px; color: var(--ink-2);
+  background: var(--surface-2); border: 1px solid var(--line-strong);
+}
+.scope-readout span:first-child { color: var(--phase); border-color: currentColor; }
+/* Prüfung bestanden */
+.pass span {
+  font: 400 34px/1 var(--font-lcd); color: var(--good); padding: 10px 18px; border: 2px solid currentColor; border-radius: 6px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  box-shadow: 0 0 calc(8px + var(--glow, 0) * 18px) color-mix(in srgb, var(--good) 50%, transparent);
+}
 
 @media (forced-colors: active) {
   [data-skin="technik"] .timer-card { background-image: none; }

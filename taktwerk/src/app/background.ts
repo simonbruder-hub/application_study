@@ -10,7 +10,7 @@ import { prefs } from './prefs';
 import { timerState } from './store';
 import type { PhaseCompleteInfo } from './timer/controller';
 import { syncMediaSession } from './timer/signals';
-import { flashMood, readTimer } from './timer/view';
+import { flashMood, PHASE_ATTR, readTimer } from './timer/view';
 
 export function initBackground(): () => void {
   let lastKey = '';
@@ -23,6 +23,10 @@ export function initBackground(): () => void {
     if (key === lastKey) return;
     lastKey = key;
     document.title = v.active ? `${v.clock} · ${v.paused ? 'Pausiert' : v.phaseLabel} – ${title}` : 'Taktwerk';
+    // Stil-Szenen: Hintergrund und Animationen hängen an Phase und Lauf-Zustand
+    const root = document.documentElement;
+    root.dataset.phase = PHASE_ATTR[v.phase];
+    root.dataset.run = v.running ? '1' : '0';
     syncMediaSession({
       enabled: p.background && v.active,
       running: v.running,

@@ -2,7 +2,13 @@
 import { render } from 'preact';
 import './ui/styles/app.css';
 import './ui/styles/v2.css';
-import './ui/styles/technik.css';
+import './ui/styles/skins/base.css';
+import './ui/styles/skins/klassisch.css';
+import './ui/styles/skins/anime.css';
+import './ui/styles/skins/technik.css';
+import './ui/styles/skins/barock.css';
+import './ui/styles/skins/natur.css';
+import './ui/styles/skins/amtlich.css';
 import { App } from './App';
 import { initBackground } from './app/background';
 import { initKeyboard } from './app/keyboard';

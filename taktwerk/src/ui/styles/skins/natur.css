@@ -1,0 +1,160 @@
+/* Natur. Tag: Moos, Holz und Blätter im Hintergrund. Nacht: Wald mit Mondlicht und Glühwürmchen.
+ * Eine Pflanze wächst mit dem Fokus, in den Pausen fallen Blätter, nach dem Pomodoro blüht sie. */
+
+:root[data-skin="natur"] {
+  --night: 0;
+  --sun: #ffd23f; --sun-glow: rgb(255 210 63 / 0.55);
+  --scene-short: linear-gradient(180deg, color-mix(in srgb, var(--indigo) 16%, transparent), transparent 55%);
+  --scene-long: linear-gradient(180deg, color-mix(in srgb, #ff9a5a 34%, transparent), color-mix(in srgb, #f3a6bd 18%, transparent) 45%, transparent 80%);
+  --bg: #edf0e2;
+  --bg-layers: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='rgb(79,122,58)' fill-opacity='0.09'%3E%3Cpath d='M18 34c10-16 32-16 36 0-12 11-28 11-36 0z'/%3E%3Cpath d='M86 92c6-17 28-21 34-8-9 13-24 17-34 8z'/%3E%3Cpath d='M78 18c13-4 24 6 20 19-13 3-22-6-20-19z'/%3E%3Cpath d='M22 104c4-12 20-16 26-6-6 10-18 13-26 6z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 140px 140px, linear-gradient(180deg, #f4f6ea, #e4ead3);
+  --surface: #fbfcf5; --surface-2: #f1f4e6; --surface-3: #e2e8d0;
+  --ink: #1f2a1c; --ink-2: #3d4a35; --muted: #626f56; --line: #d8dfc6; --line-strong: #b6c29a; --outline: #3d4a35;
+  --tomato: #b8432f; --on-tomato: #ffffff; --sage: #4f7a3a; --on-sage: #ffffff; --indigo: #2f6f8f; --on-indigo: #ffffff;
+  --leaf: #4f7a3a; --link: #3d6b2c; --focus-ring: #3d6b2c;
+  --dial-track: #e6dac0; --tick: #b6a585; --tick-major: #6b5432;
+  --card-border: 1px solid var(--line);
+  --card-shadow: 0 10px 26px -18px rgb(40 60 20 / 0.45);
+  --radius: 22px;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Nunito", ui-rounded, "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="natur"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark;
+    --night: 1;
+    --sun: #eef0d6; --sun-glow: rgb(230 240 200 / 0.35);
+    --bg: #0b130e;
+    --bg-layers: radial-gradient(circle at 85% 6%, rgb(230 245 210 / 0.12), transparent 22%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='rgb(158,210,122)' fill-opacity='0.05'%3E%3Cpath d='M18 34c10-16 32-16 36 0-12 11-28 11-36 0z'/%3E%3Cpath d='M86 92c6-17 28-21 34-8-9 13-24 17-34 8z'/%3E%3Cpath d='M78 18c13-4 24 6 20 19-13 3-22-6-20-19z'/%3E%3Cpath d='M22 104c4-12 20-16 26-6-6 10-18 13-26 6z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 140px 140px, linear-gradient(180deg, #0b130e, #122018);
+    --surface: #121c15; --surface-2: #18241b; --surface-3: #223226;
+    --ink: #e4eedb; --ink-2: #bfd0b2; --muted: #8ea383; --line: #22332a; --line-strong: #36503e; --outline: #bfd0b2;
+    --tomato: #ff8a5c; --on-tomato: #1a0d06; --sage: #9ed27a; --on-sage: #0f1a0a; --indigo: #7cc4e4; --on-indigo: #0a1a22;
+    --leaf: #9ed27a; --link: #b5e08f; --focus-ring: #b5e08f; --good: #9ed27a; --warn: #e8b04a; --bad: #ff8a7a;
+    --dial-track: #2b2a1d; --tick: #4a4630; --tick-major: #d9c9a0;
+    --card-shadow: 0 14px 34px -20px rgb(0 0 0 / 0.85);
+  }
+}
+:root[data-skin="natur"][data-theme="dark"]:not([data-mode="tag"]),
+:root[data-skin="natur"][data-mode="nacht"] {
+  color-scheme: dark;
+  --night: 1;
+  --sun: #eef0d6; --sun-glow: rgb(230 240 200 / 0.35);
+  --bg: #0b130e;
+  --bg-layers: radial-gradient(circle at 85% 6%, rgb(230 245 210 / 0.12), transparent 22%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='rgb(158,210,122)' fill-opacity='0.05'%3E%3Cpath d='M18 34c10-16 32-16 36 0-12 11-28 11-36 0z'/%3E%3Cpath d='M86 92c6-17 28-21 34-8-9 13-24 17-34 8z'/%3E%3Cpath d='M78 18c13-4 24 6 20 19-13 3-22-6-20-19z'/%3E%3Cpath d='M22 104c4-12 20-16 26-6-6 10-18 13-26 6z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 140px 140px, linear-gradient(180deg, #0b130e, #122018);
+  --surface: #121c15; --surface-2: #18241b; --surface-3: #223226;
+  --ink: #e4eedb; --ink-2: #bfd0b2; --muted: #8ea383; --line: #22332a; --line-strong: #36503e; --outline: #bfd0b2;
+  --tomato: #ff8a5c; --on-tomato: #1a0d06; --sage: #9ed27a; --on-sage: #0f1a0a; --indigo: #7cc4e4; --on-indigo: #0a1a22;
+  --leaf: #9ed27a; --link: #b5e08f; --focus-ring: #b5e08f; --good: #9ed27a; --warn: #e8b04a; --bad: #ff8a7a;
+  --dial-track: #2b2a1d; --tick: #4a4630; --tick-major: #d9c9a0;
+  --card-shadow: 0 14px 34px -20px rgb(0 0 0 / 0.85);
+}
+
+[data-skin="natur"] .view-head h1 { font-weight: 700; letter-spacing: -0.01em; }
+[data-skin="natur"] .view-head h1::before { content: ""; display: inline-block; width: 0.5em; height: 0.36em; margin-right: 0.25em; background: var(--leaf); border-radius: 0 100% 0 100%; vertical-align: 0.12em; }
+[data-skin="natur"] .timer-card { border-radius: 34px 24px 36px 22px / 26px 36px 24px 34px; }
+[data-skin="natur"] .nav-item.is-on { box-shadow: inset 0 0 0 1px var(--line-strong); background: color-mix(in srgb, var(--leaf) 12%, var(--surface)); }
+[data-skin="natur"] .btn-start { box-shadow: 0 12px 24px -12px var(--phase), inset 0 -3px 0 rgb(0 0 0 / 0.15); }
+[data-skin="natur"] .round-dots i { border-radius: 0 100% 0 100%; }
+
+/* Zifferblatt: Holzring, Ranke als Bogen, Blatt als Zeiger */
+[data-skin="natur"] .dial-track { stroke-width: 14; stroke-dasharray: 70 3 40 2 95 4 55 3; }
+[data-skin="natur"] .dial-arc { stroke-width: 12; }
+[data-skin="natur"] .dial-knob { fill: var(--leaf); stroke: var(--surface); stroke-width: 1.5; }
+[data-skin="natur"] .dial .tk { stroke-linecap: round; }
+[data-skin="natur"] .clock { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; }
+[data-skin="natur"] .mini-clock { font-family: var(--font-display); letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; }
+
+/* Blätter statt Blüten in den Pausen */
+.leaves i { background: var(--leaf); border-radius: 0 14px 0 14px; width: 15px; height: 10px; }
+.leaves i:nth-child(2n) { background: #c98a2b; }
+.leaves i:nth-child(3n) { background: #a5b84a; }
+
+/* Glühwürmchen, nur nachts */
+.fireflies { inset: 0; opacity: var(--night, 0); transition: opacity 1.2s; }
+:root[data-phase="long"] .fireflies { opacity: 1; }
+.fireflies i {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #f4ffa8;
+  box-shadow: 0 0 8px 3px rgb(230 255 120 / 0.55); animation: float 7s ease-in-out infinite, twinkle 2.6s ease-in-out infinite;
+}
+.fireflies i:nth-child(1) { left: 10%; top: 20%; }
+.fireflies i:nth-child(2) { left: 84%; top: 14%; animation-delay: -2s, -1s; }
+.fireflies i:nth-child(3) { left: 20%; top: 66%; animation-delay: -4s, -0.5s; }
+.fireflies i:nth-child(4) { left: 78%; top: 58%; animation-delay: -1s, -1.8s; }
+.fireflies i:nth-child(5) { left: 52%; top: 8%; animation-delay: -5s, -0.2s; }
+.fireflies i:nth-child(6) { left: 90%; top: 82%; animation-delay: -3s, -2.2s; }
+.fireflies i:nth-child(7) { left: 6%; top: 88%; animation-delay: -6s, -1.2s; }
+
+/* Pflanze im Topf */
+.sprout-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: -6px; }
+.sprout { width: 80px; height: 96px; flex: none; overflow: visible; }
+.sp-stem { fill: none; stroke: var(--leaf); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.sp-leaf { fill: var(--leaf); opacity: 0; transform: scale(0.2); transform-box: fill-box; transform-origin: center; transition: opacity 0.5s, transform 0.6s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.sp-leaf.is-on { opacity: 1; transform: none; }
+.sp-flower { opacity: 0; transform: scale(0.2); transform-box: fill-box; transform-origin: center; transition: opacity 0.5s, transform 0.7s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.sp-flower.is-on { opacity: 1; transform: none; }
+.sp-flower ellipse { fill: #f3a6bd; }
+.sp-core { fill: #f0b429; }
+.sp-pot { fill: #b5673d; }
+.sp-rim { fill: #9a552f; }
+[data-skin="natur"] .motto { font-style: normal; font-weight: 500; }
+
+/* Aufgeblüht: Blütenblätter fliegen auseinander */
+.bloom i {
+  position: absolute; left: 50%; top: 46%; width: 12px; height: 18px; border-radius: 50% 50% 50% 0; background: #f3a6bd;
+  animation: confetti 1.8s cubic-bezier(0.1, 0.7, 0.3, 1) both;
+}
+.bloom i:nth-child(2n) { background: #f0b429; }
+.bloom i:nth-child(3n) { background: var(--leaf); border-radius: 0 100% 0 100%; }
+.bloom i:nth-child(1) { --dx: -120px; --dy: -120px; }
+.bloom i:nth-child(2) { --dx: 120px; --dy: -110px; }
+.bloom i:nth-child(3) { --dx: -160px; --dy: 20px; }
+.bloom i:nth-child(4) { --dx: 160px; --dy: 30px; }
+.bloom i:nth-child(5) { --dx: 0px; --dy: -170px; }
+.bloom i:nth-child(6) { --dx: -90px; --dy: 140px; }
+.bloom i:nth-child(7) { --dx: 100px; --dy: 130px; }
+.bloom i:nth-child(8) { --dx: -60px; --dy: -160px; }
+.bloom i:nth-child(9) { --dx: 60px; --dy: -160px; }
+.bloom i:nth-child(10) { --dx: 170px; --dy: -60px; }
+
+/* ---------- Landschaft ---------- */
+/* Himmel: in der langen Pause Sonnenuntergang */
+.sky { inset: 0; opacity: 0; transition: opacity 1.6s;
+  background: linear-gradient(180deg, color-mix(in srgb, #ff9a5a 42%, transparent), color-mix(in srgb, #f3a6bd 26%, transparent) 38%, transparent 68%); }
+:root[data-phase="long"] .sky { opacity: 1; }
+/* Sonne (nachts Mond): sinkt in der langen Pause hinter die Bäume */
+.sun {
+  top: 62px; right: 9%; width: 34px; height: 34px; border-radius: 50%; background: var(--sun);
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--sun) 22%, transparent), 0 0 34px 8px var(--sun-glow);
+  transition: top 2.4s ease, transform 2.4s ease, background 2.4s;
+}
+:root[data-phase="long"] .sun { top: calc(100% - 132px); right: 22%; transform: scale(1.7); background: #ff8a3d; }
+/* Wolken ziehen, in der kurzen Pause weht Wind */
+.clouds { inset: 0; }
+.clouds i {
+  position: absolute; left: 0; width: 70px; height: 20px; border-radius: 20px; opacity: 0.8;
+  background: var(--surface-3); animation: across 70s linear infinite;
+}
+.clouds i::before, .clouds i::after { content: ""; position: absolute; border-radius: 50%; background: inherit; }
+.clouds i::before { width: 30px; height: 30px; left: 12px; top: -14px; }
+.clouds i::after { width: 22px; height: 22px; left: 34px; top: -9px; }
+.clouds i:nth-child(1) { top: 70px; animation-delay: -20s; }
+.clouds i:nth-child(2) { top: 116px; transform: scale(0.7); animation-delay: -48s; animation-duration: 90s; }
+.clouds i:nth-child(3) { top: 40%; animation-delay: -5s; animation-duration: 110s; }
+:root[data-phase="short"] .clouds i { animation-duration: 18s; }
+:root[data-phase="short"] .clouds i:nth-child(2) { animation-duration: 24s; }
+/* Vögel ziehen im Sonnenuntergang vorbei */
+.birds { top: 20%; left: 0; width: 70px; height: 24px; display: none; animation: across 16s linear infinite; }
+.birds path { fill: none; stroke: var(--ink-2); stroke-width: 2.2; stroke-linecap: round; }
+:root[data-phase="long"] .birds { display: block; }
+/* Baumreihen: hinten heller, vorne dunkler; wiegen in den Pausen im Wind */
+.trees { left: -2%; width: 104%; bottom: 0; transform-origin: 50% 100%; transition: fill 1.6s; }
+.trees-far { height: 92px; fill: color-mix(in srgb, var(--leaf) 28%, var(--surface)); }
+.trees-near { height: 118px; fill: color-mix(in srgb, var(--leaf) 52%, var(--surface)); }
+.trees path { fill: inherit; }
+:root:is([data-phase="short"], [data-phase="long"]) .trees { animation: sway 2.6s ease-in-out infinite alternate; }
+:root:is([data-phase="short"], [data-phase="long"]) .trees-far { animation-duration: 3.4s; animation-delay: -1s; }
+:root[data-phase="long"] .trees-far { fill: color-mix(in srgb, #6b3f2a 30%, var(--surface)); }
+:root[data-phase="long"] .trees-near { fill: color-mix(in srgb, #3a2a1f 60%, var(--surface)); }
+/* Im Fokus ruhiger Wald: nur leichtes Atmen, wenn der Timer läuft */
+:root[data-phase="focus"][data-run="1"] .trees-near { animation: sway 6s ease-in-out infinite alternate; }
+[data-skin="natur"] .timer-card { padding-bottom: 40px; }

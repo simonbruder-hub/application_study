@@ -5,6 +5,7 @@
  */
 import { signal, effect } from '@preact/signals';
 import type { TimerKind, Workspace } from '../data/types';
+import { SKINS, type Skin } from '../ui/skins';
 
 export interface TimerPreset {
   id: string;
@@ -21,7 +22,7 @@ export interface DevicePrefs {
   /** Darstellung: automatisch / Tag / Nacht */
   mode: 'auto' | 'tag' | 'nacht';
   /** Stil */
-  skin: 'klassisch' | 'anime' | 'technik';
+  skin: Skin;
   /** Timer-Art je Modus (Lernmodus standardmässig Pomodoro) */
   timerKind: Record<Workspace, TimerKind>;
   sound: boolean;
@@ -78,6 +79,7 @@ function load(): DevicePrefs {
       timerKind: { ...DEFAULTS.timerKind, ...(saved.timerKind ?? {}) },
       presets: Array.isArray(saved.presets) && saved.presets.length ? saved.presets : structuredClone(DEFAULT_PRESETS),
       lastProject: { ...(saved.lastProject ?? {}) },
+      skin: SKINS.some((k) => k.id === saved.skin) ? saved.skin! : DEFAULTS.skin,
       // Einstellungen von vor diesem Feld: auf dem Handy den Hintergrund-Modus einmalig einschalten
       ...(saved.notifyAsked === undefined && touch ? { background: true } : {}),
     };

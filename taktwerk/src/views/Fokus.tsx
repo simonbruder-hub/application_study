@@ -11,8 +11,9 @@ import { app } from '../app/services';
 import { settings, timerState, workspaceData } from '../app/store';
 import { minimize } from '../app/pip';
 import { PHASE_LABEL } from '../app/timer/controller';
-import { PHASE_ATTR, PHASE_CHANNEL, PHASE_KANJI, readTimer } from '../app/timer/view';
-import { Dial, Mascot, MOOD_LINES } from '../ui/components/Dial';
+import { flashMood, PHASE_ATTR, readTimer } from '../app/timer/view';
+import { Celebrate, DIAL_STYLE, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
+import { Dial, MOOD_LINES } from '../ui/components/Dial';
 import {
   Meter, PomoDots, ProjectChip, Seg, WORKSPACE_ICON, WORKSPACE_LABEL,
 } from '../ui/components/bits';
@@ -70,8 +71,8 @@ function TimerCard() {
   const set = settings.value;
   const ws = prefs.value.workspace;
   const { timer } = app();
-  const anime = prefs.value.skin === 'anime';
-  const technik = prefs.value.skin === 'technik';
+  const skin = prefs.value.skin;
+  const yay = flashMood.value === 'yay';
   const every = Math.max(1, set.long_break_every);
   const inRound = s.cycle % every;
   const otherWs = v.active && s.workspace !== ws;
@@ -91,7 +92,7 @@ function TimerCard() {
 
   return (
     <div class="card timer-card">
-      {anime && <><div class="speedlines" aria-hidden="true" /><div class="petals" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div></>}
+      <SkinBackdrop skin={skin} v={v} cycle={s.cycle} />
       <div class="kind-row">
         <Seg
           label="Timer-Art" value={v.kind} options={KIND_OPTIONS} disabled={v.active}
@@ -114,15 +115,16 @@ function TimerCard() {
         </div>
       )}
       <div class={`dial-wrap${v.running ? ' is-running' : ''}`}>
-        <Dial frac={v.frac} />
+        <SkinDialFx skin={skin} />
+        <Dial frac={v.frac} {...DIAL_STYLE[skin]} />
         <div class="dial-center">
-          {anime && <span class="kanji" aria-hidden="true">{v.kind === 'stopwatch' ? '計時' : PHASE_KANJI[v.phase]}</span>}
-          {technik && <span class="scope-ch" aria-hidden="true">{v.kind === 'stopwatch' ? 'Δt Messung' : PHASE_CHANNEL[v.phase]}</span>}
+          <SkinBadge skin={skin} v={v} />
           <div class="clock mono" role="timer" aria-live="off">{v.clock}</div>
           <div class="dial-sub">{v.statusLabel}</div>
         </div>
+        {yay && <Celebrate skin={skin} />}
       </div>
-      {anime && <div class="mascot-wrap"><Mascot mood={v.mood} /><p class="bubble">{say}</p></div>}
+      <SkinCompanion skin={skin} v={v} say={say ?? ''} set={set} yay={yay} />
       {otherWs && <p class="ws-note">Dieser Timer läuft im Modus {WORKSPACE_LABEL[s.workspace]}.</p>}
       {v.kind === 'pomodoro'
         ? (

@@ -1,0 +1,110 @@
+/* Klassisch: ruhige Fläche, aber das Zifferblatt leuchtet in der Phasenfarbe, läuft der Timer,
+ * pulsiert ein Ring. Pausen: Atemkreis (4 s ein, 4 s aus), lange Pause zusätzlich aufsteigende Blasen.
+ * Nach einem Pomodoro: Konfetti. */
+
+:root[data-skin="klassisch"] {
+  --scene-short: radial-gradient(ellipse 80% 70% at 50% 30%, color-mix(in srgb, var(--sage) 20%, transparent), transparent 75%);
+  --scene-long: radial-gradient(ellipse 80% 70% at 50% 30%, color-mix(in srgb, var(--indigo) 22%, transparent), transparent 75%), radial-gradient(circle at 80% 90%, color-mix(in srgb, var(--indigo) 14%, transparent), transparent 40%);
+  --bg-layers:
+    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(198 58 41 / 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(33 122 111 / 0.12), transparent 70%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="klassisch"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    --bg-layers:
+      radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.12), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.12), transparent 70%);
+  }
+}
+:root[data-skin="klassisch"][data-theme="dark"]:not([data-mode="tag"]),
+:root[data-skin="klassisch"][data-mode="nacht"] {
+  --bg-layers:
+    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(240 100 78 / 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgb(76 180 165 / 0.12), transparent 70%);
+}
+
+[data-skin="klassisch"] .view-head h1 {
+  padding-bottom: 10px;
+  background: linear-gradient(90deg, var(--tomato), var(--sage)) left bottom / 56px 4px no-repeat;
+}
+[data-skin="klassisch"] .nav-item.is-on { box-shadow: inset 3px 0 0 var(--tomato), inset 0 0 0 1px var(--line), 0 1px 2px rgb(0 0 0 / 0.06); }
+
+/* Lichthof hinter dem Zifferblatt */
+.halo {
+  inset: 0;
+  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--phase) 22%, transparent), transparent 52%);
+  opacity: 0.6; transition: opacity 0.6s;
+}
+.timer-card:has(.dial-wrap.is-running) .halo { opacity: 1; }
+
+[data-skin="klassisch"] .dial-arc { filter: drop-shadow(0 3px 8px color-mix(in srgb, var(--phase) 55%, transparent)); }
+[data-skin="klassisch"] .dial-knob { stroke-width: 5; filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.25)); }
+[data-skin="klassisch"] .clock { font-weight: 600; }
+[data-skin="klassisch"] .dial-wrap.is-running::after {
+  content: ""; position: absolute; inset: 11%; border-radius: 50%; border: 2px solid var(--phase);
+  pointer-events: none; animation: ring 2.6s ease-out infinite;
+}
+[data-skin="klassisch"] .btn-start {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--phase) 78%, #ffffff), var(--phase) 60%);
+  box-shadow: 0 14px 28px -12px var(--phase), inset 0 1px 0 rgb(255 255 255 / 0.3);
+}
+
+/* Konfetti */
+.confetti i {
+  position: absolute; left: 50%; top: 46%; width: 9px; height: 14px; border-radius: 2px; background: var(--tomato);
+  animation: confetti 1.6s cubic-bezier(0.1, 0.7, 0.3, 1) both;
+}
+.confetti i:nth-child(3n) { background: var(--sage); }
+.confetti i:nth-child(3n + 1) { background: var(--indigo); width: 7px; height: 7px; border-radius: 50%; }
+.confetti i:nth-child(4n) { background: #eda100; }
+.confetti i:nth-child(1) { --dx: -130px; --dy: -110px; }
+.confetti i:nth-child(2) { --dx: 120px; --dy: -120px; animation-delay: 0.05s; }
+.confetti i:nth-child(3) { --dx: -160px; --dy: 10px; animation-delay: 0.1s; }
+.confetti i:nth-child(4) { --dx: 150px; --dy: 30px; }
+.confetti i:nth-child(5) { --dx: -80px; --dy: -160px; animation-delay: 0.15s; }
+.confetti i:nth-child(6) { --dx: 70px; --dy: -170px; }
+.confetti i:nth-child(7) { --dx: -120px; --dy: 120px; animation-delay: 0.08s; }
+.confetti i:nth-child(8) { --dx: 130px; --dy: 110px; animation-delay: 0.12s; }
+.confetti i:nth-child(9) { --dx: 0px; --dy: -180px; }
+.confetti i:nth-child(10) { --dx: -170px; --dy: -60px; animation-delay: 0.2s; }
+.confetti i:nth-child(11) { --dx: 175px; --dy: -50px; animation-delay: 0.18s; }
+.confetti i:nth-child(12) { --dx: 40px; --dy: 160px; }
+.confetti i:nth-child(13) { --dx: -40px; --dy: 170px; animation-delay: 0.1s; }
+.confetti i:nth-child(14) { --dx: 100px; --dy: -60px; animation-delay: 0.25s; }
+
+/* Atemkreis in den Pausen */
+.breath { position: absolute; inset: 0; display: none; }
+:root:is([data-phase="short"], [data-phase="long"]) .breath { display: block; }
+.breath i {
+  position: absolute; inset: 4%; border-radius: 50%; transform: scale(0.72);
+  background: radial-gradient(circle, color-mix(in srgb, var(--phase) 26%, transparent) 30%, color-mix(in srgb, var(--phase) 10%, transparent) 62%, transparent 70%);
+}
+.breath span {
+  position: absolute; left: 50%; top: 27%; transform: translateX(-50%); opacity: 0;
+  font: 700 12px/1 var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--phase);
+}
+:root[data-run="1"] .breath i { animation: breathe 8s ease-in-out infinite; }
+:root[data-run="1"] .breath .in { animation: say-in 8s ease-in-out infinite; }
+:root[data-run="1"] .breath .out { animation: say-out 8s ease-in-out infinite; }
+@keyframes say-in { 0%, 45% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes say-out { 0%, 50% { opacity: 0; } 55%, 95% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Lange Pause: Blasen steigen auf */
+.bubbles { inset: 0; display: none; }
+:root[data-phase="long"] .bubbles { display: block; }
+.bubbles i {
+  position: absolute; bottom: -30px; width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--indigo) 55%, transparent); background: color-mix(in srgb, var(--indigo) 8%, transparent);
+  animation: rise 11s linear infinite paused;
+}
+:root[data-run="1"] .bubbles i { animation-play-state: running; }
+.bubbles i:nth-child(1) { left: 6%; animation-delay: -1s; }
+.bubbles i:nth-child(2) { left: 18%; width: 28px; height: 28px; animation-delay: -6s; animation-duration: 14s; }
+.bubbles i:nth-child(3) { left: 31%; width: 12px; height: 12px; animation-delay: -3s; }
+.bubbles i:nth-child(4) { left: 44%; animation-delay: -9s; animation-duration: 13s; }
+.bubbles i:nth-child(5) { left: 57%; width: 24px; height: 24px; animation-delay: -4s; }
+.bubbles i:nth-child(6) { left: 69%; width: 10px; height: 10px; animation-delay: -7.5s; animation-duration: 9s; }
+.bubbles i:nth-child(7) { left: 79%; width: 30px; height: 30px; animation-delay: -2s; animation-duration: 15s; }
+.bubbles i:nth-child(8) { left: 90%; animation-delay: -10s; }
+.bubbles i:nth-child(9) { left: 12%; width: 14px; height: 14px; animation-delay: -12s; animation-duration: 12s; }
+.bubbles i:nth-child(10) { left: 64%; width: 16px; height: 16px; animation-delay: -5.5s; }

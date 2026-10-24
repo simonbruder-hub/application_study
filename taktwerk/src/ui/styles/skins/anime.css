@@ -1,0 +1,119 @@
+/* Anime: Ergänzungen zu den Tokens in app.css. Rasterpunkte am Kartenrand, funkelnde Sterne,
+ * Soundwörter während der Timer läuft, Titel mit Kontur und ein «やった!»-Stern nach dem Pomodoro. */
+
+[data-skin="anime"] .view-head h1 {
+  -webkit-text-stroke: 1.5px var(--outline); paint-order: stroke fill; color: var(--surface);
+  text-shadow: 4px 4px 0 var(--tomato);
+}
+[data-skin="anime"] .nav-item.is-on { transform: rotate(-1.5deg); background: color-mix(in srgb, var(--tomato) 14%, var(--surface)); }
+[data-skin="anime"] .timer-card {
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--tomato) 32%, transparent) 1.3px, transparent 1.8px);
+  background-size: 10px 10px;
+}
+[data-skin="anime"] .timer-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 44%, var(--surface) 48%, transparent 72%);
+}
+[data-skin="anime"] .dial-arc { filter: drop-shadow(3px 3px 0 var(--outline)); }
+
+/* Funkelnde Sterne rund ums Zifferblatt */
+.sparkles i {
+  position: absolute; width: 18px; height: 18px; background: #ffd23f;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+.sparkles i:nth-child(1) { left: 12%; top: 24%; }
+.sparkles i:nth-child(2) { right: 12%; top: 18%; width: 12px; height: 12px; animation-delay: -0.8s; background: var(--blush); }
+.sparkles i:nth-child(3) { left: 16%; top: 58%; width: 11px; height: 11px; animation-delay: -1.5s; background: var(--sage); }
+.sparkles i:nth-child(4) { right: 14%; top: 52%; animation-delay: -0.4s; }
+
+/* Soundwort, wackelt im Takt */
+.sfx {
+  position: absolute; right: 7%; top: 22%; font: 400 22px/1 var(--font-display); color: var(--tomato);
+  -webkit-text-stroke: 1px var(--outline); paint-order: stroke fill; transform: rotate(12deg);
+  animation: bob 0.9s ease-in-out infinite;
+}
+
+/* «やった!» im Stern */
+.burst span {
+  display: grid; place-items: center; width: 190px; height: 190px; background: #ffd23f; color: var(--ink);
+  font: 400 30px/1 var(--font-display); -webkit-text-stroke: 1px var(--outline);
+  clip-path: polygon(50% 0, 61% 26%, 90% 10%, 76% 40%, 100% 50%, 76% 60%, 90% 90%, 61% 74%, 50% 100%, 39% 74%, 10% 90%, 24% 60%, 0 50%, 24% 40%, 10% 10%, 39% 26%);
+  filter: drop-shadow(4px 4px 0 var(--outline));
+}
+
+/* ---------- Szenen je Phase ---------- */
+:root[data-skin="anime"] {
+  --scene-short:
+    radial-gradient(ellipse 60% 40% at 20% 10%, color-mix(in srgb, var(--blush) 35%, transparent), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 85% 25%, color-mix(in srgb, var(--sage) 28%, transparent), transparent 70%);
+  --scene-long:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 40%, transparent) 1px, transparent 1.5px) 0 0 / 46px 52px,
+    radial-gradient(ellipse 90% 60% at 50% 110%, color-mix(in srgb, #ff9a3d 35%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--indigo) 30%, transparent), transparent 70%);
+}
+
+/* Fokus: Energie-Aura dreht sich ums Zifferblatt, Blitze zucken */
+.aura {
+  position: absolute; inset: -6%; border-radius: 50%; opacity: 0; transition: opacity 0.6s;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--phase) 40%, transparent) 0 5deg, transparent 5deg 15deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 46%, #000 52%, transparent 72%);
+  mask-image: radial-gradient(circle, transparent 46%, #000 52%, transparent 72%);
+}
+:root[data-phase="focus"][data-run="1"] .aura { opacity: 1; animation: spin 9s linear infinite; }
+.bolts { inset: 0; display: none; }
+:root[data-phase="focus"][data-run="1"] .bolts { display: block; }
+.bolts i {
+  position: absolute; width: 30px; height: 58px; opacity: 0;
+  background: linear-gradient(180deg, #fffbd0, #ffd23f 45%, #ff9f1a);
+  clip-path: polygon(58% 0, 14% 56%, 44% 56%, 26% 100%, 86% 38%, 54% 38%, 74% 0);
+  animation: flash 2.2s linear infinite;
+}
+.bolts i:nth-child(1) { left: 7%; top: 30%; transform: rotate(-12deg); }
+.bolts i:nth-child(2) { right: 8%; top: 42%; transform: rotate(14deg) scale(1.2); animation-delay: -0.7s; animation-duration: 2.6s; }
+.bolts i:nth-child(3) { left: 12%; top: 58%; transform: rotate(8deg) scale(0.8); animation-delay: -1.4s; animation-duration: 3s; }
+.bolts i:nth-child(4) { right: 14%; top: 18%; transform: rotate(-20deg) scale(0.9); animation-delay: -1.9s; }
+:root[data-skin="anime"][data-phase="focus"][data-run="1"] .speedlines { animation-duration: 0.9s; }
+
+/* Kurze Pause: Blüten und Herzen schweben nach oben */
+[data-skin="anime"] .focus-grid[data-phase="long"] .petals { display: none; }
+.hearts { inset: 0; display: none; }
+:root[data-phase="short"] .hearts { display: block; }
+.hearts span {
+  position: absolute; bottom: -30px; font-size: 22px; line-height: 1; color: var(--tomato);
+  -webkit-text-stroke: 1px var(--outline); animation: rise 9s linear infinite paused;
+}
+:root[data-run="1"] .hearts span { animation-play-state: running; }
+.hearts span:nth-child(1) { left: 8%; animation-delay: -1s; }
+.hearts span:nth-child(2) { left: 22%; color: var(--blush); font-size: 16px; animation-delay: -5s; animation-duration: 11s; }
+.hearts span:nth-child(3) { left: 36%; animation-delay: -2.5s; font-size: 28px; }
+.hearts span:nth-child(4) { left: 50%; color: #ffb3cc; animation-delay: -7s; }
+.hearts span:nth-child(5) { left: 63%; animation-delay: -3.5s; animation-duration: 12s; }
+.hearts span:nth-child(6) { left: 75%; color: var(--blush); font-size: 18px; animation-delay: -8.5s; }
+.hearts span:nth-child(7) { left: 86%; color: #ffb3cc; animation-delay: -4s; font-size: 26px; }
+.hearts span:nth-child(8) { left: 94%; animation-delay: -6.2s; animation-duration: 10s; font-size: 15px; }
+
+/* Lange Pause: Laternenfest mit Sternschnuppen */
+.lanterns, .shooting { inset: 0; display: none; }
+:root[data-phase="long"] :is(.lanterns, .shooting) { display: block; }
+.lanterns i {
+  position: absolute; bottom: -40px; width: 18px; height: 24px; border-radius: 7px 7px 9px 9px;
+  background: linear-gradient(180deg, #ffe08a, #ff8a3d 70%, #e2483a);
+  box-shadow: 0 0 16px 4px rgb(255 150 60 / 0.55); animation: rise 16s linear infinite paused;
+}
+.lanterns i::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: -4px; height: 4px; background: #7a1530; border-radius: 0 0 2px 2px; }
+:root[data-run="1"] .lanterns i { animation-play-state: running; }
+.lanterns i:nth-child(1) { left: 10%; animation-delay: -2s; }
+.lanterns i:nth-child(2) { left: 26%; transform: scale(0.7); animation-delay: -9s; animation-duration: 19s; }
+.lanterns i:nth-child(3) { left: 44%; animation-delay: -5s; }
+.lanterns i:nth-child(4) { left: 61%; animation-delay: -12s; animation-duration: 18s; }
+.lanterns i:nth-child(5) { left: 77%; animation-delay: -1s; animation-duration: 21s; }
+.lanterns i:nth-child(6) { left: 90%; animation-delay: -7s; }
+.shooting i {
+  position: absolute; width: 110px; height: 2px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(90deg, transparent, #ffffff 70%, #fff7b0);
+  box-shadow: 0 0 6px #ffffff; animation: shoot 5s ease-in infinite;
+}
+.shooting i:nth-child(1) { left: 6%; top: 8%; }
+.shooting i:nth-child(2) { left: 42%; top: 4%; animation-delay: -1.8s; animation-duration: 6.5s; }
+.shooting i:nth-child(3) { left: 20%; top: 26%; animation-delay: -3.6s; animation-duration: 7.5s; }

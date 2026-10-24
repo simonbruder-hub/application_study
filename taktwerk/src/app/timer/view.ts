@@ -18,7 +18,9 @@ export const PHASE_ATTR: Record<TimerPhase, 'focus' | 'short' | 'long'> = {
 };
 export const PHASE_KANJI: Record<TimerPhase, string> = { focus: '集中', short_break: '休憩', long_break: '休息' };
 /** Technik-Stil: Phasen wie Messkanäle am Oszilloskop */
-export const PHASE_CHANNEL: Record<TimerPhase, string> = { focus: 'CH1 Fokus', short_break: 'CH2 Pause', long_break: 'CH3 Pause' };
+export const PHASE_CHANNEL: Record<TimerPhase, string> = { focus: 'CH1 · 1 min/Div', short_break: 'CH2 · 1 min/Div', long_break: 'CH3 · 1 min/Div' };
+/** Barock-Stil: lateinische Überschrift je Phase */
+export const PHASE_LATIN: Record<TimerPhase, string> = { focus: 'Labor', short_break: 'Otium', long_break: 'Quies' };
 
 /** Kurz nach einem geschafften Pomodoro jubelt das Maskottchen */
 export const flashMood = signal<Mood | null>(null);

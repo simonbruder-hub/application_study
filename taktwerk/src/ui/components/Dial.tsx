@@ -15,19 +15,40 @@ const TICKS = Array.from({ length: 60 }, (_, i) => {
   return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} class={major ? 'tk tk-major' : 'tk'} />;
 });
 
-export function Dial({ frac }: { frac: number }) {
+const ROMAN = ['XII', 'III', 'VI', 'IX'];
+
+export type DialKnob = 'dot' | 'leaf' | 'gem';
+
+const KNOB_PATH: Record<Exclude<DialKnob, 'dot'>, string> = {
+  leaf: 'M0 -13 C9 -7 9 7 0 13 C-9 7 -9 -7 0 -13 Z M0 -10 V10',
+  gem: 'M0 -12 L8 0 L0 12 L-8 0 Z',
+};
+
+export function Dial({ frac, numerals = false, knob = 'dot' }: { frac: number; numerals?: boolean; knob?: DialKnob }) {
   const f = clamp(frac, 0, 1);
   const th = (f * 360 - 90) * (Math.PI / 180);
+  const kx = (160 + R * Math.cos(th)).toFixed(2);
+  const ky = (160 + R * Math.sin(th)).toFixed(2);
   return (
     <svg class="dial" viewBox="0 0 320 320" aria-hidden="true">
       <g class="dial-ticks">{TICKS}</g>
+      {numerals && (
+        <g class="dial-num">
+          {ROMAN.map((n, i) => {
+            const a = (i * 90 * Math.PI) / 180;
+            return <text key={n} x={(160 + 100 * Math.sin(a)).toFixed(1)} y={(160 - 100 * Math.cos(a)).toFixed(1)}>{n}</text>;
+          })}
+        </g>
+      )}
       <circle class="dial-track" cx="160" cy="160" r={R} />
       <circle
         class="dial-arc" cx="160" cy="160" r={R}
         stroke-dasharray={C.toFixed(2)} stroke-dashoffset={(C * (1 - f)).toFixed(2)}
         transform="rotate(-90 160 160)"
       />
-      <circle class="dial-knob" cx={(160 + R * Math.cos(th)).toFixed(2)} cy={(160 + R * Math.sin(th)).toFixed(2)} r="8" />
+      {knob === 'dot'
+        ? <circle class="dial-knob" cx={kx} cy={ky} r="8" />
+        : <path class={`dial-knob dial-knob-${knob}`} d={KNOB_PATH[knob]} transform={`translate(${kx} ${ky}) rotate(${(f * 360).toFixed(1)})`} />}
     </svg>
   );
 }

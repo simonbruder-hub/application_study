@@ -1,0 +1,169 @@
+/* Barock. Tag: Elfenbein mit Goldgitter, Bordeaux als Fokus. Nacht: Kerzenlicht auf dunklem Holz.
+ * Doppelrahmen mit Eckzier, römische Ziffern, Edelstein als Zeiger und ein Pendel im Sekundentakt. */
+
+:root[data-skin="barock"] {
+  --scene-short:
+    radial-gradient(ellipse 80% 60% at 50% 100%, color-mix(in srgb, var(--sage) 26%, transparent), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 20%, color-mix(in srgb, var(--sage) 14%, transparent), transparent 70%);
+  --scene-long:
+    radial-gradient(circle, color-mix(in srgb, var(--gold) 40%, transparent) 0 1.2px, transparent 1.8px) 0 0 / 34px 34px,
+    linear-gradient(180deg, color-mix(in srgb, var(--indigo) 30%, transparent), color-mix(in srgb, var(--indigo) 8%, transparent) 70%);
+  --bg: #f4ecdc;
+  --gold: #b0862f;
+  --bg-layers:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(176 134 47 / 0.16), transparent 70%),
+    radial-gradient(circle, rgb(176 134 47 / 0.16) 0 1.6px, transparent 2px) 0 0 / 28px 28px,
+    repeating-linear-gradient(45deg, rgb(176 134 47 / 0.07) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(-45deg, rgb(176 134 47 / 0.07) 0 1px, transparent 1px 20px);
+  --surface: #fffaf0; --surface-2: #f7eedb; --surface-3: #ecdcbc;
+  --ink: #2b1d14; --ink-2: #4e3a2a; --muted: #7a6551; --line: #e3d3b4; --line-strong: #c9ad78; --outline: #8a6420;
+  --tomato: #8e1b2c; --on-tomato: #fff8ec; --sage: #3f6b4f; --on-sage: #fff8ec; --indigo: #3b3f8f; --on-indigo: #fff8ec;
+  --leaf: #4d7a3a; --link: #7a1f2b; --focus-ring: #8e1b2c;
+  --dial-track: #efe2c6; --tick: #c9ad78; --tick-major: #7a5a1e;
+  --card-border: 1px solid var(--line-strong);
+  --card-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line-strong), 0 18px 34px -22px rgb(80 50 10 / 0.55);
+  --radius: 3px;
+  --font-display: "Playfair Display", "Times New Roman", Georgia, serif;
+  --font-body: "EB Garamond", Garamond, "Times New Roman", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="barock"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark;
+    --bg: #120b08; --gold: #d9ac4f;
+    --bg-layers:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(142 27 44 / 0.35), transparent 70%),
+      radial-gradient(circle, rgb(217 172 79 / 0.12) 0 1.6px, transparent 2px) 0 0 / 28px 28px,
+      repeating-linear-gradient(45deg, rgb(217 172 79 / 0.05) 0 1px, transparent 1px 20px),
+      repeating-linear-gradient(-45deg, rgb(217 172 79 / 0.05) 0 1px, transparent 1px 20px);
+    --surface: #1d1410; --surface-2: #261a14; --surface-3: #33241b;
+    --ink: #f3e6cc; --ink-2: #d8c4a0; --muted: #a8916f; --line: #3a2a1f; --line-strong: #6b5230; --outline: #d9ac4f;
+    --tomato: #e0566a; --on-tomato: #1a0a0c; --sage: #7fb38f; --on-sage: #0f1a12; --indigo: #9aa0f0; --on-indigo: #12142a;
+    --leaf: #8fc07a; --link: #e8c27a; --focus-ring: #d9ac4f; --good: #8fc07a; --warn: #e8b04a; --bad: #f07a7a;
+    --dial-track: #2a1e16; --tick: #6b5230; --tick-major: #e8c27a;
+    --card-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line-strong), 0 18px 40px -20px rgb(0 0 0 / 0.8);
+  }
+}
+:root[data-skin="barock"][data-theme="dark"]:not([data-mode="tag"]),
+:root[data-skin="barock"][data-mode="nacht"] {
+  color-scheme: dark;
+  --bg: #120b08; --gold: #d9ac4f;
+  --bg-layers:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgb(142 27 44 / 0.35), transparent 70%),
+    radial-gradient(circle, rgb(217 172 79 / 0.12) 0 1.6px, transparent 2px) 0 0 / 28px 28px,
+    repeating-linear-gradient(45deg, rgb(217 172 79 / 0.05) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(-45deg, rgb(217 172 79 / 0.05) 0 1px, transparent 1px 20px);
+  --surface: #1d1410; --surface-2: #261a14; --surface-3: #33241b;
+  --ink: #f3e6cc; --ink-2: #d8c4a0; --muted: #a8916f; --line: #3a2a1f; --line-strong: #6b5230; --outline: #d9ac4f;
+  --tomato: #e0566a; --on-tomato: #1a0a0c; --sage: #7fb38f; --on-sage: #0f1a12; --indigo: #9aa0f0; --on-indigo: #12142a;
+  --leaf: #8fc07a; --link: #e8c27a; --focus-ring: #d9ac4f; --good: #8fc07a; --warn: #e8b04a; --bad: #f07a7a;
+  --dial-track: #2a1e16; --tick: #6b5230; --tick-major: #e8c27a;
+  --card-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line-strong), 0 18px 40px -20px rgb(0 0 0 / 0.8);
+}
+
+[data-skin="barock"] body { font-size: 17px; }
+[data-skin="barock"] .view-head h1 { font-style: italic; font-weight: 800; letter-spacing: 0; }
+[data-skin="barock"] .view-head h1::after { content: " ❦"; color: var(--gold); font-size: 0.55em; font-style: normal; vertical-align: middle; }
+[data-skin="barock"] .brand { font-style: italic; letter-spacing: 0.01em; }
+[data-skin="barock"] .eyebrow { font-variant: small-caps; letter-spacing: 0.12em; color: var(--gold); }
+[data-skin="barock"] :is(.btn, .chip, .phase-tabs, .phase-tab, .seg, .seg-btn, .ws-switch, .ws-btn, .icon-btn, .nav-item, .tab, .sync, .toast, .btn-round) { border-radius: 3px; }
+[data-skin="barock"] .nav-item.is-on { box-shadow: inset 3px 0 0 var(--gold), inset 0 0 0 1px var(--line-strong); font-style: italic; }
+[data-skin="barock"] .btn-start {
+  border-radius: 3px; border: 2px solid var(--gold); font-style: italic;
+  box-shadow: inset 0 0 0 2px var(--phase), inset 0 0 0 3px color-mix(in srgb, var(--gold) 60%, transparent), 0 12px 26px -12px var(--phase);
+}
+[data-skin="barock"] .btn-primary { border: 1px solid var(--gold); }
+
+/* Doppelrahmen mit Eckzier und Blüte oben in der Mitte */
+.frame {
+  inset: 9px; border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  background:
+    linear-gradient(var(--gold), var(--gold)) 4px 4px / 28px 2px,
+    linear-gradient(var(--gold), var(--gold)) 4px 4px / 2px 28px,
+    linear-gradient(var(--gold), var(--gold)) right 4px top 4px / 28px 2px,
+    linear-gradient(var(--gold), var(--gold)) right 4px top 4px / 2px 28px,
+    linear-gradient(var(--gold), var(--gold)) left 4px bottom 4px / 28px 2px,
+    linear-gradient(var(--gold), var(--gold)) left 4px bottom 4px / 2px 28px,
+    linear-gradient(var(--gold), var(--gold)) right 4px bottom 4px / 28px 2px,
+    linear-gradient(var(--gold), var(--gold)) right 4px bottom 4px / 2px 28px;
+  background-repeat: no-repeat;
+}
+.fleuron { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); padding: 0 8px; background: var(--surface); color: var(--gold); font-size: 22px; line-height: 1; }
+
+/* Zifferblatt wie eine Pendeluhr */
+[data-skin="barock"] .dial-track { stroke: var(--gold); stroke-width: 2; }
+[data-skin="barock"] .dial-arc { stroke-width: 9; stroke-linecap: butt; filter: drop-shadow(0 0 1px var(--gold)); }
+[data-skin="barock"] .dial-knob { fill: var(--gold); stroke: var(--ink); stroke-width: 1.5; }
+[data-skin="barock"] .dial .tk-major { stroke: var(--gold); stroke-width: 3.2; }
+[data-skin="barock"] .clock { font-family: var(--font-display); font-weight: 800; letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; }
+[data-skin="barock"] .mini-clock { font-family: var(--font-display); letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; }
+[data-skin="barock"] .dial-sub { font-variant: small-caps; text-transform: none; letter-spacing: 0.18em; font-size: 14px; }
+[data-skin="barock"] .round-dots i { border-radius: 1px; transform: rotate(45deg) scale(0.85); }
+.baroque-badge { font: italic 600 15px/1 var(--font-display); color: var(--phase); }
+.baroque-badge::before { content: "☙ "; color: var(--gold); }
+.baroque-badge::after { content: " ❧"; color: var(--gold); }
+
+/* Pendel: schwingt im Sekundentakt, solange der Timer läuft */
+.pendulum-wrap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: -6px; }
+.pendulum { width: 50px; height: 78px; flex: none; overflow: visible; }
+.pendulum line { stroke: var(--gold); stroke-width: 2.5; }
+.pendulum circle { fill: var(--gold); stroke: var(--ink); stroke-width: 1.2; }
+.pendulum .p-inner { fill: var(--phase); stroke: none; }
+.pendulum .p-pin { fill: var(--ink); }
+.pendulum .p-arm { transform-box: view-box; transform-origin: 30px 5px; }
+.pendulum.is-swinging .p-arm { animation: swing 1s ease-in-out infinite alternate; }
+[data-skin="barock"] .motto { font-size: 17px; color: var(--ink-2); }
+
+/* Bravissimo! */
+.bravo span {
+  font: italic 800 42px/1 var(--font-display); color: var(--gold); padding: 14px 22px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--gold);
+  box-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--gold); text-shadow: 0 1px 0 var(--ink);
+}
+
+/* Kerzen neben dem Pendel */
+.candle { position: relative; display: inline-block; width: 14px; height: 56px; flex: none; }
+.candle .wax {
+  position: absolute; left: 2px; bottom: 4px; width: 10px; height: 34px; border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #e9d9b4, #fffaf0 45%, #dcc697);
+}
+.candle::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: 0; height: 5px; border-radius: 2px; background: var(--gold); }
+.candle .flame {
+  position: absolute; left: 3px; bottom: 37px; width: 8px; height: 16px; transform-origin: 50% 100%;
+  border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%;
+  background: radial-gradient(ellipse at 50% 72%, #fffbe0 0 22%, #ffd45a 44%, #ff8a1f 78%, transparent 80%);
+  filter: drop-shadow(0 0 6px #ffb347) drop-shadow(0 0 14px rgb(255 160 60 / 0.6));
+  animation: flicker 0.35s ease-in-out infinite alternate;
+}
+:root[data-run="0"] .candle .flame { animation-duration: 1.2s; }
+
+/* Kurze Pause: Noten steigen auf (Tafelmusik) */
+.notes { inset: 0; display: none; }
+:root[data-phase="short"] .notes { display: block; }
+.notes span {
+  position: absolute; bottom: -30px; font: 400 24px/1 var(--font-display); color: var(--gold);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 30%, transparent); animation: rise 10s linear infinite paused;
+}
+:root[data-run="1"] .notes span { animation-play-state: running; }
+.notes span:nth-child(1) { left: 8%; animation-delay: -1s; }
+.notes span:nth-child(2) { left: 21%; font-size: 30px; animation-delay: -6s; animation-duration: 12s; }
+.notes span:nth-child(3) { left: 34%; animation-delay: -3s; color: var(--tomato); }
+.notes span:nth-child(4) { left: 49%; font-size: 20px; animation-delay: -8s; }
+.notes span:nth-child(5) { left: 62%; animation-delay: -4.5s; animation-duration: 11s; }
+.notes span:nth-child(6) { left: 74%; font-size: 30px; animation-delay: -9.5s; color: var(--tomato); }
+.notes span:nth-child(7) { left: 86%; animation-delay: -2s; animation-duration: 13s; }
+.notes span:nth-child(8) { left: 94%; font-size: 18px; animation-delay: -6.8s; }
+
+/* Lange Pause: königliches Feuerwerk */
+.fireworks { inset: 0; display: none; }
+:root[data-phase="long"] .fireworks { display: block; }
+.fireworks i {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%; color: var(--gold); opacity: 0;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--gold) 70%, transparent));
+  box-shadow: 64px 0px 0 2px var(--gold), 59px 24px 0 2px var(--tomato), 45px 45px 0 2px var(--gold), 24px 59px 0 2px var(--tomato), 0px 64px 0 2px var(--gold), -24px 59px 0 2px var(--tomato), -45px 45px 0 2px var(--gold), -59px 24px 0 2px var(--tomato), -64px 0px 0 2px var(--gold), -59px -24px 0 2px var(--tomato), -45px -45px 0 2px var(--gold), -24px -59px 0 2px var(--tomato), -0px -64px 0 2px var(--gold), 24px -59px 0 2px var(--tomato), 45px -45px 0 2px var(--gold), 59px -24px 0 2px var(--tomato), 38px 0px 0 1px #fff1c2, 33px 19px 0 1px var(--gold), 19px 33px 0 1px #fff1c2, 0px 38px 0 1px var(--gold), -19px 33px 0 1px #fff1c2, -33px 19px 0 1px var(--gold), -38px 0px 0 1px #fff1c2, -33px -19px 0 1px var(--gold), -19px -33px 0 1px #fff1c2, -0px -38px 0 1px var(--gold), 19px -33px 0 1px #fff1c2, 33px -19px 0 1px var(--gold), 16px 0px 0 0 var(--gold), 11px 11px 0 0 #fff1c2, 0px 16px 0 0 var(--gold), -11px 11px 0 0 #fff1c2, -16px 0px 0 0 var(--gold), -11px -11px 0 0 #fff1c2, -0px -16px 0 0 var(--gold), 11px -11px 0 0 #fff1c2;
+  animation: burst 2.8s ease-out infinite paused;
+}
+:root[data-run="1"] .fireworks i { animation-play-state: running; }
+.fireworks i:nth-child(1) { left: 18%; top: 14%; }
+.fireworks i:nth-child(2) { left: 80%; top: 10%; animation-delay: -0.9s; transform: scale(0.8); }
+.fireworks i:nth-child(3) { left: 12%; top: 46%; animation-delay: -1.7s; animation-duration: 3.4s; }
+.fireworks i:nth-child(4) { left: 86%; top: 40%; animation-delay: -2.3s; animation-duration: 3.1s; }

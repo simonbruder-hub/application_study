@@ -1,0 +1,69 @@
+/* Gemeinsame Bausteine der Stile: Deko-Ebene der Timer-Karte, Feier, Begleiter, Stil-Auswahl.
+ * Die einzelnen Stile (klassisch.css, anime.css, …) setzen nur Tokens und Akzente darauf. */
+
+.timer-card > .deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; container-type: size; }
+.deco > * { position: absolute; }
+
+/* Ebene hinter dem Zifferblatt: zentriert auf die Uhr, unter dem SVG */
+.dial-wrap { isolation: isolate; }
+.dial-fx { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+
+/* Hintergrund der ganzen Seite je Phase: Überblendung Fokus, kurze Pause (::before), lange Pause (::after) */
+body::before, body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.4s ease; }
+body::before { background: var(--scene-short, none); }
+body::after { background: var(--scene-long, none); }
+:root[data-phase="short"] body::before, :root[data-phase="long"] body::after { opacity: 1; }
+
+/* Zifferblatt: römische Ziffern und Zeiger-Formen */
+.dial-num text { font: 600 17px var(--font-display); fill: var(--tick-major); text-anchor: middle; dominant-baseline: central; letter-spacing: 0.04em; }
+.dial-knob-leaf, .dial-knob-gem { transition: transform 0.3s linear; }
+
+/* Begleiter unter dem Zifferblatt: Text darunter */
+.motto { margin: 0; font: italic 600 15px/1.3 var(--font-display); color: var(--ink-2); text-align: center; }
+
+/* Feier nach einem geschafften Pomodoro (über dem Zifferblatt) */
+.celebrate { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 2; }
+.celebrate > span { animation: pop-in 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+
+/* Stil-Auswahl in den Einstellungen */
+.skin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.skin-opt {
+  display: grid; gap: 4px; justify-items: start; text-align: left; padding: 10px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: border-color 0.15s, transform 0.15s;
+}
+.skin-opt:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.skin-opt.is-on { border-color: var(--phase, var(--tomato)); box-shadow: inset 0 0 0 1px var(--tomato); }
+.skin-opt b { font-size: 15px; }
+.skin-opt .small { line-height: 1.3; }
+.skin-swatch {
+  position: relative; display: block; width: 100%; height: 46px; border-radius: 8px; background: var(--s0);
+  border: 1px solid rgb(0 0 0 / 0.12); overflow: hidden; margin-bottom: 4px;
+}
+.skin-swatch i { position: absolute; border-radius: 50%; }
+.skin-swatch i:first-child { width: 30px; height: 30px; left: 12px; top: 8px; border: 5px solid var(--s1); }
+.skin-swatch i:last-child { width: 46%; height: 6px; right: 12px; top: 20px; border-radius: 3px; background: var(--s2); }
+
+@keyframes pop-in { from { opacity: 0; transform: scale(0.3) rotate(-12deg); } }
+@keyframes swing { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+@keyframes drift { to { transform: translateX(-50%); } }
+@keyframes twinkle { 50% { opacity: 0.15; transform: scale(0.6); } }
+@keyframes float { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(14px, -18px); } 66% { transform: translate(-10px, -6px); } }
+@keyframes ring { from { transform: scale(0.86); opacity: 0.55; } to { transform: scale(1.12); opacity: 0; } }
+@keyframes rise { from { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 1; } 50% { transform: translateY(-55cqh) translateX(16px); } 90% { opacity: 1; } to { transform: translateY(-112cqh) translateX(-8px); opacity: 0; } }
+@keyframes flash { 0%, 62%, 100% { opacity: 0; } 64% { opacity: 1; } 67% { opacity: 0.2; } 70% { opacity: 1; } 78% { opacity: 0; } }
+@keyframes breathe { 0%, 100% { transform: scale(0.72); } 50% { transform: scale(1.02); } }
+@keyframes spin3d { to { transform: perspective(700px) rotateY(360deg); } }
+@keyframes eq { from { transform: scaleY(0.15); } to { transform: scaleY(1); } }
+@keyframes flicker { 0% { transform: scale(1, 1) skewX(0); } 30% { transform: scale(0.94, 1.08) skewX(3deg); } 60% { transform: scale(1.04, 0.95) skewX(-2deg); } 100% { transform: scale(0.97, 1.05) skewX(1deg); } }
+@keyframes burst { 0% { transform: scale(0.05); opacity: 1; } 70% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes across { from { transform: translateX(-140px); } to { transform: translateX(calc(100cqw + 140px)); } }
+@keyframes sway { from { transform: skewX(-1.6deg); } to { transform: skewX(1.6deg); } }
+@keyframes shoot { 0%, 70% { transform: translate(0, 0) rotate(-28deg); opacity: 0; } 72% { opacity: 1; } 100% { transform: translate(260px, 140px) rotate(-28deg); opacity: 0; } }
+@keyframes steam { from { transform: translateY(4px); opacity: 0; } 40% { opacity: 0.9; } to { transform: translateY(-8px); opacity: 0; } }
+@keyframes dangle { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes confetti { from { transform: translate(0, 0) rotate(0); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(540deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .deco *, .dial-fx *, .celebrate *, .pendulum *, .candle *, .dial-wrap::after { animation: none !important; }
+  body::before, body::after { transition: none; }
+}

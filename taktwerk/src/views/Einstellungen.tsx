@@ -13,6 +13,7 @@ import { confirmDialog } from '../ui/dialog';
 import { Icon } from '../ui/Icon';
 import { fmtAgo, todayKey } from '../ui/format';
 import { toast } from '../ui/toast';
+import { SKINS } from '../ui/skins';
 
 type NumKey = 'focus_minutes' | 'short_break_minutes' | 'long_break_minutes' | 'long_break_every' | 'daily_goal_minutes';
 
@@ -101,8 +102,18 @@ function LookCard() {
           options={[{ value: 'auto', label: 'Automatisch', icon: 'auto' }, { value: 'tag', label: 'Tag', icon: 'sun' }, { value: 'nacht', label: 'Nacht', icon: 'moon' }]} />
       </div>
       <div class="field" style={{ marginTop: '12px' }}><span class="field-label">Stil</span>
-        <Seg label="Stil" value={p.skin} wide onChange={(skin) => setPrefs({ skin })}
-          options={[{ value: 'klassisch', label: 'Klassisch' }, { value: 'anime', label: 'Anime' }, { value: 'technik', label: 'Technik' }]} />
+        <div class="skin-grid" role="radiogroup" aria-label="Stil">
+          {SKINS.map((k) => (
+            <button
+              key={k.id} type="button" role="radio" aria-checked={p.skin === k.id}
+              class={`skin-opt${p.skin === k.id ? ' is-on' : ''}`} onClick={() => setPrefs({ skin: k.id })}
+            >
+              <span class="skin-swatch" aria-hidden="true" style={{ '--s0': k.swatch[0], '--s1': k.swatch[1], '--s2': k.swatch[2] }}><i /><i /></span>
+              <b>{k.label}</b>
+              <span class="small muted">{k.hint}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );

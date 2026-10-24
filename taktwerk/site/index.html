@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taktwerk · Fokus im Takt</title>
+<meta name="description" content="Taktwerk ist ein Pomodoro-Timer und eine Stechuhr für Lernen und Arbeit. Projekte, Aufgaben, Auswertung und sechs Stile. Läuft auf Laptop und Handy, auch offline.">
+<meta name="theme-color" content="#132024">
+<meta property="og:title" content="Taktwerk · Fokus im Takt">
+<meta property="og:description" content="Pomodoro-Timer und Stechuhr für Lernen und Arbeit. Kostenlos, offline, auf Laptop und Handy.">
+<meta property="og:image" content="img/hero.jpg">
+<link rel="icon" href="app/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="app/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Martian+Mono:wght@400;500&amp;display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f5f2; --surface: #ffffff; --surface-2: #eaefec; --ink: #132024; --ink-2: #3c4d53; --muted: #5f7076;
+    --line: #d7dfdd; --tomato: #c63a29; --tomato-2: #e2483a; --sage: #217a6f; --indigo: #4859bd; --on-accent: #ffffff;
+    --hero-bg: #132024; --hero-ink: #f3f5f2; --hero-muted: #a9bbbd;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+    --mono: "Martian Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0d1214; --surface: #151b1e; --surface-2: #1b2326; --ink: #e3ebeb; --ink-2: #b4c2c4; --muted: #8b9b9e;
+      --line: #263135; --tomato: #f0644e; --tomato-2: #ff7a63; --sage: #4cb4a5; --indigo: #8d9aef; --on-accent: #1b0d0a;
+      --hero-bg: #080c0d;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1214; --surface: #151b1e; --surface-2: #1b2326; --ink: #e3ebeb; --ink-2: #b4c2c4; --muted: #8b9b9e;
+    --line: #263135; --tomato: #f0644e; --tomato-2: #ff7a63; --sage: #4cb4a5; --indigo: #8d9aef; --on-accent: #1b0d0a;
+    --hero-bg: #080c0d;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: inherit; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+  h1, h2, h3 { font-family: var(--display); line-height: 1.05; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; font: 700 16px/1 var(--display);
+    text-decoration: none; border: 1px solid transparent; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary { background: var(--tomato); color: var(--on-accent); box-shadow: 0 14px 30px -14px var(--tomato); }
+  .btn-ghost { border-color: currentColor; color: inherit; }
+  .btn svg { width: 18px; height: 18px; }
+  .eyebrow { font: 500 12px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--tomato); margin: 0 0 14px; }
+
+  /* Kopf */
+  header.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--hero-bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--hero-ink); }
+  header.top .wrap { display: flex; align-items: center; gap: 20px; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font: 800 20px/1 var(--display); text-decoration: none; letter-spacing: -0.02em; }
+  .logo img { width: 32px; height: 32px; }
+  header.top nav { display: flex; gap: 22px; margin-left: auto; font-weight: 700; font-size: 15px; }
+  header.top nav a { text-decoration: none; color: var(--hero-muted); }
+  header.top nav a:hover { color: var(--hero-ink); }
+  header.top .btn { padding: 10px 16px; font-size: 14px; }
+  @media (max-width: 720px) { header.top nav { display: none; } header.top .btn { margin-left: auto; } }
+
+  /* Hero */
+  .hero { background: var(--hero-bg); color: var(--hero-ink); overflow: hidden; position: relative; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 50% 60% at 85% 30%, rgb(226 72 58 / 0.35), transparent 70%), radial-gradient(ellipse 40% 50% at 10% 90%, rgb(33 122 111 / 0.35), transparent 70%);
+  }
+  .hero .wrap { position: relative; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; padding: 72px 0 88px; }
+  .hero h1 { font-size: clamp(44px, 7vw, 84px); font-weight: 800; }
+  .hero h1 em { font-style: normal; color: var(--tomato-2); }
+  .hero .lead { font-size: 20px; color: var(--hero-muted); margin: 22px 0 32px; max-width: 30em; }
+  .hero .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 28px; font: 500 12px/1.4 var(--mono); color: var(--hero-muted); }
+  .hero .meta span::before { content: "✓ "; color: var(--tomato-2); }
+  .shots { position: relative; }
+  .shots .laptop { border-radius: 14px; overflow: hidden; box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.08); transform: perspective(1400px) rotateY(-8deg) rotateX(3deg); }
+  .shots .phone { position: absolute; width: 34%; right: -4%; bottom: -14%; border-radius: 26px; overflow: hidden; border: 6px solid #0a0f10; box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.8); }
+  .shots .phone img { aspect-ratio: 9 / 18; object-fit: cover; object-position: top; }
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; padding: 48px 0 96px; }
+    .shots .laptop { transform: none; }
+    .shots .phone { right: 0; }
+  }
+
+  /* Abschnitte */
+  section.block { padding: 96px 0; }
+  section.block h2 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; }
+  section.block .intro { color: var(--muted); font-size: 19px; max-width: 36em; margin: 16px 0 44px; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .feature { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .feature .ic { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--c); margin-bottom: 18px; }
+  .feature .ic svg { width: 24px; height: 24px; }
+  .feature h3 { font-size: 21px; margin-bottom: 8px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 16px; }
+  @media (max-width: 900px) { .features { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+
+  /* Stile */
+  .styles { background: var(--surface-2); }
+  .gallery { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 18px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x mandatory; }
+  .gallery figure { margin: 0; scroll-snap-align: start; }
+  .gallery img { border-radius: 20px; aspect-ratio: 9 / 16; object-fit: cover; object-position: top; box-shadow: 0 20px 40px -24px rgb(0 0 0 / 0.5); border: 1px solid var(--line); transition: transform 0.2s; }
+  .gallery figure:hover img { transform: translateY(-6px) rotate(-1deg); }
+  .gallery figcaption { margin-top: 12px; }
+  .gallery b { font: 800 19px/1.2 var(--display); display: block; }
+  .gallery span { color: var(--muted); font-size: 15px; }
+
+  /* Installieren */
+  .install { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: step; }
+  .install .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .install h3 { font-size: 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .install h3 svg { width: 26px; height: 26px; color: var(--tomato); }
+  .install ol { margin: 0; padding-left: 20px; color: var(--ink-2); }
+  .install li + li { margin-top: 6px; }
+  .install kbd { font: 500 13px var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  .note { margin-top: 26px; padding: 18px 22px; border-radius: 14px; background: color-mix(in srgb, var(--sage) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--sage) 35%, transparent); color: var(--ink-2); font-size: 16px; }
+  .note a { font-weight: 700; }
+  @media (max-width: 900px) { .install { grid-template-columns: 1fr; } }
+
+  /* Abschluss */
+  .final { background: var(--hero-bg); color: var(--hero-ink); text-align: center; }
+  .final h2 { color: var(--hero-ink); }
+  .final p { color: var(--hero-muted); margin: 16px auto 32px; max-width: 32em; font-size: 19px; }
+  .final .cta { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+  footer { padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .btn, .gallery img { transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="app/icon.svg" alt="">Taktwerk</a>
+    <nav aria-label="Seitennavigation">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#stile">Stile</a>
+      <a href="#installieren">Installieren</a>
+    </nav>
+    <a class="btn btn-primary" href="app/">App öffnen</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Pomodoro · Stechuhr · Auswertung</p>
+        <h1>Fokus im <em>Takt</em>.</h1>
+        <p class="lead">Taktwerk teilt Lernen und Arbeit in klare Runden: 25 Minuten Fokus, kurze Pause, weiter. Mit Projekten, Aufgaben und einer Auswertung, die zeigt, wohin deine Zeit geht.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="app/">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+            Jetzt starten
+          </a>
+          <a class="btn btn-ghost" href="#installieren">Als App installieren</a>
+        </div>
+        <div class="meta"><span>Kostenlos</span><span>Ohne Konto</span><span>Funktioniert offline</span><span>Laptop und Handy</span></div>
+      </div>
+      <div class="shots">
+        <div class="laptop"><img src="img/hero.jpg" width="1280" height="800" alt="Taktwerk auf dem Laptop: Fokus-Ansicht mit laufendem Timer"></div>
+        <div class="phone"><img src="img/technik.jpg" width="585" height="1170" alt="Taktwerk auf dem Handy im Technik-Stil"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="funktionen">
+    <div class="wrap">
+      <p class="eyebrow">Funktionen</p>
+      <h2>Alles, was eine Lernsession braucht.</h2>
+      <p class="intro">Nichts lenkt ab, alles ist einen Tastendruck entfernt. Die Zeit wird aus Zeitstempeln berechnet und läuft deshalb auch im Hintergrund exakt weiter.</p>
+      <div class="features">
+        <article class="feature" style="--c: var(--tomato)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div>
+          <h3>Pomodoro und Stechuhr</h3>
+          <p>Fokus, kurze und lange Pause mit frei wählbaren Längen. Oder die Stechuhr, die offen läuft, bis du stoppst.</p>
+        </article>
+        <article class="feature" style="--c: var(--sage)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+          <h3>Projekte und Aufgaben</h3>
+          <p>Getrennt nach Lernen und Arbeit. Ein Klick auf eine Aufgabe startet den Timer, die Zeit wird ihr gutgeschrieben.</p>
+        </article>
+        <article class="feature" style="--c: var(--indigo)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+          <h3>Auswertung</h3>
+          <p>Woche, Monat, Jahr: Verlauf nach Projekt, Vergleich mit der Vorperiode, Export als CSV oder Excel.</p>
+        </article>
+        <article class="feature" style="--c: var(--tomato)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <h3>Klingelt pünktlich</h3>
+          <p>Auch bei gesperrtem Handy: Ton, Benachrichtigung und Steuerung über die Medienleiste.</p>
+        </article>
+        <article class="feature" style="--c: var(--sage)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+          <h3>Installierbar und offline</h3>
+          <p>Eigenes Symbol auf Laptop und Handy, startet wie eine normale App und braucht kein Internet.</p>
+        </article>
+        <article class="feature" style="--c: var(--indigo)">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5"/></svg></div>
+          <h3>Sync auf Wunsch</h3>
+          <p>Mit einem kostenlosen Supabase-Konto auf dem Laptop starten und auf dem Handy pausieren.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block styles" id="stile">
+    <div class="wrap">
+      <p class="eyebrow">Sechs Stile</p>
+      <h2>Dein Timer, dein Look.</h2>
+      <p class="intro">Jeder Stil hat Tag- und Nachtmodus, eigene Szenen für Fokus, kurze und lange Pause und eine kleine Belohnung, wenn ein Pomodoro geschafft ist.</p>
+      <div class="gallery">
+        <figure><img src="img/klassisch.jpg" loading="lazy" width="585" height="1170" alt="Stil Klassisch in der kurzen Pause"><figcaption><b>Klassisch</b><span>Leuchtendes Zifferblatt, Atemkreis in der Pause, Konfetti</span></figcaption></figure>
+        <figure><img src="img/anime.jpg" loading="lazy" width="585" height="1170" alt="Stil Anime in der langen Pause"><figcaption><b>Anime</b><span>Blitze im Fokus, Herzen in der Pause, Laternenfest</span></figcaption></figure>
+        <figure><img src="img/technik.jpg" loading="lazy" width="585" height="1170" alt="Stil Technik bei Nacht"><figcaption><b>Technik</b><span>Oszilloskop: Sinus, Rechteck, Lissajous je nach Phase</span></figcaption></figure>
+        <figure><img src="img/barock.jpg" loading="lazy" width="585" height="1170" alt="Stil Barock in der langen Pause"><figcaption><b>Barock</b><span>Kerzen, Pendel, Tafelmusik und Feuerwerk</span></figcaption></figure>
+        <figure><img src="img/natur.jpg" loading="lazy" width="585" height="1170" alt="Stil Natur im Sonnenuntergang"><figcaption><b>Natur</b><span>Wald im Wind, Sonnenuntergang, eine Pflanze wächst mit</span></figcaption></figure>
+        <figure><img src="img/amtlich.jpg" loading="lazy" width="585" height="1170" alt="Stil Amtlich in der Kaffeepause"><figcaption><b>Amtlich</b><span>Formular, Kaffeepause und Stempel «Erledigt»</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="installieren">
+    <div class="wrap">
+      <p class="eyebrow">Installieren</p>
+      <h2>In zehn Sekunden auf deinem Gerät.</h2>
+      <p class="intro">Taktwerk wird direkt aus dem Browser installiert, ganz ohne App-Store. Danach startet es wie jede andere App.</p>
+      <div class="install">
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>Laptop</h3>
+          <ol>
+            <li><a href="app/">Taktwerk öffnen</a> in Chrome oder Edge.</li>
+            <li>Rechts in der Adressleiste auf das Symbol <kbd>Installieren</kbd> klicken.</li>
+            <li>Bestätigen. Taktwerk erscheint im Startmenü bzw. im Dock.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Android</h3>
+          <ol>
+            <li><a href="app/">Taktwerk öffnen</a> in Chrome.</li>
+            <li>Menü <kbd>⋮</kbd> antippen, dann <kbd>App installieren</kbd>.</li>
+            <li>Beim ersten Timer-Start Benachrichtigungen <b>zulassen</b>.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 5h2"/></svg>iPhone</h3>
+          <ol>
+            <li><a href="app/">Taktwerk öffnen</a> in Safari.</li>
+            <li>Teilen-Symbol antippen, dann <kbd>Zum Home-Bildschirm</kbd>.</li>
+            <li>Taktwerk vom Home-Bildschirm aus starten.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">Kein Browser zur Hand oder ganz ohne Internet? Die <a href="taktwerk.html" download>Einzeldatei herunterladen</a> und per Doppelklick öffnen. Die Daten liegen dann nur in dieser Datei im Browser.</p>
+    </div>
+  </section>
+
+  <section class="block final">
+    <div class="wrap">
+      <h2>Bereit für die erste Runde?</h2>
+      <p>25 Minuten. Ein Thema. Kein Handy-Scrollen. Los geht’s.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app/">Taktwerk öffnen</a>
+        <a class="btn btn-ghost" href="#installieren">Installieren</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Taktwerk · Fokus im Takt</span>
+    <span><a href="https://github.com/simonbruder-hub/application_study/tree/main/taktwerk">Quellcode auf GitHub</a></span>
+  </div>
+</footer>
+</body>
+</html>

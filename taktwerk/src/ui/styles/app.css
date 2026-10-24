@@ -692,7 +692,7 @@ body.pip .mini { width: 100%; border: 0; box-shadow: none; background: transpare
   mask-image: radial-gradient(circle at 50% 44%, transparent 30%, #000 62%);
 }
 .timer-card:has(.dial-wrap.is-running) .speedlines { animation: speed 1.8s ease-in-out infinite; }
-.timer-card > :not(.speedlines):not(.petals) { position: relative; }
+.timer-card > :not(.deco) { position: relative; }
 .kanji { font: 400 16px/1 var(--font-display); color: var(--phase); letter-spacing: 0.3em; margin-right: -0.3em; }
 .mascot-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: -4px; }
 .mascot { width: 74px; height: 74px; flex: none; overflow: visible; animation: bob 2.6s ease-in-out infinite; }

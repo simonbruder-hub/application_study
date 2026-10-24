@@ -1,8 +1,8 @@
 # Stand & Übergabe
 
 Für die Weiterarbeit in einem neuen Chat: Dieses Dokument, [`ARCHITEKTUR.md`](ARCHITEKTUR.md) und [`../README.md`](../README.md) lesen.
-Entwicklungszweig: `claude/tender-gates-ufxzx9` (Pull Request #1 gegen `main`). Nach dem Merge veröffentlicht
-GitHub Pages die App unter `https://simonbruder-hub.github.io/application_study/pomodoro-planer/v2/`.
+Taktwerk (früher Pomodoro-Planer) liegt auf `main`. GitHub Pages veröffentlicht
+die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/`.
 
 ## Fertig (Phase 0 + Phase 1)
 - Datenmodell, lokale Datenbank (Dexie), Repository, Sync-Engine mit Supabase, Live-Timer über Geräte und Tabs,
