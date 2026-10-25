@@ -156,22 +156,190 @@ describe('Geschenkejagd', () => {
   });
 });
 
-describe('Kürbismann', () => {
-  it('bannt den Kürbismann beim Antippen, zu langsam kostet ein Leben', async () => {
-    const { createPumpkin, monsterBox, stepPumpkin } = await import('./pumpkin');
-    const g = createPumpkin(seeded(12));
-    g.monster.cool = 0;
-    expect(stepPumpkin(g, 0.01, NO_INPUT)).toContain('appear');
-    const b = monsterBox(g.monster);
-    const events = stepPumpkin(g, 0.2, { ...NO_INPUT, taps: [{ x: b.x, y: (b.top + b.bottom) / 2 }] });
+describe('Kürbismann: Das richtige Haus', () => {
+  it('genau ein Haus passt zum Hinweis, der Start ist frei', async () => {
+    const { createHaunt, goalIndex, FIELD } = await import('./pumpkin');
+    for (let seed = 1; seed < 30; seed++) {
+      const g = createHaunt(seeded(seed));
+      const matches = g.houses.filter((h) => h.light === g.target.light && h.mark === g.target.mark);
+      expect(matches.length).toBe(1);
+      expect(goalIndex(g)).toBeGreaterThanOrEqual(0);
+      expect(g.houses.length).toBeGreaterThanOrEqual(4);
+      for (const h of g.houses) expect(Math.hypot(h.x, h.z - (FIELD - 3))).toBeGreaterThan(12);
+    }
+  });
+
+  it('jeder Versuch ordnet den Wald neu an', async () => {
+    const { createHaunt } = await import('./pumpkin');
+    const a = createHaunt(seeded(5)), b = createHaunt(seeded(6));
+    expect(a.houses.map((h) => Math.round(h.x))).not.toEqual(b.houses.map((h) => Math.round(h.x)));
+  });
+
+  it('richtiges Haus: Münzen und nächste Stufe; falsches Haus: Schreck und Ende', async () => {
+    const { createHaunt, stepHaunt, doorAt, goalIndex } = await import('./pumpkin');
+    const g = createHaunt(seeded(7));
+    g.monster.wait = 999; g.amulet = 0;
+    const goal = g.houses[goalIndex(g)]!;
+    const d = doorAt(goal);
+    const coins = g.progress.coins;
+    g.p.x = d.x; g.p.z = d.z;
+    const events: string[] = [];
+    for (let i = 0; i < 30; i++) events.push(...stepHaunt(g, 0.05, NO_INPUT));
+    expect(events).toContain('found');
+    expect(g.level).toBe(2);
+    expect(g.found).toBe(1);
+    expect(g.progress.coins + (events.includes('upgrade') ? 20 : 0)).toBeGreaterThan(coins);
+    // jetzt ein falsches Haus
+    g.monster.wait = 999; g.amulet = 0;
+    const wrong = g.houses.find((_, i) => i !== goalIndex(g))!;
+    const w = doorAt(wrong);
+    g.p.x = w.x; g.p.z = w.z;
+    const ev2: string[] = [];
+    for (let i = 0; i < 80 && !g.over; i++) ev2.push(...stepHaunt(g, 0.05, NO_INPUT));
+    expect(ev2).toContain('scare');
+    expect(g.over).toBe(true);
+  });
+
+  it('das Amulett rettet einmal', async () => {
+    const { createHaunt, stepHaunt, doorAt, goalIndex } = await import('./pumpkin');
+    const g = createHaunt(seeded(8));
+    g.monster.wait = 999; g.amulet = 1;
+    const wrong = g.houses.find((_, i) => i !== goalIndex(g))!;
+    const w = doorAt(wrong);
+    g.p.x = w.x; g.p.z = w.z;
+    const events: string[] = [];
+    for (let i = 0; i < 30; i++) events.push(...stepHaunt(g, 0.05, NO_INPUT));
+    expect(events).toContain('amulet');
+    expect(g.over).toBe(false);
+    expect(g.amulet).toBe(0);
+  });
+
+  it('im Licht der Lampe verschwindet der Kürbismann, sonst holt er einen', async () => {
+    const { createHaunt, stepHaunt } = await import('./pumpkin');
+    const g = createHaunt(seeded(9));
+    g.amulet = 0;
+    g.p = { ...g.p, x: 0, z: 0, yaw: 0, look: 0 };
+    g.monster = { x: 0, z: 6, lit: 0, active: true, wait: 0, gone: 0 };
+    const events: string[] = [];
+    for (let i = 0; i < 40; i++) events.push(...stepHaunt(g, 0.05, NO_INPUT));
     expect(events).toContain('banish');
-    expect(g.score).toBeGreaterThan(100);
-    expect(g.banished).toBe(1);
-    for (let i = 0; i < 400 && g.monster.state !== 'appear'; i++) stepPumpkin(g, 0.05, NO_INPUT);
-    const lives = g.lives;
-    let lunged = false;
-    for (let i = 0; i < 100 && !lunged; i++) lunged = stepPumpkin(g, 0.05, NO_INPUT).includes('lunge');
-    expect(lunged).toBe(true);
-    expect(g.lives).toBe(lives - 1);
+    expect(g.monster.active).toBe(false);
+    const h = createHaunt(seeded(10));
+    h.amulet = 0;
+    h.p = { ...h.p, x: 0, z: 0, yaw: 0, look: 0 };
+    h.monster = { x: 0, z: -4, lit: 0, active: true, wait: 0, gone: 0 };
+    for (let i = 0; i < 200 && !h.over; i++) stepHaunt(h, 0.05, NO_INPUT);
+    expect(h.over).toBe(true);
+  });
+
+  it('läuft und dreht sich mit den Pfeiltasten', async () => {
+    const { createHaunt, stepHaunt } = await import('./pumpkin');
+    const g = createHaunt(seeded(11));
+    g.monster.wait = 999;
+    const z0 = g.p.z, yaw0 = g.p.yaw;
+    for (let i = 0; i < 20; i++) stepHaunt(g, 0.05, { ...NO_INPUT, dy: -1 });
+    expect(g.p.z).toBeLessThan(z0 - 1);
+    for (let i = 0; i < 10; i++) stepHaunt(g, 0.05, { ...NO_INPUT, dx: 1 });
+    expect(g.p.yaw).toBeLessThan(yaw0);
+    expect(g.p.look).toBeGreaterThan(0.5);
+  });
+});
+
+describe('Dschungelschlange', () => {
+  it('frisst eine Frucht, wächst und zählt Punkte', async () => {
+    const { createSnake, stepSnake, POINTS } = await import('./snake');
+    const g = createSnake(seeded(21));
+    g.nextGold = 999;
+    const head = g.body[0]!;
+    g.fruits = [{ x: head.x, y: head.y - 1, kind: 'mango', life: Infinity, move: 0, born: 0 }];
+    const len = g.body.length;
+    const events: string[] = [];
+    for (let i = 0; i < 4; i++) events.push(...stepSnake(g, 0.05, NO_INPUT));
+    expect(events).toContain('eat');
+    expect(g.score).toBe(POINTS.mango);
+    for (let i = 0; i < 6; i++) stepSnake(g, 0.05, NO_INPUT);
+    expect(g.body.length).toBe(len + 1);
+  });
+
+  it('kann nicht umkehren und verliert an der Wand ein Leben', async () => {
+    const { createSnake, stepSnake, steer } = await import('./snake');
+    const g = createSnake(seeded(22));
+    g.nextGold = 999; g.fruits = [];
+    steer(g, { x: 0, y: 1 });
+    expect(g.queue.length).toBe(0);
+    steer(g, { x: 1, y: 0 });
+    let hit = false;
+    for (let i = 0; i < 200 && !hit; i++) hit = stepSnake(g, 0.05, NO_INPUT).includes('hit');
+    expect(hit).toBe(true);
+    expect(g.lives).toBe(2);
+    expect(g.inv).toBeGreaterThan(0);
+  });
+
+  it('Tiger beisst ein Stück Schwanz ab', async () => {
+    const { createSnake, stepSnake } = await import('./snake');
+    const g = createSnake(seeded(23));
+    g.nextGold = 999; g.fruits = []; g.level = 2;
+    g.body = Array.from({ length: 8 }, (_, k) => ({ x: 9, y: 10 + k }));
+    g.prev = g.body.map((c) => ({ ...c }));
+    g.step = 99;
+    g.tiger = { row: 15, x: 9, dir: 1, warn: 0 };
+    expect(stepSnake(g, 0.01, NO_INPUT)).toContain('bite');
+    // Glied 5 liegt in der Tigerzeile: alles ab dort ist weg
+    expect(g.body.length).toBe(5);
+    expect(g.lives).toBe(3);
+  });
+});
+
+describe('Baustellen-Run', () => {
+  it('läuft von selbst, sammelt Blitze und zählt Meter', async () => {
+    const { createRun, stepRun } = await import('./runner');
+    const g = createRun(seeded(31));
+    g.obs = []; g.nextZ = 999;
+    g.obs.push({ kind: 'bolt', z: 6, lane: 0, y: 0, len: 0.4, hit: false });
+    const events: string[] = [];
+    for (let i = 0; i < 40; i++) events.push(...stepRun(g, 0.05, NO_INPUT));
+    expect(events).toContain('bolt');
+    expect(g.bolts).toBe(1);
+    expect(g.dist).toBeGreaterThan(15);
+  });
+
+  it('Absperrung kostet ein Leben, ausser man springt', async () => {
+    const { createRun, stepRun } = await import('./runner');
+    const g = createRun(seeded(32));
+    g.obs = [{ kind: 'barrier', z: 3, lane: 0, y: 0, len: 0.6, hit: false }]; g.nextZ = 999;
+    for (let i = 0; i < 20; i++) stepRun(g, 0.05, NO_INPUT);
+    expect(g.lives).toBe(2);
+    const h = createRun(seeded(33));
+    h.obs = [{ kind: 'barrier', z: 4, lane: 0, y: 0, len: 0.6, hit: false }]; h.nextZ = 999;
+    stepRun(h, 0.02, { ...NO_INPUT, dy: -1 });
+    for (let i = 0; i < 20; i++) stepRun(h, 0.03, NO_INPUT);
+    expect(h.lives).toBe(3);
+  });
+
+  it('rutscht unter dem Träger durch und wechselt die Spur', async () => {
+    const { createRun, stepRun, LANE_W } = await import('./runner');
+    const g = createRun(seeded(34));
+    g.obs = [-1, 0, 1].map((lane) => ({ kind: 'beam' as const, z: 4, lane, y: 1.15, len: 0.5, hit: false })); g.nextZ = 999;
+    stepRun(g, 0.02, { ...NO_INPUT, dy: 1 });
+    for (let i = 0; i < 12; i++) stepRun(g, 0.03, NO_INPUT);
+    expect(g.lives).toBe(3);
+    stepRun(g, 0.02, { ...NO_INPUT, dx: 1 });
+    for (let i = 0; i < 20; i++) stepRun(g, 0.03, NO_INPUT);
+    expect(g.lane).toBe(1);
+    expect(g.x).toBeCloseTo(LANE_W, 1);
+  });
+
+  it('biegt an der Abzweigung ab; verpasst kostet ein Leben', async () => {
+    const { createRun, stepRun } = await import('./runner');
+    const g = createRun(seeded(35));
+    g.obs = []; g.nextZ = 999; g.turn = 1; g.pz = g.segLen - 3;
+    const events = stepRun(g, 0.02, { ...NO_INPUT, dx: 1 });
+    expect(events).toContain('turn');
+    expect(g.pz).toBeLessThan(5);
+    expect(g.lives).toBe(3);
+    const h = createRun(seeded(36));
+    h.obs = []; h.nextZ = 999; h.turn = -1; h.pz = h.segLen - 1;
+    for (let i = 0; i < 20; i++) stepRun(h, 0.05, NO_INPUT);
+    expect(h.lives).toBe(2);
   });
 });

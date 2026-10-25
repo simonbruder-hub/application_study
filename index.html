@@ -3,27 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>application_study</title>
+<title>Taktwerk und Lernlabor</title>
+<meta name="description" content="Zwei Apps fürs Studium: Taktwerk für Fokus mit Pomodoro und Stechuhr, Lernlabor für Elektrotechnik mit Schaltungsbaukasten und Oszilloskop.">
+<link rel="icon" href="taktwerk/app/icon.svg">
 <style>
-  :root { color-scheme: light dark; --bg: #edf1f0; --fg: #132024; --muted: #5f7076; --card: #fbfcfc; --line: #d7dfdd; --accent: #c63a29; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --accent: #f0644e; } }
-  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
-  main { max-width: 640px; margin: 0 auto; padding: 48px 16px; }
-  h1 { margin: 0 0 4px; font-size: 28px; }
-  p { color: var(--muted); margin: 0 0 24px; }
-  a.app { display: block; padding: 18px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); color: inherit; text-decoration: none; }
-  a.app:hover { border-color: var(--accent); }
-  a.app b { display: block; font-size: 18px; }
-  a.app span { color: var(--muted); font-size: 14px; }
-  a.app + a.app { margin-top: 12px; }
+  :root {
+    color-scheme: light dark;
+    --bg: #edf1f0; --fg: #132024; --muted: #5f7076; --card: #fbfcfc; --line: #d7dfdd;
+    --tw: #c63a29; --ll: #2456c9; --soft: #e2e9e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --tw: #f0644e; --ll: #6b9bff; --soft: #1b2427; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 20px 0; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { font-weight: 800; letter-spacing: -0.01em; }
+  header nav { display: flex; gap: 16px; font-size: 15px; }
+  header nav a { color: var(--muted); text-decoration: none; }
+  header nav a:hover { color: var(--fg); }
+  .hero { padding: 40px 0 24px; }
+  .eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  h1 { margin: 0; font-size: clamp(32px, 6vw, 52px); line-height: 1.08; letter-spacing: -0.02em; max-width: 16ch; }
+  h1 em { font-style: normal; color: var(--tw); }
+  h1 em + em { color: var(--ll); }
+  .lead { margin: 16px 0 0; font-size: 18px; color: var(--muted); max-width: 58ch; }
+  .apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 24px 0 8px; }
+  .app { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .shot { height: 260px; background: var(--soft); display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
+  .shot img { display: block; }
+  .tw .shot img { width: 220px; height: auto; margin-top: 24px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
+  .ll .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 96%; }
+  .body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
+  .tag { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; color: #fff; }
+  .tw .tag { background: var(--tw); }
+  .ll .tag { background: var(--ll); }
+  .app h2 { margin: 12px 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  .app p { margin: 0; color: var(--muted); }
+  .app ul { margin: 14px 0 20px; padding-left: 20px; }
+  .app li { margin: 4px 0; }
+  .actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 12px; font-weight: 700; text-decoration: none; border: 1px solid transparent; }
+  .tw .btn-main { background: var(--tw); color: #fff; }
+  .ll .btn-main { background: var(--ll); color: #fff; }
+  .btn-alt { border-color: var(--line); color: var(--fg); }
+  .btn:hover { filter: brightness(1.08); }
+  .btn-alt:hover { border-color: var(--muted); }
+  .flow { padding: 40px 0; }
+  .flow h2 { margin: 0 0 16px; font-size: 24px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; counter-reset: s; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .step::before { counter-increment: s; content: counter(s); display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--soft); font-weight: 800; margin-bottom: 8px; }
+  .step b { display: block; margin-bottom: 4px; }
+  .step span { color: var(--muted); font-size: 15px; }
+  footer { padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 20px; }
+  footer a { color: inherit; }
 </style>
 </head>
 <body>
-<main>
-  <h1>application_study</h1>
-  <p>Diverse Apps zur Unterstützung.</p>
-  <a class="app" href="taktwerk/"><b>Taktwerk</b><span>Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertung, sechs Stile, installierbar auf Laptop und Handy</span></a>
-  <a class="app" href="lernlabor/app/"><b>Lernlabor</b><span>Elektrotechnik lernen: Schaltungen aus R, L, C, Quellen und Schaltern aufbauen, Strom und Spannung im Oszilloskop sehen, Theorie und Aufgaben in Stufen</span></a>
+<header>
+  <div class="wrap">
+    <span class="brand">application_study</span>
+    <nav aria-label="Apps">
+      <a href="taktwerk/app/">Taktwerk</a>
+      <a href="lernlabor/app/">Lernlabor</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Zwei Apps fürs Studium</p>
+    <h1>Im <em>Takt</em> lernen, im <em>Labor</em> verstehen.</h1>
+    <p class="lead">Taktwerk hält dich mit Pomodoro und Stechuhr bei der Sache. Das Lernlabor zeigt, was in einer Schaltung wirklich passiert. Beide laufen im Browser, auf Laptop und Handy, ohne Konto.</p>
+  </section>
+
+  <section class="apps" aria-label="Apps">
+    <article class="app tw">
+      <div class="shot"><img src="taktwerk/img/technik.jpg" width="585" height="1170" alt="Taktwerk im Technik-Stil auf dem Handy"></div>
+      <div class="body">
+        <span class="tag">Fokus</span>
+        <h2>Taktwerk</h2>
+        <p>Pomodoro-Timer und Stechuhr für Lernen und Arbeit.</p>
+        <ul>
+          <li>Projekte, Aufgaben und eine Auswertung deiner Lernzeit</li>
+          <li>17 Stile mit Tag- und Nachtmodus, von Forest bis Baustelle</li>
+          <li>Ein Spiel für jede Pause, zwei davon in 3D</li>
+          <li>Installierbar und offline nutzbar, Sync zwischen Geräten</li>
+        </ul>
+        <div class="actions">
+          <a class="btn btn-main" href="taktwerk/app/">Taktwerk öffnen</a>
+          <a class="btn btn-alt" href="taktwerk/">Mehr erfahren</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="app ll">
+      <div class="shot"><img src="lernlabor/img/labor.jpg" width="1200" height="1180" alt="Lernlabor: RLC-Schwingkreis mit gedämpfter Schwingung im Oszilloskop"></div>
+      <div class="body">
+        <span class="tag">Elektrotechnik</span>
+        <h2>Lernlabor</h2>
+        <p>Schaltungen bauen und Strom und Spannung live sehen.</p>
+        <ul>
+          <li>Baukasten mit R, L, C, Quellen, Schaltern, Lampen und Messgeräten</li>
+          <li>Oszilloskop, Zeigerdiagramm und Frequenzgang</li>
+          <li>Gleichstrom, Wechselstrom und Schaltvorgänge in Stufen</li>
+          <li>Theorie mit Formeln und Aufgaben zum Selbstprüfen</li>
+        </ul>
+        <div class="actions">
+          <a class="btn btn-main" href="lernlabor/app/">Lernlabor öffnen</a>
+          <a class="btn btn-alt" href="lernlabor/app/#/et/bauen">Zum Baukasten</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="flow">
+    <h2>So spielen die beiden zusammen</h2>
+    <div class="steps">
+      <div class="step"><b>Fokus starten</b><span>In Taktwerk ein Projekt wählen und 25 Minuten Pomodoro starten.</span></div>
+      <div class="step"><b>Im Labor lernen</b><span>Über den Link im Fokus-Bildschirm direkt ins Lernlabor: Theorie lesen, Schaltung bauen, Aufgaben lösen.</span></div>
+      <div class="step"><b>Pause machen</b><span>Klingelt der Timer, wartet das Pausenspiel deines Stils. Danach geht es weiter.</span></div>
+      <div class="step"><b>Fortschritt sehen</b><span>Die Auswertung zeigt, wie viel Zeit in welches Fach geflossen ist.</span></div>
+    </div>
+  </section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <span>Kostenlos · ohne Konto · läuft offline</span>
+    <span><a href="taktwerk/taktwerk.html">Taktwerk als einzelne Datei</a></span>
+  </div>
+</footer>
 </body>
 </html>

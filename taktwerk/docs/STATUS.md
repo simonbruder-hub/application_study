@@ -43,6 +43,14 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   es in den Einstellungen und im Stil Technik in den Pausen. Pages veröffentlicht es unter `/lernlabor/app/`.
 - Forest: Der alte Baumstrunk hat Wurzeln, Rinde und Jahresringe; der neue Baum wächst daneben als Ganzes
   (Stamm und Krone im gleichen Verhältnis), nichts formt sich mehr um.
+- Neue Stile **Dschungel** (Tiere, die sich verstecken und auftauchen) und **Baustelle** (Kräne, Lastwagen, Elektriker
+  mit Stromschlag am Ende jeder Session), mit den Spielen Dschungelschlange (Snake) und Baustellen-Run (Temple Run, 3D).
+- **Kürbismann neu** (3D): das richtige Spukhaus finden, jedes Mal neu angeordnet, Kürbismann mit der Taschenlampe
+  bannen, Münzen und Upgrades bleiben gespeichert (`taktwerk.kuerbis.v2`).
+- 3D-Grundlage in `src/ui/game/three/` (three.js, eigener Chunk, lädt erst beim Spielen): Renderer in eine eigene
+  Fläche, Bild wird in die Spielfläche kopiert; ohne WebGL zeichnen die Spiele eine 2D-Ansicht. Ohne Grafikkarte
+  (Software-Renderer) kleinere Auflösung, keine Schatten und nur alle 0,4 s ein neues Bild.
+- Gemeinsame Startseite (`/index.html`) für Taktwerk und Lernlabor mit Vorschaubildern.
 
 ## Offen
 
@@ -54,4 +62,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 3. **Lernlabor ausbauen** (nächste Schritte in `docs/LERNAPP.md`): Diode, Transistor, OP; mehr Aufgaben;
    Fächer Elektromagnetismus, Physik, Chemie, Mathematik in Stufen.
 4. Optional: eigener Superhelden-Stil (eigene Figur).
-5. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.
+5. Ziel danach: eigene Accounts für die Website mit beiden Apps, online und offline auf allen Geräten.
+6. Bekannt: der E2E-Test «läuft nach dem Neuladen an der richtigen Stelle weiter» schlägt lokal im Profil «mobile» fehl
+   (auch ohne die neuen Änderungen), in CI prüfen.
+7. Dschungelschlange optional ebenfalls in 3D.

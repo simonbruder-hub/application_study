@@ -114,3 +114,37 @@ export function drawBanner(ctx: CanvasRenderingContext2D, W: number, y: number, 
   ctx.fillText(text, W / 2, y - 4);
   ctx.restore();
 }
+
+/** Ladebild, solange eine 3D-Ansicht nachgeladen wird */
+export function drawLoading(ctx: CanvasRenderingContext2D, W: number, H: number, text = '3D-Welt wird geladen …'): void {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#16202a'); g.addColorStop(1, '#0b0f14');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#e3ebeb';
+  ctx.font = '700 16px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, W / 2, H / 2);
+  ctx.textAlign = 'left';
+}
+
+/**
+ * 3D-Ansicht bei Bedarf nachladen (three.js nur, wenn das Spiel läuft). Bis sie bereit ist, liefert get() null;
+ * schlägt WebGL fehl, bleibt failed gesetzt und das Spiel zeichnet seine 2D-Fassung.
+ */
+export function lazyView<V>(load: () => Promise<V>): { get(): V | null; failed: boolean } {
+  let view: V | null = null;
+  let started = false;
+  const state = {
+    failed: false,
+    get(): V | null {
+      if (view || state.failed) return view;
+      if (!started) {
+        started = true;
+        load().then((v) => { view = v; }).catch((e) => { console.warn('3D nicht verfügbar, 2D-Ansicht', e); state.failed = true; });
+      }
+      return null;
+    },
+  };
+  return state;
+}

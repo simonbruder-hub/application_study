@@ -1,403 +1,418 @@
 /**
- * Kürbismann (Stil Halloween), angelehnt an Slenderman: nachts durch den Wald gehen (von selbst), die Taschenlampe
- * folgt Maus, Finger oder Pfeiltasten. Taucht der lange Mann mit dem Kürbiskopf zwischen den Bäumen auf, muss man
- * ihn rechtzeitig antippen; je schneller, desto mehr Punkte. Zu langsam: Bildrauschen, ein Leben weg.
- * Bonbons am Wegrand geben Extrapunkte. Darstellung mit Perspektive: Tiefe d in Metern vor der Kamera.
+ * Kürbismann: Das richtige Haus (Stil Halloween). Nachts im nebligen Wald steht eine Handvoll Spukhäuser.
+ * Nur eines ist das gesuchte: Der Hinweis nennt zwei Merkmale (Fensterlicht und ein Zeichen am Haus).
+ * Man läuft selbst mit der Taschenlampe herum; beim Umsehen nach links oder rechts tritt die Figur zur Seite
+ * und gibt mehr Sicht frei. Vor der Tür kurz stehen bleiben öffnet sie. Das richtige Haus bringt Münzen und
+ * führt zur nächsten Stufe; im falschen wartet der Kürbismann und der Versuch ist vorbei. Jeder neue Versuch
+ * ordnet den Wald neu an. Draussen streift der Kürbismann umher: Im Licht der Lampe erstarrt er und verschwindet.
+ * Münzen und Upgrades (Laterne, Laufschuhe, Amulett, Krähe) bleiben über die Versuche hinweg erhalten.
  */
-import { burst, drawBanner, drawFloats, drawSparks, type Engine, type Float, type Input, moveFloats, moveSparks, type Pt, type Spark } from './types';
+import { drawBanner, drawFloats, drawLoading, type Engine, type Float, type Input, lazyView, moveFloats } from './types';
 
 const W = 360;
 const H = 560;
-const HOR = 236;
-const F = 210;
-const CAM = 1.7;
+export const FIELD = 28;
 
-const sx = (X: number, d: number) => W / 2 + (X * F) / d;
-const gy = (d: number) => HOR + (CAM * F) / d;
+export type Light = 'gelb' | 'grün' | 'violett';
+export type Mark = 'katze' | 'kürbis' | 'rabe' | 'grabstein';
+export const LIGHTS: Light[] = ['gelb', 'grün', 'violett'];
+export const MARKS: Mark[] = ['katze', 'kürbis', 'rabe', 'grabstein'];
+const WALLS = ['#5b3a2e', '#3e4a5c', '#4a5a3a', '#5a5150', '#6b4a6a'];
+const ROOFS = ['#2b1f2e', '#2e3138', '#3a2620', '#25303a'];
 
-interface Tree { X: number; d: number; w: number; seed: number }
-interface Candy { X: number; d: number; color: string; taken: boolean }
-type MonsterState = 'hidden' | 'appear' | 'banished' | 'lunge';
-interface Monster { X: number; d: number; state: MonsterState; t: number; window: number; cool: number }
+export interface House {
+  x: number;
+  z: number;
+  /** Tür zeigt in diese Richtung (Radiant, 0 = +Z) */
+  face: number;
+  light: Light;
+  mark: Mark;
+  wall: string;
+  roof: string;
+  tall: boolean;
+  /** Schon betreten (falsch) – nur für die Anzeige */
+  tried: boolean;
+}
 
-export interface Pumpkin {
+export interface Tree { x: number; z: number; r: number; kind: 'tot' | 'tanne'; s: number }
+
+export interface Upgrades { lamp: number; shoes: number; amulet: number; crow: number }
+export interface Progress { coins: number; up: Upgrades }
+
+export interface Haunt {
+  seed: number;
+  houses: House[];
   trees: Tree[];
-  candies: Candy[];
-  monster: Monster;
-  aim: Pt;
-  sparks: Spark[];
+  graves: { x: number; z: number; r: number }[];
+  target: { light: Light; mark: Mark };
+  p: { x: number; z: number; yaw: number; look: number; speed: number; walk: number };
+  door: { house: number; t: number } | null;
+  monster: { x: number; z: number; lit: number; active: boolean; wait: number; gone: number };
+  /** Schreckmoment: Kürbismann springt aus der Tür */
+  scare: number;
+  found: number;
+  level: number;
+  score: number;
+  amulet: number;
+  progress: Progress;
   floats: Float[];
   banner: { text: string; t: number } | null;
-  flash: number;
-  walked: number;
-  score: number;
-  banished: number;
-  lastReaction: number | null;
-  bestReaction: number | null;
-  lives: number;
   time: number;
+  touch: { x: number; y: number } | null;
   over: boolean;
   rng: () => number;
 }
 
-const CANDY = ['#ff7518', '#7cfc00', '#b14cff', '#ffd166', '#ff4d6d'];
+/* ---------- Fortschritt über die Versuche ---------- */
 
-function newTree(rng: () => number, d: number): Tree {
-  let X = (rng() - 0.5) * 10;
-  if (Math.abs(X) < 1) X = Math.sign(X || 1) * (1 + rng() * 1.5);
-  return { X, d, w: 0.22 + rng() * 0.3, seed: Math.floor(rng() * 1000) };
+const STORE = 'taktwerk.kuerbis.v2';
+export const UPGRADES: { key: keyof Upgrades; max: number; cost: number; label: string }[] = [
+  { key: 'lamp', max: 1, cost: 20, label: 'Laterne heller' },
+  { key: 'shoes', max: 1, cost: 40, label: 'Laufschuhe' },
+  { key: 'lamp', max: 2, cost: 70, label: 'Laterne weiter' },
+  { key: 'amulet', max: 1, cost: 100, label: 'Amulett (schützt einmal)' },
+  { key: 'shoes', max: 2, cost: 140, label: 'Sprintschuhe' },
+  { key: 'crow', max: 1, cost: 190, label: 'Krähe zeigt das Haus' },
+  { key: 'lamp', max: 3, cost: 250, label: 'Scheinwerfer' },
+];
+
+export function loadProgress(): Progress {
+  const empty: Progress = { coins: 0, up: { lamp: 0, shoes: 0, amulet: 0, crow: 0 } };
+  try {
+    const raw = globalThis.localStorage?.getItem(STORE);
+    if (!raw) return empty;
+    const p = JSON.parse(raw) as Progress;
+    return { coins: p.coins ?? 0, up: { ...empty.up, ...p.up } };
+  } catch { return empty; }
 }
 
-export function createPumpkin(rng: () => number = Math.random): Pumpkin {
-  return {
-    trees: Array.from({ length: 22 }, (_, i) => newTree(rng, 1.2 + (i / 22) * 13)),
-    candies: [],
-    monster: { X: 0, d: 6, state: 'hidden', t: 0, window: 2.2, cool: 4 },
-    aim: { x: W / 2, y: H * 0.48 },
-    sparks: [], floats: [], banner: null, flash: 0,
-    walked: 0, score: 0, banished: 0, lastReaction: null, bestReaction: null, lives: 3, time: 0, over: false, rng,
+function saveProgress(p: Progress): void {
+  try { globalThis.localStorage?.setItem(STORE, JSON.stringify(p)); } catch { /* privater Modus */ }
+}
+
+/** Blickrichtung der Lampe: Drehrichtung schaut voraus */
+export const viewYaw = (g: Haunt) => g.p.yaw - g.p.look * 0.55;
+
+export const lampCone = (g: Haunt) => (24 + g.progress.up.lamp * 6) * (Math.PI / 180);
+export const lampRange = (g: Haunt) => 11 + g.progress.up.lamp * 3;
+const walkSpeed = (g: Haunt) => 3.4 * (1 + g.progress.up.shoes * 0.18);
+
+/* ---------- Welt ---------- */
+
+const dist = (ax: number, az: number, bx: number, bz: number) => Math.hypot(ax - bx, az - bz);
+/** Türpunkt vor dem Haus */
+export const doorAt = (h: House) => ({ x: h.x + Math.sin(h.face) * 3.1, z: h.z + Math.cos(h.face) * 3.1 });
+
+function buildWorld(g: Haunt): void {
+  const rng = g.rng;
+  const n = Math.min(7, 4 + g.level - 1);
+  const houses: House[] = [];
+  for (let tries = 0; houses.length < n && tries < 600; tries++) {
+    const x = (rng() * 2 - 1) * (FIELD - 5), z = (rng() * 2 - 1) * (FIELD - 5);
+    if (dist(x, z, 0, FIELD - 3) < 13) continue;
+    if (houses.some((h) => dist(h.x, h.z, x, z) < 11)) continue;
+    houses.push({
+      x, z, face: Math.atan2(0 - x, FIELD - 3 - z) + (rng() - 0.5) * 1.6,
+      light: 'gelb', mark: 'katze', wall: WALLS[Math.floor(rng() * WALLS.length)]!, roof: ROOFS[Math.floor(rng() * ROOFS.length)]!,
+      tall: rng() < 0.4, tried: false,
+    });
+  }
+  // Ziel: zwei Merkmale, die genau ein Haus hat
+  const target = { light: LIGHTS[Math.floor(rng() * 3)]!, mark: MARKS[Math.floor(rng() * 4)]! };
+  const goal = Math.floor(rng() * houses.length);
+  houses.forEach((h, i) => {
+    if (i === goal) { h.light = target.light; h.mark = target.mark; return; }
+    // Täuschung: oft stimmt ein Merkmal, nie beide
+    const sameLight = rng() < 0.5;
+    h.light = sameLight ? target.light : LIGHTS.filter((l) => l !== target.light)[Math.floor(rng() * 2)]!;
+    h.mark = sameLight ? MARKS.filter((m) => m !== target.mark)[Math.floor(rng() * 3)]! : MARKS[Math.floor(rng() * 4)]!;
+  });
+  g.houses = houses;
+  g.target = target;
+  // Bäume und Gräber, nicht auf Häusern, Türen und am Start
+  const trees: Tree[] = [];
+  for (let tries = 0; trees.length < 70 && tries < 2000; tries++) {
+    const x = (rng() * 2 - 1) * FIELD, z = (rng() * 2 - 1) * FIELD;
+    if (dist(x, z, 0, FIELD - 3) < 5) continue;
+    if (houses.some((h) => dist(h.x, h.z, x, z) < 6.5)) continue;
+    if (trees.some((t) => dist(t.x, t.z, x, z) < 2.6)) continue;
+    const kind = rng() < 0.55 ? 'tot' : 'tanne';
+    trees.push({ x, z, r: kind === 'tot' ? 0.45 : 0.7, kind, s: 0.8 + rng() * 0.6 });
+  }
+  g.trees = trees;
+  g.graves = [];
+  for (let tries = 0; g.graves.length < 16 && tries < 400; tries++) {
+    const x = (rng() * 2 - 1) * (FIELD - 2), z = (rng() * 2 - 1) * (FIELD - 2);
+    if (houses.some((h) => dist(h.x, h.z, x, z) < 5) || trees.some((t) => dist(t.x, t.z, x, z) < 1.5) || dist(x, z, 0, FIELD - 3) < 4) continue;
+    g.graves.push({ x, z, r: (rng() - 0.5) * 0.6 });
+  }
+  g.p = { x: 0, z: FIELD - 3, yaw: Math.PI, look: 0, speed: 0, walk: 0 };
+  g.door = null;
+  g.monster = { x: 0, z: -FIELD + 2, lit: 0, active: false, wait: 12 - Math.min(6, g.level), gone: 0 };
+}
+
+export function createHaunt(rng: () => number = Math.random): Haunt {
+  const g: Haunt = {
+    seed: Math.floor(rng() * 1e9), houses: [], trees: [], graves: [], target: { light: 'gelb', mark: 'katze' },
+    p: { x: 0, z: 0, yaw: 0, look: 0, speed: 0, walk: 0 }, door: null,
+    monster: { x: 0, z: 0, lit: 0, active: false, wait: 10, gone: 0 },
+    scare: 0, found: 0, level: 1, score: 0, amulet: 0, progress: loadProgress(),
+    floats: [], banner: null, time: 0, touch: null, over: false, rng,
   };
+  g.amulet = g.progress.up.amulet;
+  buildWorld(g);
+  g.banner = { text: hintText(g), t: 3 };
+  return g;
 }
 
-/** Trefferfläche des Kürbismanns auf dem Bildschirm */
-export function monsterBox(m: Monster): { x: number; top: number; bottom: number; half: number } {
-  const sc = F / m.d;
-  return { x: sx(m.X, m.d), top: gy(m.d) - 3.5 * sc, bottom: gy(m.d), half: Math.max(14, 0.55 * sc) };
-}
+export const LIGHT_LABEL: Record<Light, string> = { gelb: 'gelbes Licht', grün: 'grünes Licht', violett: 'violettes Licht' };
+export const MARK_LABEL: Record<Mark, string> = { katze: 'Katze auf dem Dach', kürbis: 'Kürbis vor der Tür', rabe: 'Rabe auf dem Kamin', grabstein: 'Grabstein am Haus' };
+export const hintText = (g: Haunt) => `Gesucht: ${LIGHT_LABEL[g.target.light]} · ${MARK_LABEL[g.target.mark]}`;
 
-function act(g: Pumpkin, p: Pt, events: string[]): void {
-  g.aim = { ...p };
+/** Richtiges Haus (Index) */
+export const goalIndex = (g: Haunt) => g.houses.findIndex((h) => h.light === g.target.light && h.mark === g.target.mark);
+
+/** Steht der Kürbismann im Lichtkegel? */
+export function inLight(g: Haunt): boolean {
   const m = g.monster;
-  if (m.state === 'appear') {
-    const b = monsterBox(m);
-    if (Math.abs(p.x - b.x) < b.half + 8 && p.y > b.top - 10 && p.y < b.bottom + 6) {
-      const reaction = m.t;
-      const bonus = Math.max(0, Math.round((m.window - reaction) * 120));
-      const pts = 100 + bonus;
-      g.score += pts;
-      g.banished += 1;
-      g.lastReaction = reaction;
-      g.bestReaction = g.bestReaction === null ? reaction : Math.min(g.bestReaction, reaction);
-      m.state = 'banished';
-      m.t = 0;
-      const head = b.top + (b.bottom - b.top) * 0.1;
-      burst(g.sparks, g.rng, b.x, head, '#ff7518', 30, 200);
-      burst(g.sparks, g.rng, b.x, head, '#ffd166', 18, 140);
-      g.floats.push({ x: b.x, y: head - 20, text: `+${pts} · ${reaction.toFixed(2)} s`, color: '#ffd166', life: 1.4 });
-      events.push('banish');
-      return;
-    }
-  }
-  for (const c of g.candies) {
-    if (c.taken) continue;
-    const r = Math.max(10, (0.28 * F) / c.d);
-    if (Math.hypot(p.x - sx(c.X, c.d), p.y - (gy(c.d) - r * 0.6)) < r + 8) {
-      c.taken = true;
-      g.score += 15;
-      burst(g.sparks, g.rng, p.x, p.y, c.color, 10, 90);
-      g.floats.push({ x: p.x, y: p.y - 14, text: '+15', color: c.color, life: 0.9 });
-      events.push('candy');
-      return;
-    }
-  }
+  if (!m.active) return false;
+  const d = dist(g.p.x, g.p.z, m.x, m.z);
+  if (d > lampRange(g)) return false;
+  // Blick führt in Drehrichtung (rechts drehen: yaw sinkt, look steigt)
+  const dir = viewYaw(g);
+  const ang = Math.atan2(m.x - g.p.x, m.z - g.p.z);
+  let diff = ang - dir;
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return Math.abs(diff) < lampCone(g);
 }
 
-export function stepPumpkin(g: Pumpkin, dt: number, input: Input): string[] {
+function enterHouse(g: Haunt, i: number, events: string[]): void {
+  const h = g.houses[i]!;
+  if (i === goalIndex(g)) {
+    const coins = 10 + g.level * 5;
+    g.progress.coins += coins;
+    g.found += 1;
+    g.score += 100 * g.level;
+    g.floats.push({ x: W / 2, y: H * 0.45, text: `+${coins} Münzen`, color: '#ffd166', life: 1.6 });
+    events.push('found');
+    // Upgrade kaufen, sobald genug Münzen da sind
+    const next = UPGRADES.find((u) => g.progress.up[u.key] < u.max);
+    let msg = `Richtig! +${coins} Münzen`;
+    if (next && g.progress.coins >= next.cost) {
+      g.progress.coins -= next.cost;
+      g.progress.up[next.key] = next.max;
+      if (next.key === 'amulet') g.amulet = 1;
+      msg = `Upgrade: ${next.label}`;
+      events.push('upgrade');
+    }
+    saveProgress(g.progress);
+    g.level += 1;
+    buildWorld(g);
+    g.banner = { text: `${msg} · ${hintText(g)}`, t: 4 };
+    return;
+  }
+  h.tried = true;
+  if (g.amulet > 0) {
+    g.amulet = 0;
+    g.progress.up.amulet = 0;
+    saveProgress(g.progress);
+    g.banner = { text: 'Das Amulett zerbricht und rettet dich!', t: 2.5 };
+    g.p.x += Math.sin(h.face) * 2;
+    g.p.z += Math.cos(h.face) * 2;
+    events.push('amulet');
+    return;
+  }
+  // Falsches Haus: der Kürbismann springt aus der Tür
+  g.scare = 1.6;
+  g.monster = { ...g.monster, x: doorAt(h).x, z: doorAt(h).z, active: true };
+  events.push('scare');
+}
+
+/** Tastatur oder virtueller Joystick (Finger: vom Aufsetzpunkt aus ziehen) */
+function controls(g: Haunt, input: Input): { fwd: number; turn: number } {
+  let fwd = -input.dy, turn = input.dx;
+  if (input.target) {
+    if (!g.touch) g.touch = { ...input.target };
+    const dx = input.target.x - g.touch.x, dy = input.target.y - g.touch.y;
+    fwd = Math.abs(dy) > 10 ? Math.max(-1, Math.min(1, -dy / 60)) : 0;
+    turn = Math.abs(dx) > 8 ? Math.max(-1, Math.min(1, dx / 60)) : 0;
+  } else g.touch = null;
+  return { fwd, turn };
+}
+
+function collide(g: Haunt): void {
+  const p = g.p;
+  const push = (cx: number, cz: number, r: number) => {
+    const d = dist(p.x, p.z, cx, cz);
+    if (d < r && d > 0.0001) { p.x = cx + ((p.x - cx) / d) * r; p.z = cz + ((p.z - cz) / d) * r; }
+  };
+  for (const h of g.houses) push(h.x, h.z, 3);
+  for (const t of g.trees) push(t.x, t.z, t.r + 0.35);
+  p.x = Math.max(-FIELD + 0.8, Math.min(FIELD - 0.8, p.x));
+  p.z = Math.max(-FIELD + 0.8, Math.min(FIELD - 0.8, p.z));
+}
+
+export function stepHaunt(g: Haunt, dt: number, input: Input): string[] {
   const events: string[] = [];
   dt = Math.min(dt, 0.05);
-  g.sparks = moveSparks(g.sparks, dt);
   g.floats = moveFloats(g.floats, dt);
-  g.flash = Math.max(0, g.flash - dt);
   if (g.banner) { g.banner.t -= dt; if (g.banner.t <= 0) g.banner = null; }
   if (g.over) return events;
   g.time += dt;
+  if (g.scare > 0) {
+    g.scare -= dt;
+    if (g.scare <= 0) { g.over = true; events.push('over'); }
+    return events;
+  }
 
-  // Gehen: alles rückt näher, Bäume hinter der Kamera kommen hinten wieder
-  const speed = 1.25 + Math.min(1, g.banished * 0.05);
-  const step = speed * dt;
-  g.walked += step;
-  for (const t of g.trees) { t.d -= step; if (t.d < 0.6) Object.assign(t, newTree(g.rng, 12 + g.rng() * 3)); }
-  for (const c of g.candies) c.d -= step;
-  g.candies = g.candies.filter((c) => c.d > 0.8 && !c.taken);
-  if (g.rng() < dt * 0.35) g.candies.push({ X: (g.rng() - 0.5) * 3, d: 9 + g.rng() * 3, color: CANDY[Math.floor(g.rng() * CANDY.length)]!, taken: false });
-  g.score = Math.max(g.score, 0);
+  // Bewegen und Umsehen: Drehen lenkt den Blick vor, die Figur tritt zur Seite
+  const { fwd, turn } = controls(g, input);
+  const p = g.p;
+  p.yaw -= turn * 2.1 * dt;
+  p.look += (turn - p.look) * Math.min(1, dt * 4);
+  const target = fwd > 0 ? fwd * walkSpeed(g) : fwd * walkSpeed(g) * 0.5;
+  p.speed += (target - p.speed) * Math.min(1, dt * 8);
+  p.x += Math.sin(p.yaw) * p.speed * dt;
+  p.z += Math.cos(p.yaw) * p.speed * dt;
+  p.walk += Math.abs(p.speed) * dt * 3.2;
+  collide(g);
 
-  // Taschenlampe
-  if (input.target) g.aim = { ...input.target };
-  g.aim.x = Math.min(W, Math.max(0, g.aim.x + input.dx * 320 * dt));
-  g.aim.y = Math.min(H, Math.max(0, g.aim.y + input.dy * 320 * dt));
-  for (const t of input.taps) act(g, t, events);
-  if (input.press) act(g, g.aim, events);
+  // Tür: kurz davor stehen öffnet sie
+  const at = g.houses.findIndex((h) => { const d = doorAt(h); return dist(p.x, p.z, d.x, d.z) < 1.25; });
+  if (at >= 0) {
+    if (!g.door || g.door.house !== at) { g.door = { house: at, t: 0 }; events.push('door'); }
+    g.door.t += dt;
+    if (g.door.t >= 1) { g.door = null; enterHouse(g, at, events); if (g.over || g.scare > 0) return events; }
+  } else g.door = null;
 
-  // Der Kürbismann: taucht auf, wartet, wird gebannt oder springt einen an
+  // Kürbismann draussen
   const m = g.monster;
-  m.t += dt;
-  m.d -= step;
-  if (m.state === 'hidden') {
-    m.cool -= dt;
-    if (m.cool <= 0) {
-      // neben einem Baum in mittlerer Entfernung, halb verdeckt
-      const near = g.trees.filter((t) => t.d > 4.5 && t.d < 8.5);
-      const tree = near[Math.floor(g.rng() * near.length)];
-      m.X = tree ? tree.X + (g.rng() < 0.5 ? -1 : 1) * (tree.w + 0.35) : (g.rng() - 0.5) * 4;
-      m.d = tree ? tree.d + 0.3 : 6 + g.rng() * 2;
-      m.state = 'appear';
-      m.t = 0;
-      m.window = Math.max(0.85, 2.2 - g.banished * 0.09);
+  if (!m.active) {
+    m.wait -= dt;
+    if (m.wait <= 0) {
+      // erscheint hinter dem Spieler, in Nebeldistanz
+      const a = p.yaw + Math.PI + (g.rng() - 0.5) * 1.6;
+      m.x = Math.max(-FIELD + 1, Math.min(FIELD - 1, p.x + Math.sin(a) * 16));
+      m.z = Math.max(-FIELD + 1, Math.min(FIELD - 1, p.z + Math.cos(a) * 16));
+      m.active = true; m.lit = 0;
+      g.banner = { text: 'Etwas knackt im Unterholz …', t: 2 };
       events.push('appear');
     }
-  } else if (m.state === 'appear') {
-    if (m.t > m.window || m.d < 1.6) {
-      m.state = 'lunge';
-      m.t = 0;
-      g.flash = 0.9;
-      g.lives -= 1;
-      g.floats.push({ x: W / 2, y: H * 0.3, text: 'Zu langsam!', color: '#ff4d6d', life: 1.2 });
-      events.push('lunge');
-      if (g.lives <= 0) { g.over = true; events.push('over'); }
+  } else {
+    if (inLight(g)) {
+      m.lit += dt;
+      if (m.lit > 1.1) {
+        m.active = false; m.wait = 9 + g.rng() * 8; m.gone = 1;
+        g.score += 25;
+        g.floats.push({ x: W / 2, y: H * 0.35, text: '+25 gebannt', color: '#b8ff6b', life: 1.2 });
+        events.push('banish');
+      }
+    } else {
+      m.lit = Math.max(0, m.lit - dt * 0.5);
+      const d = dist(m.x, m.z, p.x, p.z);
+      const v = (1.5 + g.level * 0.15) * dt;
+      m.x += ((p.x - m.x) / d) * v;
+      m.z += ((p.z - m.z) / d) * v;
+      if (d < 1.3) {
+        if (g.amulet > 0) {
+          g.amulet = 0; g.progress.up.amulet = 0; saveProgress(g.progress);
+          m.active = false; m.wait = 10;
+          g.banner = { text: 'Das Amulett zerbricht und rettet dich!', t: 2.5 };
+          events.push('amulet');
+        } else { g.scare = 1.2; events.push('scare'); }
+      }
     }
-  } else if (m.state === 'banished' && m.t > 0.7) { m.state = 'hidden'; m.cool = 2.5 + g.rng() * 3.5; }
-  else if (m.state === 'lunge' && m.t > 0.7) { m.state = 'hidden'; m.cool = 3 + g.rng() * 3; }
+  }
+  m.gone = Math.max(0, m.gone - dt);
   return events;
 }
 
 /* ---------- Zeichnen ---------- */
 
-const cache: { k: number; bg: HTMLCanvasElement | null } = { k: 0, bg: null };
-
-function backdrop(ctx: CanvasRenderingContext2D): void {
-  const sky = ctx.createLinearGradient(0, 0, 0, HOR + 20);
-  sky.addColorStop(0, '#07040d'); sky.addColorStop(0.7, '#1d1130'); sky.addColorStop(1, '#3a2347');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, HOR + 20);
-  const halo = ctx.createRadialGradient(270, 70, 8, 270, 70, 110);
-  halo.addColorStop(0, 'rgba(255, 230, 180, 0.45)'); halo.addColorStop(1, 'rgba(255, 230, 180, 0)');
-  ctx.fillStyle = halo; ctx.fillRect(140, 0, 220, 200);
-  ctx.fillStyle = '#f6e7c1'; ctx.beginPath(); ctx.arc(270, 70, 26, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(160, 140, 110, 0.35)';
-  for (const [x, y, r] of [[262, 62, 6], [280, 78, 5], [272, 84, 3]] as const) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
-  // ferne Baumreihe als Silhouette
-  ctx.fillStyle = '#140b1d';
-  ctx.beginPath(); ctx.moveTo(0, HOR + 10);
-  for (let x = 0; x <= W; x += 6) ctx.lineTo(x, HOR - 18 - Math.abs(Math.sin(x * 0.11) * 22) - Math.abs(Math.sin(x * 0.037) * 30));
-  ctx.lineTo(W, HOR + 10); ctx.fill();
-  // Waldboden mit Weg zur Mitte
-  const ground = ctx.createLinearGradient(0, HOR, 0, H);
-  ground.addColorStop(0, '#1b1424'); ground.addColorStop(1, '#0a070d');
-  ctx.fillStyle = ground; ctx.fillRect(0, HOR, W, H - HOR);
-  const path = ctx.createLinearGradient(0, HOR, 0, H);
-  path.addColorStop(0, 'rgba(90, 70, 70, 0.25)'); path.addColorStop(1, 'rgba(70, 55, 50, 0.55)');
-  ctx.fillStyle = path;
-  ctx.beginPath(); ctx.moveTo(W / 2 - 4, HOR); ctx.lineTo(W / 2 + 4, HOR); ctx.lineTo(W / 2 + 120, H); ctx.lineTo(W / 2 - 120, H); ctx.fill();
-  ctx.fillStyle = 'rgba(40, 30, 40, 0.6)';
-  for (let i = 0; i < 160; i++) { const v = Math.sin(i * 77.7) * 9999; const x = (v - Math.floor(v)) * W; const y = HOR + ((Math.sin(i * 3.3) + 1) / 2) ** 2 * (H - HOR); ctx.fillRect(x, y, 1 + (y - HOR) / 120, 1); }
-}
-
-/** Farbe nach Entfernung: nah dunkel, fern im violetten Nebel */
-const fogMix = (d: number) => Math.min(1, Math.max(0, (d - 1.5) / 11));
-
-function drawTree(ctx: CanvasRenderingContext2D, t: Tree): void {
-  const sc = F / t.d;
-  const x = sx(t.X, t.d);
-  const base = gy(t.d);
-  const w = t.w * sc;
-  if (x + w < -40 || x - w > W + 40) return;
-  const f = fogMix(t.d);
-  const dark = `rgb(${Math.round(38 + f * 40)}, ${Math.round(30 + f * 32)}, ${Math.round(40 + f * 50)})`;
-  const light = `rgb(${Math.round(92 + f * 20)}, ${Math.round(80 + f * 20)}, ${Math.round(96 + f * 30)})`;
-  const g = ctx.createLinearGradient(x - w, 0, x + w, 0);
-  g.addColorStop(0, light); g.addColorStop(0.6, dark); g.addColorStop(1, dark);
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.moveTo(x - w * 0.9, base); ctx.lineTo(x - w * 0.55, base - 14 * sc); ctx.lineTo(x + w * 0.55, base - 14 * sc); ctx.lineTo(x + w * 0.95, base); ctx.fill();
-  // Wurzeln und Rinde
-  ctx.beginPath(); ctx.moveTo(x - w * 1.5, base); ctx.quadraticCurveTo(x - w * 0.8, base - 0.2 * sc, x - w * 0.8, base - 0.6 * sc); ctx.lineTo(x + w * 0.8, base - 0.6 * sc); ctx.quadraticCurveTo(x + w * 0.8, base - 0.2 * sc, x + w * 1.5, base); ctx.fill();
-  if (sc > 30) {
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.lineWidth = Math.max(1, sc / 90);
-    for (let i = 0; i < 4; i++) {
-      const bx = x - w * 0.5 + (i / 3) * w;
-      ctx.beginPath(); ctx.moveTo(bx, base); ctx.lineTo(bx + Math.sin(t.seed + i) * 3, base - 6 * sc); ctx.stroke();
-    }
+/** Ohne WebGL: Karte von oben */
+function drawMap(ctx: CanvasRenderingContext2D, g: Haunt): void {
+  ctx.fillStyle = '#0b0f1e';
+  ctx.fillRect(0, 0, W, H);
+  const k = (W - 20) / (FIELD * 2);
+  const X = (x: number) => W / 2 + x * k, Z = (z: number) => H / 2 + z * k;
+  ctx.fillStyle = '#16301f';
+  ctx.fillRect(X(-FIELD), Z(-FIELD), FIELD * 2 * k, FIELD * 2 * k);
+  for (const t of g.trees) { ctx.fillStyle = t.kind === 'tanne' ? '#1f4a2c' : '#3a2e26'; ctx.beginPath(); ctx.arc(X(t.x), Z(t.z), t.r * k * 1.6, 0, Math.PI * 2); ctx.fill(); }
+  const glow: Record<Light, string> = { gelb: '#ffd166', grün: '#7cfc00', violett: '#c77dff' };
+  for (const h of g.houses) {
+    ctx.fillStyle = h.wall; ctx.fillRect(X(h.x) - 2.5 * k, Z(h.z) - 2.5 * k, 5 * k, 5 * k);
+    ctx.fillStyle = glow[h.light]; ctx.fillRect(X(h.x) - 0.8 * k, Z(h.z) - 0.8 * k, 1.6 * k, 1.6 * k);
+    ctx.fillStyle = '#ffffff'; ctx.font = '700 10px system-ui'; ctx.textAlign = 'center'; ctx.fillText(h.mark, X(h.x), Z(h.z) + 3.6 * k);
   }
-  // kahle Äste
-  ctx.strokeStyle = dark;
-  ctx.lineCap = 'round';
-  for (let i = 0; i < 4; i++) {
-    const s = Math.sin(t.seed * 3.1 + i * 7.7);
-    const y0 = base - (2.6 + i * 1.5 + Math.abs(s)) * sc;
-    const dir = i % 2 ? 1 : -1;
-    const len = (0.9 + Math.abs(s) * 0.9) * sc;
-    ctx.lineWidth = Math.max(1, w * 0.35);
-    ctx.beginPath(); ctx.moveTo(x + dir * w * 0.4, y0); ctx.lineTo(x + dir * (w * 0.4 + len), y0 - len * 0.5); ctx.stroke();
-    ctx.lineWidth = Math.max(0.6, w * 0.15);
-    ctx.beginPath(); ctx.moveTo(x + dir * (w * 0.4 + len * 0.6), y0 - len * 0.3); ctx.lineTo(x + dir * (w * 0.4 + len * 0.8), y0 - len * 0.85); ctx.stroke();
-  }
-}
-
-function drawCandy(ctx: CanvasRenderingContext2D, c: Candy): void {
-  const r = Math.max(5, (0.22 * F) / c.d);
-  const x = sx(c.X, c.d);
-  const y = gy(c.d) - r * 0.6;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = c.color;
-  ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.6, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(-r * 1.7, -r * 0.6); ctx.lineTo(-r * 1.7, r * 0.6); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(r * 1.7, -r * 0.6); ctx.lineTo(r * 1.7, r * 0.6); ctx.fill();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; ctx.beginPath(); ctx.ellipse(-r * 0.3, -r * 0.2, r * 0.3, r * 0.15, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.save(); ctx.translate(X(g.p.x), Z(g.p.z)); ctx.rotate(-g.p.yaw);
+  ctx.fillStyle = 'rgba(255, 240, 180, 0.25)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, lampRange(g) * k, Math.PI / 2 - lampCone(g), Math.PI / 2 + lampCone(g)); ctx.fill();
+  ctx.fillStyle = '#c77dff'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
+  if (g.monster.active) { ctx.fillStyle = '#ff7518'; ctx.beginPath(); ctx.arc(X(g.monster.x), Z(g.monster.z), 6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.textAlign = 'left';
 }
 
-/** Der lange Mann: schwarzer Anzug, endlose Arme, Kürbiskopf mit geschnitztem Gesicht */
-function drawMonster(ctx: CanvasRenderingContext2D, m: Monster, time: number, glowOnly: boolean): void {
-  if (m.state === 'hidden') return;
-  const sc = F / m.d;
-  const x = sx(m.X, m.d);
-  const base = gy(m.d);
-  let alpha = m.state === 'appear' ? Math.min(1, m.t / 0.35) : m.state === 'banished' ? Math.max(0, 1 - m.t / 0.5) : 1;
-  let scale = 1;
-  if (m.state === 'lunge') { scale = 1 + m.t * 3; alpha = Math.max(0, 1 - m.t / 0.7); }
-  const sway = Math.sin(time * 1.3) * 0.04;
-  ctx.save();
-  ctx.translate(x, base);
-  ctx.scale(scale, scale);
-  ctx.rotate(sway);
-  ctx.globalAlpha = alpha;
-  const u = sc;
-  const headY = -3.25 * u;
-  const headR = 0.42 * u;
-  if (!glowOnly) {
-    // Beine
-    ctx.fillStyle = '#0b0910';
-    ctx.fillRect(-0.2 * u, -1.6 * u, 0.13 * u, 1.6 * u);
-    ctx.fillRect(0.07 * u, -1.6 * u, 0.13 * u, 1.6 * u);
-    // Anzug mit Revers, Hemd und Krawatte
-    const suit = ctx.createLinearGradient(-0.4 * u, 0, 0.4 * u, 0);
-    suit.addColorStop(0, '#2a2533'); suit.addColorStop(0.5, '#141119'); suit.addColorStop(1, '#0b0910');
-    ctx.fillStyle = suit;
-    ctx.beginPath(); ctx.moveTo(-0.34 * u, -1.5 * u); ctx.lineTo(-0.38 * u, -2.75 * u); ctx.quadraticCurveTo(0, -2.95 * u, 0.38 * u, -2.75 * u); ctx.lineTo(0.34 * u, -1.5 * u); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#d9d4cc';
-    ctx.beginPath(); ctx.moveTo(-0.1 * u, -2.85 * u); ctx.lineTo(0.1 * u, -2.85 * u); ctx.lineTo(0, -2.35 * u); ctx.fill();
-    ctx.fillStyle = '#c2410c';
-    ctx.beginPath(); ctx.moveTo(-0.035 * u, -2.8 * u); ctx.lineTo(0.035 * u, -2.8 * u); ctx.lineTo(0.05 * u, -2.3 * u); ctx.lineTo(0, -2.2 * u); ctx.lineTo(-0.05 * u, -2.3 * u); ctx.fill();
-    // lange Arme bis unter die Knie, dürre Finger
-    ctx.strokeStyle = '#141119';
-    ctx.lineCap = 'round';
-    for (const s of [-1, 1]) {
-      const swing = Math.sin(time * 1.1 + s) * 0.08 * u;
-      ctx.lineWidth = 0.11 * u;
-      ctx.beginPath(); ctx.moveTo(s * 0.36 * u, -2.7 * u); ctx.quadraticCurveTo(s * 0.62 * u, -1.8 * u, s * 0.58 * u + swing, -0.9 * u); ctx.stroke();
-      ctx.lineWidth = 0.025 * u;
-      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(s * 0.58 * u + swing, -0.9 * u); ctx.lineTo(s * (0.52 + k * 0.05) * u + swing, -0.55 * u + k * 0.02 * u); ctx.stroke(); }
-    }
-    // Hals
-    ctx.fillStyle = '#d9d4cc'; ctx.fillRect(-0.06 * u, -2.98 * u, 0.12 * u, 0.15 * u);
-    // Kürbiskopf mit Rippen und Stiel
-    const pk = ctx.createRadialGradient(-headR * 0.3, headY - headR * 0.4, headR * 0.1, 0, headY, headR * 1.2);
-    pk.addColorStop(0, '#ff9a3c'); pk.addColorStop(0.7, '#d9600f'); pk.addColorStop(1, '#8a3a06');
-    ctx.fillStyle = pk;
-    ctx.beginPath(); ctx.ellipse(0, headY, headR * 1.15, headR, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(110, 40, 0, 0.6)'; ctx.lineWidth = Math.max(0.6, headR * 0.06);
-    for (const rx of [0.4, 0.8]) { ctx.beginPath(); ctx.ellipse(0, headY, headR * 1.15 * rx, headR, 0, 0, Math.PI * 2); ctx.stroke(); }
-    ctx.fillStyle = '#3f5a1a'; ctx.beginPath(); ctx.moveTo(-headR * 0.08, headY - headR * 0.95); ctx.quadraticCurveTo(0, headY - headR * 1.45, headR * 0.25, headY - headR * 1.35); ctx.lineTo(headR * 0.1, headY - headR * 0.92); ctx.fill();
+/** Anzeigen über der Szene: Hinweis, Türfortschritt, Schreck, Punkte */
+export function hauntOverlays(ctx: CanvasRenderingContext2D, g: Haunt): void {
+  // Hinweis oben
+  ctx.fillStyle = 'rgba(10, 6, 20, 0.6)';
+  ctx.fillRect(0, 0, W, 30);
+  ctx.fillStyle = '#ffd166';
+  ctx.font = '700 13px Fredoka, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(hintText(g), W / 2, 20);
+  ctx.textAlign = 'left';
+  if (g.door) {
+    const t = Math.min(1, g.door.t);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.arc(W / 2, H * 0.62, 26, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#ffd166';
+    ctx.beginPath(); ctx.arc(W / 2, H * 0.62, 26, -Math.PI / 2, -Math.PI / 2 + t * Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.font = '700 12px Fredoka, system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Tür öffnet …', W / 2, H * 0.62 + 46);
+    ctx.textAlign = 'left';
   }
-  // geschnitztes Gesicht leuchtet (auch im Dunkeln)
-  const flick = 0.75 + Math.sin(time * 23) * 0.12 + Math.sin(time * 7) * 0.1;
-  ctx.shadowColor = '#ffb347';
-  ctx.shadowBlur = headR * 1.4;
-  ctx.fillStyle = `rgba(255, ${Math.round(190 + flick * 40)}, 90, ${flick})`;
-  ctx.beginPath();
-  ctx.moveTo(-headR * 0.7, headY - headR * 0.15); ctx.lineTo(-headR * 0.42, headY - headR * 0.55); ctx.lineTo(-headR * 0.18, headY - headR * 0.1); ctx.closePath();
-  ctx.moveTo(headR * 0.7, headY - headR * 0.15); ctx.lineTo(headR * 0.42, headY - headR * 0.55); ctx.lineTo(headR * 0.18, headY - headR * 0.1); ctx.closePath();
-  ctx.moveTo(-headR * 0.75, headY + headR * 0.2);
-  const teeth = 6;
-  for (let i = 0; i <= teeth; i++) { const tx = -headR * 0.75 + (i / teeth) * headR * 1.5; ctx.lineTo(tx, headY + headR * (i % 2 ? 0.32 : 0.48)); }
-  ctx.quadraticCurveTo(0, headY + headR * 0.95, -headR * 0.75, headY + headR * 0.2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.restore();
+  if (g.scare > 0) {
+    const a = Math.min(0.75, (1.6 - g.scare) * 1.5);
+    ctx.fillStyle = `rgba(120, 0, 0, ${a})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  drawFloats(ctx, g.floats, '700 16px Fredoka, system-ui, sans-serif');
+  if (g.banner) drawBanner(ctx, W, H * 0.3, g.banner.text, '#ff9f43', Math.min(1, g.banner.t * 1.5), '700 15px Fredoka, system-ui, sans-serif');
 }
 
-export function drawPumpkin(ctx: CanvasRenderingContext2D, g: Pumpkin): void {
-  const k = ctx.getTransform().a || 1;
-  if (cache.k !== k || !cache.bg) {
-    const el = document.createElement('canvas');
-    el.width = Math.round(W * k); el.height = Math.round(H * k);
-    const c = el.getContext('2d')!; c.scale(k, k); backdrop(c);
-    cache.k = k; cache.bg = el;
-  }
-  ctx.drawImage(cache.bg, 0, 0, W, H);
-  // nach Tiefe: weit weg zuerst
-  type Item = { d: number; draw: () => void };
-  const items: Item[] = g.trees.map((t) => ({ d: t.d, draw: () => drawTree(ctx, t) }));
-  for (const c of g.candies) items.push({ d: c.d, draw: () => drawCandy(ctx, c) });
-  if (g.monster.state !== 'hidden') items.push({ d: g.monster.d, draw: () => drawMonster(ctx, g.monster, g.time, false) });
-  items.sort((a, b) => b.d - a.d);
-  for (const it of items) it.draw();
-  // Bodennebel
-  const fog = ctx.createLinearGradient(0, HOR - 30, 0, HOR + 120);
-  fog.addColorStop(0, 'rgba(120, 100, 150, 0)'); fog.addColorStop(0.4, 'rgba(120, 100, 150, 0.28)'); fog.addColorStop(1, 'rgba(120, 100, 150, 0)');
-  ctx.fillStyle = fog; ctx.fillRect(0, HOR - 30, W, 150);
-  // Dunkelheit mit Lichtkegel der Taschenlampe
-  const { x, y } = g.aim;
-  const dark = ctx.createRadialGradient(x, y, 30, x, y, 210);
-  dark.addColorStop(0, 'rgba(0, 0, 0, 0)'); dark.addColorStop(0.5, 'rgba(4, 2, 8, 0.4)'); dark.addColorStop(1, 'rgba(4, 2, 8, 0.74)');
-  ctx.fillStyle = dark; ctx.fillRect(0, 0, W, H);
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  const beam = ctx.createRadialGradient(x, y, 0, x, y, 90);
-  beam.addColorStop(0, 'rgba(255, 240, 200, 0.12)'); beam.addColorStop(1, 'rgba(255, 240, 200, 0)');
-  ctx.fillStyle = beam; ctx.fillRect(x - 90, y - 90, 180, 180);
-  ctx.restore();
-  // das Gesicht leuchtet auch ausserhalb des Lichtkegels
-  if (g.monster.state !== 'hidden') drawMonster(ctx, g.monster, g.time, true);
-  drawSparks(ctx, g.sparks);
-  // Rauschen, solange er da ist, und beim Ansprung
-  const m = g.monster;
-  const noise = m.state === 'appear' ? Math.min(0.5, m.t / m.window * 0.5) : g.flash;
-  if (noise > 0.02) {
-    ctx.save();
-    // Bildstörung wie bei einer alten Kamera: helle Zeilen und verrutschte Streifen
-    for (let i = 0; i < 70; i++) {
-      ctx.fillStyle = `rgba(${180 + ((i * 37) % 70)}, ${180 + ((i * 17) % 70)}, ${190 + ((i * 7) % 60)}, ${noise * 0.45})`;
-      ctx.fillRect(g.rng() * W - 20, g.rng() * H, 10 + g.rng() * 60, 1);
-    }
-    const band = g.rng() * H;
-    ctx.fillStyle = `rgba(255, 255, 255, ${noise * 0.12})`;
-    ctx.fillRect(0, band, W, 4 + g.rng() * 10);
-    if (g.flash > 0.5) { ctx.fillStyle = `rgba(255, 60, 30, ${(g.flash - 0.5) * 0.5})`; ctx.fillRect(0, 0, W, H); }
-    ctx.restore();
-  }
-  // Reaktionsbalken, solange er wartet
-  if (m.state === 'appear') {
-    const left = Math.max(0, 1 - m.t / m.window);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'; ctx.fillRect(40, 16, W - 80, 6);
-    ctx.fillStyle = left > 0.4 ? '#ff7518' : '#ff4d6d'; ctx.fillRect(40, 16, (W - 80) * left, 6);
-  }
-  // Zielkreuz der Lampe
-  ctx.strokeStyle = 'rgba(255, 240, 200, 0.6)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.stroke();
-  drawFloats(ctx, g.floats, '700 14px Fredoka, system-ui, sans-serif');
-  if (g.banner) drawBanner(ctx, W, H * 0.35, g.banner.text, '#ff7518', Math.min(1, g.banner.t * 2), '400 22px Creepster, Fredoka, system-ui, sans-serif');
+const view3d = lazyView(async () => new (await import('./three/pumpkin3d')).HauntView());
+
+export function drawHaunt(ctx: CanvasRenderingContext2D, g: Haunt): void {
+  const v = view3d.get();
+  if (v) v.render(ctx, g);
+  else if (view3d.failed) drawMap(ctx, g);
+  else { drawLoading(ctx, W, H, 'Der Wald wird geladen …'); return; }
+  hauntOverlays(ctx, g);
 }
 
-export const pumpkin: Engine<Pumpkin> = {
+export const pumpkin: Engine<Haunt> = {
   W, H,
-  create: createPumpkin,
-  step: stepPumpkin,
-  draw: drawPumpkin,
+  create: createHaunt,
+  step: stepHaunt,
+  draw: drawHaunt,
   hud: (g) => [
     { label: 'Punkte', value: String(g.score) },
-    { label: 'Gebannt', value: String(g.banished), tone: 'c' },
-    { label: 'Reaktion', value: g.lastReaction === null ? '–' : `${g.lastReaction.toFixed(2)} s` },
-    { label: 'Leben', value: '♥'.repeat(Math.max(0, g.lives)) || '–', tone: 'b' },
+    { label: 'Häuser', value: String(g.found), tone: 'a' },
+    { label: 'Münzen', value: String(g.progress.coins), tone: 'c' },
+    { label: 'Amulett', value: g.amulet > 0 ? 'ja' : '–', tone: 'b' },
   ],
   score: (g) => g.score,
   over: (g) => g.over,
   tones: {
-    appear: ['sawtooth', 70, 55, 0.9, 0.05],
-    banish: ['square', 220, 1320, 0.3, 0.05],
-    candy: ['sine', 990, 1480, 0.12, 0.04],
-    lunge: ['sawtooth', 160, 40, 0.7, 0.1],
-    over: ['triangle', 300, 60, 1.2, 0.08],
+    door: ['sine', 220, 180, 0.4, 0.04],
+    found: ['triangle', 523, 1568, 0.6, 0.06],
+    upgrade: ['sine', 660, 1980, 0.7, 0.06],
+    appear: ['sawtooth', 90, 60, 0.8, 0.05],
+    banish: ['triangle', 880, 1760, 0.3, 0.05],
+    scare: ['sawtooth', 600, 60, 1.2, 0.09],
+    amulet: ['square', 1200, 300, 0.5, 0.05],
+    over: ['triangle', 392, 98, 1, 0.07],
   },
 };

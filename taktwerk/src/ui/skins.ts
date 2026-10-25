@@ -3,7 +3,7 @@
  * data-skin auf <html>); hier stehen Name, Vorschaufarben, Browser-Farbe und nachzuladende Schriften.
  */
 
-export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug' | 'meer' | 'flora' | 'scifi' | 'elemente' | 'zug' | 'weihnacht' | 'halloween';
+export type Skin = 'klassisch' | 'anime' | 'technik' | 'barock' | 'natur' | 'amtlich' | 'rennen' | 'flug' | 'meer' | 'flora' | 'scifi' | 'elemente' | 'zug' | 'weihnacht' | 'halloween' | 'dschungel' | 'baustelle';
 
 export interface SkinInfo {
   id: Skin;
@@ -91,6 +91,16 @@ export const SKINS: readonly SkinInfo[] = [
     id: 'halloween', label: 'Halloween', hint: 'Kürbisse, Fledermäuse, Nebel und Spukhaus',
     swatch: ['#1a1024', '#ff7518', '#7cfc00'], bar: ['#f3e6d8', '#120a1a'],
     fonts: 'Creepster&family=Fredoka:wght@500;700',
+  },
+  {
+    id: 'dschungel', label: 'Dschungel', hint: 'Tiger, Schlangen, Affen und Papageien im Blätterwald',
+    swatch: ['#edf2df', '#e8590c', '#2d8a3e'], bar: ['#edf2df', '#07140c'],
+    fonts: 'Lilita+One&family=Nunito:wght@600;800',
+  },
+  {
+    id: 'baustelle', label: 'Baustelle', hint: 'Kran, Lastwagen, Bauarbeiter und ein Elektriker mit Pech',
+    swatch: ['#f2efe6', '#ffb000', '#1d1d1d'], bar: ['#f2efe6', '#121314'],
+    fonts: 'Saira+Stencil+One&family=Barlow+Condensed:wght@600;800',
   },
 ];
 

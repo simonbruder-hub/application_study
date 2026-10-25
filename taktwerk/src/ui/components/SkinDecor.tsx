@@ -16,6 +16,8 @@ import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 import { LERNLABOR_URL } from '../../app/lernlabor';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 import { ZugControls } from './ZugControls';
+import { JungleScene, JungleWreath, VineSwing } from './jungle';
+import { BaustelleScene, RohbauMeter } from './baustelle';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -31,6 +33,8 @@ export const DIAL_STYLE: Partial<Record<Skin, { numerals?: boolean; knob?: DialK
   zug: { knob: 'train' },
   weihnacht: { knob: 'sleigh' },
   halloween: { knob: 'bat' },
+  dschungel: { knob: 'snake' },
+  baustelle: { knob: 'truck' },
 };
 
 /* ---------- Hintergrund ---------- */
@@ -117,6 +121,8 @@ export function SkinBackdrop({ skin, v, cycle, frac = v.frac, seek }: { skin: Sk
     case 'elemente': return <ElementeScene />;
     case 'weihnacht': return <WeihnachtScene />;
     case 'halloween': return <><HalloweenScene /><SpiderToy phase={v.phase} still={prefs.value.motion === 'aus'} /></>;
+    case 'dschungel': return <JungleScene />;
+    case 'baustelle': return <BaustelleScene />;
     case 'zug': {
       // Fahrt im Fokus mit dem Fortschritt, in der Pause steht der Zug am Bahnsteig (ganz rechts)
       const p = v.kind === 'stopwatch' ? frac : v.phase !== 'focus' ? 1 : !v.active && frac >= 1 ? 0 : 1 - Math.min(1, frac);
@@ -191,6 +197,8 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
       return <div class="dial-fx" aria-hidden="true"><XmasWreath /></div>;
     case 'halloween':
       return <div class="dial-fx" aria-hidden="true"><SpiderWeb /></div>;
+    case 'dschungel':
+      return <div class="dial-fx" aria-hidden="true"><JungleWreath /></div>;
     default:
       return null;
   }
@@ -228,6 +236,8 @@ const CUT_IN: Record<Skin, Record<TimerView['phase'], [string, string]>> = {
   zug: { focus: ['Abfahrt!', 'Fokus'], short_break: ['Kurzer Halt', 'Kurze Pause'], long_break: ['Umsteigen', 'Lange Pause'] },
   weihnacht: { focus: ['Ho ho ho!', 'Fokus in der Werkstatt'], short_break: ['Plätzchenpause', 'Kurze Pause'], long_break: ['Bescherung', 'Lange Pause'] },
   halloween: { focus: ['Buh!', 'Geisterstunde'], short_break: ['Süsses oder Saures', 'Kurze Pause'], long_break: ['Spukpause', 'Lange Pause'] },
+  dschungel: { focus: ['Auf die Pirsch!', 'Fokus'], short_break: ['Lianenschwung', 'Kurze Pause'], long_break: ['Dschungelnacht', 'Lange Pause'] },
+  baustelle: { focus: ['Schichtbeginn', 'Helm auf, Fokus'], short_break: ['Znünipause', 'Kurze Pause'], long_break: ['Zmittag', 'Lange Pause'] },
 };
 
 /** Welle durchs Zifferblatt und Banner im Stil; wird über key bei jedem Wechsel neu abgespielt */
@@ -285,6 +295,10 @@ export function SkinBadge({ skin, v }: { skin: Skin; v: TimerView }) {
       return <span class="theme-badge" aria-hidden="true">{stop ? 'Wichtelzeit' : v.phase === 'focus' ? 'Werkstatt' : v.phase === 'short_break' ? 'Plätzchen' : 'Bescherung'}</span>;
     case 'halloween':
       return <span class="theme-badge" aria-hidden="true">{stop ? 'Spukzeit' : v.phase === 'focus' ? 'Geisterstunde' : v.phase === 'short_break' ? 'Süsses' : 'Saures'}</span>;
+    case 'dschungel':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Expedition' : v.phase === 'focus' ? 'Pirsch' : v.phase === 'short_break' ? 'Lichtung' : 'Dschungelnacht'}</span>;
+    case 'baustelle':
+      return <span class="theme-badge" aria-hidden="true">{stop ? 'Rapport' : v.phase === 'focus' ? 'Schicht' : v.phase === 'short_break' ? 'Znüni' : 'Zmittag'}</span>;
     case 'amtlich':
       return <span class="form-label" aria-hidden="true">{stop ? 'Feld 1 · Laufzeit' : 'Feld 1 · Restzeit'}</span>;
     default:
@@ -394,6 +408,10 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
       return <AdventWreath p={p} />;
     case 'halloween':
       return <Cauldron p={p} />;
+    case 'dschungel':
+      return <VineSwing p={p} />;
+    case 'baustelle':
+      return <RohbauMeter p={p} />;
   }
 }
 

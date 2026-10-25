@@ -96,12 +96,12 @@ body::after { background: var(--scene-long, none); }
 
 /* ---------- Bewegung (Einstellung): aus, dezent, lebendig ---------- */
 /* Dezent: keine fliegenden Teilchen und kein Wackeln, nur ruhige Flächen, Atemkreis, Messkurve, Landschaft */
-:root:not([data-motion="lebendig"]) :is(.bolts, .sfx, .petals, .hearts, .lanterns, .shooting, .sparkles, .bubbles, .notes, .fireworks, .planes, .birds, .fft, .aura, .butterflies, .cel-flash, .cel-speed, .cel-scan, .school, .sea-bubbles, .jellies, .bees, .ladybug, .beetle, .pollen, .warp, .comets, .dogfight, .embers, .droplets, .wind, .pebbles, .poles, .z-spark, .plankton, .xm-snow, .xm-sleigh, .hw-bats, .hw-ghosts, .godrays) { display: none !important; }
+:root:not([data-motion="lebendig"]) :is(.bolts, .sfx, .petals, .hearts, .lanterns, .shooting, .sparkles, .bubbles, .notes, .fireworks, .planes, .birds, .fft, .aura, .butterflies, .cel-flash, .cel-speed, .cel-scan, .school, .sea-bubbles, .jellies, .bees, .ladybug, .beetle, .pollen, .warp, .comets, .dogfight, .embers, .droplets, .wind, .pebbles, .poles, .z-spark, .plankton, .xm-snow, .xm-sleigh, .hw-bats, .hw-ghosts, .godrays, .dj-birds, .dj-fireflies, .dj-rays, .bs-dust, .bs-sparks, .bs-clouds) { display: none !important; }
 :root[data-motion="dezent"] .celebration .p:nth-child(2n) { display: none; }
 :root[data-motion="aus"] :is(.celebration .p, .cel-bloom, .phase-wave) { display: none; }
 :root[data-motion="aus"] :is(.clock .ch, .cel-text) { animation: none !important; }
 :root[data-motion="aus"] .timer-card > .deco.cutin { display: none; }
-:root:not([data-motion="lebendig"]) :is(.trees, .speedlines, .mf, .weed, .alps, .peaks, .hills, .firs, .z-forest, .z-bridge, .z-parapet, .sleepers, .z-wheel, .z-body, .clouds-z svg, .sun-z, .moon-z, .sky-night, .dial-track, .vine, .vine-rose, .wreath-turn, .wr-bloom, .stars-a, .stars-b) { animation: none !important; }
+:root:not([data-motion="lebendig"]) :is(.trees, .speedlines, .mf, .weed, .alps, .peaks, .hills, .firs, .z-forest, .z-bridge, .z-parapet, .sleepers, .z-wheel, .z-body, .clouds-z svg, .sun-z, .moon-z, .sky-night, .dial-track, .vine, .vine-rose, .wreath-turn, .wr-bloom, .stars-a, .stars-b, .dj-liana, .dj-front, .bs-truck, .bs-walker) { animation: none !important; }
 /* Aus: alles steht still */
 :root[data-motion="aus"] :is(.deco, .dial-fx) * { animation: none !important; }
 :root[data-motion="aus"] .dial-wrap::after { display: none; }
