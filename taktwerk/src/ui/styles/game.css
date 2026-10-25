@@ -1,6 +1,9 @@
 /* Knopf unter der Uhr, der in den Pausen das Spiel des Stils öffnet */
 .sr-open { gap: 8px; border-color: var(--phase); color: var(--phase); font-family: var(--font-display); font-weight: 700; box-shadow: 0 0 14px -4px var(--phase); }
 .sr-open svg { width: 18px; height: 18px; fill: currentColor; }
+.pause-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.pause-actions:empty { display: none; }
+.lab-open { text-decoration: none; }
 
 /* Space Rider: Vollbild-Ebene mit Anzeige oben und Spielfeld darunter (immer dunkel, Neonfarben) */
 .sr-layer {

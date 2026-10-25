@@ -13,6 +13,7 @@ import { Mascot, type DialKnob } from './Dial';
 import { AdventWreath, Bouquet, Cauldron, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, HalloweenScene, MeerScene, SbbClock, ScifiScene, SpiderToy, SpiderWeb, WeihnachtScene, XmasWreath, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
+import { LERNLABOR_URL } from '../../app/lernlabor';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 import { ZugControls } from './ZugControls';
 
@@ -412,6 +413,17 @@ function ScopeReadout({ v, set }: { v: TimerView; set: UserSettings }) {
     <p class="scope-readout" aria-hidden="true">
       <span>T {period} min</span><span>f {fmt(mhz)} mHz</span><span>D {fmt(duty, 0)} %</span>
     </p>
+  );
+}
+
+/** Stil Technik: in den Pausen ein Knopf zum Lernlabor (Schaltungen bauen und messen) */
+export function LabButton({ skin, v }: { skin: Skin; v: TimerView }) {
+  if (skin !== 'technik' || v.kind !== 'pomodoro' || v.phase === 'focus') return null;
+  return (
+    <a class="btn sr-open lab-open" href={`${LERNLABOR_URL}#/et/bauen`} target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm1.2 8.2c1.6-4.8 3.1-4.8 4.4 0 1.3 4.6 2.9 4.6 4.4 0 1.2-3.6 2.6-4.3 4.8-2.6l.8-1.2c-2.9-2.3-5.1-1.2-6.6 3.4-.9 2.8-1.8 2.8-2.6 0C8.5 6.9 5.6 6.9 3.8 12.8l1.4.4Z" /></svg>
+      Lernlabor: Schaltung bauen
+    </a>
   );
 }
 

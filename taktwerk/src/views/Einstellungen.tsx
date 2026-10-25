@@ -17,6 +17,7 @@ import { toast } from '../ui/toast';
 import { SKINS } from '../ui/skins';
 import { allTags, deleteTag, renameTag, setTagColor, tagColor } from '../app/tags';
 import { missingSchemaColumns } from '../sync/supabaseRemote';
+import { LERNLABOR_URL } from '../app/lernlabor';
 
 type NumKey = 'focus_minutes' | 'short_break_minutes' | 'long_break_minutes' | 'long_break_every' | 'daily_goal_minutes';
 
@@ -364,6 +365,7 @@ function AppCard() {
       {install.available && <button type="button" class="btn btn-primary" onClick={() => void install.install()}><Icon name="download" />App installieren</button>}
       <p class="small">Android: in Chrome im Menü ⋮ «App installieren». Laptop: Installieren-Symbol in der Adressleiste von Chrome oder Edge.</p>
       <p class="small"><a href="../taktwerk.html" download>Einzeldatei herunterladen</a> (Notfall-Variante, offline per Doppelklick) · <a href="../">Startseite</a></p>
+      <p class="small"><a href={LERNLABOR_URL} target="_blank" rel="noopener">Lernlabor öffnen</a>: Elektrotechnik mit Schaltungsbaukasten (R, L, C, Quellen, Schalter), Oszilloskop, Theorie und Aufgaben in Stufen.</p>
     </section>
   );
 }

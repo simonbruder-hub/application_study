@@ -26,7 +26,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: taktwerk/package-lock.json
+          cache-dependency-path: |
+            taktwerk/package-lock.json
+            lernlabor/package-lock.json
       - name: Abhängigkeiten installieren
         working-directory: taktwerk
         run: npm ci
@@ -41,13 +43,20 @@ jobs:
         run: |
           npm run build
           npm run build:single
+      - name: Lernlabor bauen (PWA)
+        working-directory: lernlabor
+        run: |
+          npm ci
+          npm run build
       - name: Seite zusammenstellen
         run: |
-          mkdir -p _site/taktwerk
+          mkdir -p _site/taktwerk _site/lernlabor
           cp index.html _site/
           cp -r taktwerk/site/. _site/taktwerk/
           cp -r taktwerk/dist/app _site/taktwerk/app
           cp taktwerk/dist/single/index.html _site/taktwerk/taktwerk.html
+          cp -r lernlabor/dist/app _site/lernlabor/app
+          cp lernlabor/site/index.html _site/lernlabor/index.html
           # Frühere Adresse (/pomodoro-planer/v2/) leitet auf die App weiter
           cp -r .github/pages-legacy/. _site/
       - uses: actions/configure-pages@v5
