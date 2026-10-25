@@ -33,10 +33,19 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 - Flora blumiger (Blütenkranz, Kletterrosen, volle Wiese), Zug mit fahrendem Zug, Bahnhof (kurze Pause) und
   Zürich HB (lange Pause), Sci-Fi mit Raumgefecht und dem Pausenspiel Space Rider (`src/ui/game/`).
 
+- Pausenspiele für alle Stile (`src/ui/game/`): Space Rider mit Boss, Hummelflug, Grand Prix, Waldjagd, Sudoku,
+  Geschenkejagd, Kürbismann, Memory. Neue Stile Weihnachten und Halloween. Elemente-Spektakel und Elementwahl,
+  Technik-Oszilloskop interaktiv, Zug mit SBB-Uhren, Zugwahl und Zug zum Anfassen, Zeiger behält seinen Massstab.
+
 ## Offen
 
 1. **Name und Domain:** «Taktwerk» ist schon vergeben (auch als Firma). Neuen Namen wählen, prüfen (nic.ch, swissreg.ch),
    dann umbenennen (Texte, Manifest, Startseite, Desktop), Pages auf `/` und `/app/` umbauen, Custom Domain und DNS,
    Supabase Site-URL/Redirects und `desktop/loader/index.html` anpassen. Neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
-2. Optional: eigener Superhelden-Stil (eigene Figur).
-3. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.
+2. Technik ausbauen: Cursor auch in Y-Richtung (Umschalter X/Y, Anzeige ΔU), Frequenz, Amplitude und Offset der
+   Kurve einstellbar, Freeze-Taste zum Ablesen.
+3. Pausenspiel Technik: Schaltungsbaukasten (Widerstand, Spule, Kondensator, Quellen), der korrekte Werte berechnet.
+   Vor dem Bau mit dem Nutzer klären: Gleich- oder Wechselstrom, Zeitverläufe (RC, RL, RLC), Symbole nach IEC,
+   Aufgabenstellungen, Lösungsweg mit Formeln, Anbindung an das Oszilloskop.
+4. Optional: eigener Superhelden-Stil (eigene Figur).
+5. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.

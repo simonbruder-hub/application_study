@@ -1,6 +1,6 @@
 # Taktwerk
 
-Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertung und sechs Stile. Läuft im Browser auf Laptop und Handy, lässt sich als App installieren, funktioniert offline und synchronisiert auf Wunsch zwischen deinen Geräten.
+Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertung, 15 Stile und ein Pausenspiel zu jedem Stil. Läuft im Browser auf Laptop und Handy, lässt sich als App installieren, funktioniert offline und synchronisiert auf Wunsch zwischen deinen Geräten.
 
 | | |
 |---|---|
@@ -19,13 +19,20 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
 - **Auswertung** – Woche, Monat, Jahr: Verlauf nach Projekt, Vergleich mit der Vorperiode, Protokoll, Zeit nachtragen, Zusammenfassung zum Kopieren, CSV- und Excel-Export.
 - **Sync** – Mit einem kostenlosen Supabase-Projekt erscheinen Änderungen auf allen Geräten, auch der laufende Timer: auf dem Laptop starten, auf dem Handy pausieren. Offline wird alles lokal gespeichert und später übertragen. Anzeige oben rechts: grün = synchron, gelb = offline, rot = Fehler, grau = nur lokal.
 - **Zeiger ziehen** – den Zeiger auf dem Zifferblatt mit Maus oder Finger verschieben: vorspringen oder verlängern (auch über eine volle Runde hinaus), auf die Sekunde genau bis hinunter auf 5 Sekunden; Pfeiltasten ±1 Minute, mit Umschalt ±10 Sekunden, Bild auf/ab ±5 Minuten.
-- **Space Rider:** kleines Weltraum-Spiel für die Pausen im Stil Sci-Fi (Knopf unter dem Zifferblatt). Pfeiltasten oder WASD steuern, Leertaste schiesst (oder Autofeuer), P oder Esc pausiert; am Handy folgt das Schiff dem Finger. Punkte, Stufen, Extras (Doppelschuss, Schild, Leben) und Rekord. Solange das Spiel offen ist, gehen Tasten nicht an den Timer; endet die Pause, hält das Spiel an.
+- **Pausenspiele:** In jeder Pause öffnet der Knopf unter dem Zifferblatt das Spiel des Stils (Vollbild, Tasten gehen nur ans Spiel, endet die Pause, hält das Spiel an; Rekord je Spiel):
+  - **Space Rider** (Sci-Fi): Weltraum-Shooter mit Extras und Mutterschiff als Boss.
+  - **Hummelflug** (Flora): Nektar sammeln, Wespen stechen, Netze und Vögel meiden.
+  - **Grand Prix** (Rennen): auf der Strecke bleiben, überholen, Boost-Felder, Ölflecken.
+  - **Waldjagd** (Forest): nach Moorhuhn-Art mit Zapfen-Schleuder, Tiere teils hinter Bäumen; Wanderer, Igel, Vogelhaus nicht treffen.
+  - **Sudoku** (Amtlich): vier Stufen, Tipps mit Begründung, gesperrte Felder für die gewählte Zahl, Notizen, Spielstand bleibt.
+  - **Geschenkejagd** (Weihnachten): Elf fängt Geschenke, Kohle meiden. **Kürbismann** (Halloween): nachts im Wald rechtzeitig reagieren.
+  - **Memory** (alle übrigen Stile): Motive passend zum Stil, 6, 8 oder 12 Paare.
 - **Tags und Farben** – Projekte mit Tags (z. B. «Coding», «Lernen», «Admin») und freier Farbe; Tags in Projektkarten, Auswertung «Nach Tag», Verwaltung unter Einstellungen → Tags.
 - **Signale** – sieben synthetische Töne (Glocke, Marimba, Gong, Harfe, Kristall, Vogelruf, Digital), je für Ende Fokus, kurze und lange Pause; Restzeit auf Wunsch ausblenden (nur Zifferblatt).
-- **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 13 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
+- **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 15 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
   - **Klassisch:** Glas-Karten, leuchtendes Zifferblatt, Atemkreis in der Pause, Tomate füllt sich; Konfetti.
   - **Anime:** Tomaten-Chan, Blitze, Herzen, Laternenfest, Power-Leiste; «やった!».
-  - **Technik:** Oszilloskop (Sinus, Rechteck mit Spektrum, Lissajous), Kennwerte, LED-Pegel; Funkenregen.
+  - **Technik:** Oszilloskop: Kurve zieht beim Überfahren elastisch mit, Messcursor X1/X2 mit ΔX, Δt, 1/Δt, RUN/STOP-Taste, in der langen Pause XY-Modus mit Strahl und Nachleuchten; Kennwerte, LED-Pegel; Funkenregen.
   - **Barock:** römische Ziffern, Pendel im Sekundentakt, Sanduhr, Kerzen, Tafelmusik, Feuerwerk.
   - **Forest:** pro Pomodoro wächst ein Baum (jedes Mal eine andere Art), darunter der Wald des Tages; Wind und Sonnenuntergang in den Pausen.
   - **Amtlich:** Formular mit getipptem Status, Aktenstapel, Kaffeepause, Stempel «Pendent» und «Erledigt».
@@ -33,9 +40,11 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
   - **Flug:** Flugzeug als Zeiger, Wolken, Route ZRH → Ziel mit Flughöhe, Looping.
   - **Meer:** Fisch als Zeiger, Fischschwärme, Quallen, Oktopus, Tauchtiefe, Plankton in der Nacht.
   - **Flora:** Biene als Zeiger, Blütenkranz um die Uhr, Kletterrosen, volle Wiese (Tulpen, Margeriten, Sonnenblumen, Mohn, Rosen, Pusteblumen), Bienen, Marienkäfer und Käfer.
-  - **Sci-Fi:** Raumschiff als Zeiger, Warp-Sprung, Raumgefecht im Hintergrund, Radar, Planet mit Ring, HUD, Reise zum Mars. In den Pausen lässt sich **Space Rider** spielen (siehe unten).
-  - **Elemente:** Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe; vier Element-Kugeln.
-  - **Zug:** Lok als Zeiger auf dem Gleisring, ein Zug auf dem Gleis, die Landschaft zieht in Ebenen vorbei und die Schwellen laufen mit. Kurze Pause: Halt an einem Bahnhof, lange Pause: Halt im Zürich HB mit Halle, Uhr und Abfahrtstafel.
+  - **Sci-Fi:** Raumschiff als Zeiger, Warp-Sprung, Raumgefecht im Hintergrund, Radar, Planet mit Ring, HUD, Reise zum Mars.
+  - **Elemente:** Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe, oder ein Element fest gewählt (Kugeln unter der Uhr). Endet ein Element, folgt ein Spektakel: Flammenmeer mit Brandspuren, Schwall mit Tropfen, Böe, die alles wegstösst, Felssturz, der das Zifferblatt bricht.
+  - **Zug:** SBB-Bahnhofsuhr als Zifferblatt (Kelle mit Halt bei 12), Lok auf dem Gleisring, blauer Himmel mit Wolken oder Sterne. Ein elektrischer Zug (Re 460, Giruno, FLIRT, Krokodil oder Glacier Express) fährt mit dem Fortschritt, durch Wald und über ein Viadukt; festhalten hält den Timer an, nach vorne schieben spult vor. Kurze Pause: Halt an einem Bahnhof, lange Pause: Zürich HB mit Halle, SBB-Uhr und Abfahrtstafel.
+  - **Weihnachten:** Lichterkette, geschmückter Baum, Schneefall, Schlitten mit Rentieren, verschneite Hütte, Tannenkranz um die Uhr, Adventskranz als Fortschritt.
+  - **Halloween:** Spukhügel, Mond, Fledermäuse, Nebel, Kürbisse, Geister, Spinnennetz hinter der Uhr, Hexenkessel als Fortschritt; die Spinne am Faden lässt sich ziehen und federt zurück.
 
 ### Tastenkürzel
 
