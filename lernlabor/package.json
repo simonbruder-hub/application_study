@@ -1,0 +1,32 @@
+{
+  "name": "lernlabor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lernlabor: Lernapp mit Schaltungsbaukasten, Theorie und Aufgaben in Stufen",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "icons": "node scripts/icons.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:e2e": "playwright test"
+  },
+  "type": "module",
+  "dependencies": {
+    "@preact/signals": "^2.11.1",
+    "katex": "^0.16.25",
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@playwright/test": "^1.56.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^22.20.5",
+    "typescript": "6.0.3",
+    "vite": "^8.3.3",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "5.0.3"
+  }
+}

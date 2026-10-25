@@ -23,6 +23,30 @@ test.describe('Stile', () => {
     });
   }
 
+  test('Technik: in der Pause führt ein Knopf zum Lernlabor, die Einstellungen verlinken es auch', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'technik', notifyAsked: true })));
+    await openApp(page);
+    await expect(page.locator('.lab-open')).toHaveCount(0);
+    await page.locator('.phase-tab', { hasText: 'Kurze Pause' }).click();
+    await expect(page.locator('.lab-open')).toHaveAttribute('href', /lernlabor\/app\/#\/et\/bauen$/);
+    await openApp(page, 'einstellungen');
+    await expect(page.getByRole('link', { name: 'Lernlabor öffnen' })).toHaveAttribute('href', /lernlabor\/app\/$/);
+  });
+
+  test('Forest: Baumstrunk mit Wurzeln, der neue Baum wächst daneben', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'natur', notifyAsked: true })));
+    await page.clock.install();
+    await openApp(page);
+    const tree = page.locator('.tree-big');
+    await expect(tree.locator('.t-stump .st-root')).toHaveCount(4);
+    await expect(tree.locator('.t-seed')).toHaveCount(1);
+    await expect(tree.locator('.t-young')).toHaveCount(0);
+    await page.locator('.btn-start').click();
+    await page.clock.fastForward('10:00');
+    await expect(tree.locator('.t-young')).toHaveCount(1);
+    await expect(tree.locator('.t-stump')).toHaveCount(1);
+  });
+
   test('Auswahl in den Einstellungen wechselt den Stil', async ({ page }) => {
     await openApp(page, 'einstellungen');
     await page.locator('.skin-opt', { hasText: 'Barock' }).click();

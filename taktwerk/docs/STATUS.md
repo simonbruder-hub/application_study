@@ -38,6 +38,11 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   Technik-Oszilloskop interaktiv, Zug mit SBB-Uhren, Zugwahl und Zug zum Anfassen, Zeiger behält seinen Massstab.
 - Hummelflug erweitert (Wespen mit Flugmustern statt Klumpen, Sonnenblumen, Goldblüten, Libellen, Schild, Gelée royale,
   Nektarkette, Hornissennest), Waldjagd mit neuen Tannen und Blätterbüschen, Grand Prix mit neuer Strecke und weicher Lenkung.
+- **Lernlabor** als eigene App (`../lernlabor/`, Plan und Stand in [`LERNAPP.md`](LERNAPP.md)): Schaltungsbaukasten mit
+  Oszilloskop, Zeigern, Frequenzgang und Kennwerten, Theorie und Aufgaben in Stufen für Elektrotechnik. Taktwerk verlinkt
+  es in den Einstellungen und im Stil Technik in den Pausen. Pages veröffentlicht es unter `/lernlabor/app/`.
+- Forest: Der alte Baumstrunk hat Wurzeln, Rinde und Jahresringe; der neue Baum wächst daneben als Ganzes
+  (Stamm und Krone im gleichen Verhältnis), nichts formt sich mehr um.
 
 ## Offen
 
@@ -46,7 +51,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
    Supabase Site-URL/Redirects und `desktop/loader/index.html` anpassen. Neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
 2. Technik ausbauen: Cursor auch in Y-Richtung (Umschalter X/Y, Anzeige ΔU), Frequenz, Amplitude und Offset der
    Kurve einstellbar, Freeze-Taste zum Ablesen.
-3. **Lernapp als eigene App** (Plan in `docs/LERNAPP.md`): Schaltungen aufbauen mit Strom- und Spannungsverlauf,
-   Fächer Elektrotechnik, Elektromagnetismus, Physik, Chemie, Mathematik in Stufen. In dieser App ein Link dorthin.
+3. **Lernlabor ausbauen** (nächste Schritte in `docs/LERNAPP.md`): Diode, Transistor, OP; mehr Aufgaben;
+   Fächer Elektromagnetismus, Physik, Chemie, Mathematik in Stufen.
 4. Optional: eigener Superhelden-Stil (eigene Figur).
 5. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.
