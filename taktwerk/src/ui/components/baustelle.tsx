@@ -1,9 +1,12 @@
 /**
  * Stil Baustelle: Turmdrehkran mit schwingender Last, Rohbau mit Gerüst, Bagger, Kipplaster, Bauarbeiter und
  * ein Elektriker am Baustromverteiler. Nach jeder geschafften Session bekommt er einen Stromschlag
- * (Röntgenblitz, Funken, Rauch). Alles liegt im DOM, CSS steuert die Phasen.
+ * (Röntgenblitz, Funken, Rauch). Unter der Uhr wächst ein Turm mit jedem Pomodoro bis ins Weltall.
+ * Alles liegt im DOM, CSS steuert die Phasen.
  */
+import { useId } from 'preact/hooks';
 import { celebration, flashMood } from '../../app/timer/view';
+import { STAGES, type StageKey, skyAt, stageAt, TOWER_CYCLE, towerState } from './tower';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -216,36 +219,198 @@ export function BaustelleScene() {
   );
 }
 
-/** Begleiter: Der Rohbau wächst Stockwerk um Stockwerk; der Kran setzt gerade das nächste */
-export function RohbauMeter({ p }: { p: number }) {
-  const q = Math.max(0, Math.min(1, p));
-  const N = 8;
-  const exact = q * N;
-  const done = Math.min(N, Math.floor(exact + 1e-6));
-  const part = done >= N ? 0 : exact - done;
-  const floorH = 8;
-  const top = 86 - done * floorH;
-  const hookY = 10 + part * (top - floorH - 10);
+/* ---------- Begleiter: Turm, der mit jedem Pomodoro wächst ---------- */
+
+const FH = 11;
+const TW_X = 96;
+const TW_W = 48;
+const VIEW_H = 150;
+/** Bodenlinie, solange der Turm niedrig ist, und Höhe der Turmspitze, sobald die Kamera mitfährt */
+const GROUND_Y = 138;
+const TOP_Y = 74;
+const STAR_PTS = (() => {
+  let seed = 7;
+  const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  return Array.from({ length: 28 }, (_, i) => [4 + r() * 216, 4 + r() * 136, i % 3 === 0 ? 1.1 : 0.6] as const);
+})();
+
+const Cloud = ({ x, y, s = 1, cls = '' }: { x: number; y: number; s?: number; cls?: string }) => (
+  <g class={`tw-cloud ${cls}`} transform={`translate(${x} ${y}) scale(${s})`}>
+    <ellipse cx="0" cy="0" rx="16" ry="6" /><ellipse cx="-7" cy="-4" rx="8" ry="6" /><ellipse cx="6" cy="-5" rx="9" ry="7" />
+  </g>
+);
+
+const Satellite = ({ x, y, cls }: { x: number; y: number; cls: string }) => (
+  <g class={`tw-sat ${cls}`} transform={`translate(${x} ${y}) rotate(-18)`}>
+    <rect class="ts-panel" x="-19" y="-4" width="13" height="8" /><rect class="ts-panel" x="6" y="-4" width="13" height="8" />
+    <path class="ts-arm" d="M-6 0 H6" /><rect class="ts-body" x="-4" y="-5" width="8" height="10" rx="1.5" />
+    <path class="ts-arm" d="M0 -5 V-10" /><circle class="ts-dish" cx="0" cy="-11" r="2.2" />
+  </g>
+);
+
+function Ufo({ x, y, cls = '', beam = true }: { x: number; y: number; cls?: string; beam?: boolean }) {
   return (
-    <div class="rohbau-row" aria-hidden="true">
-      <svg class="rohbau" viewBox="0 0 200 92">
-        <rect class="rb-ground" x="0" y="86" width="200" height="6" />
-        {Array.from({ length: done }, (_, i) => (
-          <g key={i}>
-            <rect class="rb-floor" x="40" y={86 - (i + 1) * floorH} width="70" height={floorH - 1.5} />
-            {[48, 64, 80, 96].map((x) => <rect key={x} class="rb-win" x={x} y={86 - (i + 1) * floorH + 2} width="8" height={floorH - 5} />)}
+    <g class={`tw-ufo ${cls}`} transform={`translate(${x} ${y})`}>
+      {beam && <path class="tu-beam" d="M-7 4 L7 4 L22 46 L-22 46 Z" />}
+      <ellipse class="tu-dome" cx="0" cy="-4" rx="8" ry="7" />
+      <ellipse class="tu-disc" cx="0" cy="1" rx="20" ry="5.5" />
+      {[-12, -4, 4, 12].map((lx) => <circle key={lx} class="tu-light" cx={lx} cy="2" r="1.4" />)}
+    </g>
+  );
+}
+
+/** Dinge auf der Höhe des aktuellen Abschnitts */
+function StageThings({ k, top }: { k: StageKey; top: number }) {
+  const clip = useId();
+  switch (k) {
+    case 'boden':
+      return <g><circle class="tw-sun" cx="36" cy="30" r="11" /><Cloud x={186} y={34} cls="tw-drift" /></g>;
+    case 'wolken':
+      return (
+        <g>
+          <Cloud x={40} y={64} s={1.2} cls="tw-drift" /><Cloud x={196} y={52} cls="tw-drift d2" />
+          <Cloud x={60} y={120} s={1.5} cls="tw-drift d3" /><Cloud x={176} y={128} s={1.4} cls="tw-drift" />
+          <path class="tw-birds" d="M30 32 q4 -4 8 0 q4 -4 8 0 M58 22 q3 -3 6 0 q3 -3 6 0" />
+        </g>
+      );
+    case 'flug':
+      return (
+        <g>
+          <Cloud x={30} y={136} s={1.6} /><Cloud x={84} y={144} s={1.3} /><Cloud x={168} y={140} s={1.7} /><Cloud x={214} y={134} s={1.2} />
+          <g class="tw-plane" transform="translate(150 36)">
+            <path class="tp-trail" d="M-62 1 H-16" />
+            <path class="tp-body" d="M-16 -2 H12 Q20 -2 20 1 Q20 4 12 4 H-16 Z" />
+            <path class="tp-wing" d="M-2 1 L-10 12 H-4 L6 1 Z M-2 1 L-8 -8 H-3 L5 1 Z M-14 1 L-19 -6 H-15 L-10 1 Z" />
+            {[-8, -4, 0, 4, 8].map((wx) => <circle key={wx} class="tp-win" cx={wx} cy="0" r="0.9" />)}
           </g>
-        ))}
-        <path class="rb-crane" d="M160 86 V6 M150 6 H196 M160 6 L196 6 M160 16 L196 6 M150 6 L160 16" />
-        {done < N && (
+        </g>
+      );
+    case 'orbit':
+      return (
+        <g>
+          <circle class="tw-earth" cx="120" cy="560" r="440" />
+          <circle class="tw-atmo" cx="120" cy="560" r="444" />
+          <Satellite x={46} y={44} cls="s1" /><Satellite x={196} y={86} cls="s2" />
+        </g>
+      );
+    case 'mond':
+      return (
+        <g class="tw-moon">
+          <circle cx="194" cy="44" r="26" class="tm-disc" />
+          <circle cx="184" cy="36" r="5" class="tm-crater" /><circle cx="202" cy="54" r="7" class="tm-crater" /><circle cx="204" cy="32" r="3" class="tm-crater" />
+          <Satellite x={44} y={96} cls="s1" />
+        </g>
+      );
+    case 'mars':
+      return (
+        <g class="tw-mars">
+          <circle cx="44" cy="46" r="20" class="tp-mars" />
+          <path class="tp-mars-spot" d="M30 40 q8 -6 14 0 q6 5 14 -2 M34 56 q6 3 12 0" />
+          <circle cx="210" cy="22" r="6" class="tm-disc" />
+        </g>
+      );
+    case 'meteore':
+      return (
+        <g>
+          {[[200, 10, 0], [150, -10, 1], [236, 50, 2], [110, 20, 3]].map(([mx, my, i]) => (
+            <g key={i} class={`tw-meteor m${i}`} transform={`translate(${mx} ${my})`}>
+              <path class="tm-tail" d="M0 0 L26 -14" /><circle class="tm-rock" cx="0" cy="0" r={i === 1 ? 4 : 2.6} />
+            </g>
+          ))}
+          <path class="tw-rock" d="M36 96 l7 -4 l6 3 l1 7 l-6 5 l-7 -2 Z" />
+        </g>
+      );
+    case 'jupiter':
+      return (
+        <g class="tw-jupiter">
+          <clipPath id={clip}><circle cx="196" cy="54" r="30" /></clipPath>
+          <circle cx="196" cy="54" r="30" class="tj-disc" />
+          <g clip-path={`url(#${clip})`}>
+            {[34, 44, 56, 66, 76].map((by, i) => <rect key={by} x="160" y={by} width="72" height={i % 2 ? 5 : 3} class="tj-band" />)}
+            <ellipse cx="206" cy="62" rx="6" ry="3.5" class="tj-spot" />
+          </g>
+        </g>
+      );
+    case 'saturn':
+      return (
+        <g class="tw-saturn" transform="translate(48 50) rotate(-16)">
+          <ellipse cx="0" cy="0" rx="34" ry="8" class="tsat-ring back" />
+          <circle cx="0" cy="0" r="16" class="tsat-disc" />
+          <path d="M-34 0 A34 8 0 0 0 34 0" class="tsat-ring" />
+        </g>
+      );
+    case 'ufo':
+      return <Ufo x={120} y={Math.max(14, top - 70)} />;
+  }
+}
+
+/**
+ * Begleiter im Stil Baustelle: ein Turm mit einem Stockwerk pro geschafftem Pomodoro. Während des Fokus hebt
+ * der Kran das nächste Stockwerk hoch. Die Kamera fährt mit der Spitze mit, der Himmel wird zum Weltall.
+ */
+export function TowerMeter({ done, p, fresh = false }: { done: number; p: number; fresh?: boolean }) {
+  const st = towerState(done);
+  const { floors } = st;
+  const q = Math.max(0, Math.min(1, p));
+  const H = floors * FH;
+  const G = GROUND_Y + Math.max(0, H - (GROUND_Y - TOP_Y));
+  const T = G - H;
+  const jibY = T - 34;
+  const sky = skyAt(floors + q);
+  const first = Math.max(0, Math.floor((G - VIEW_H) / FH) - 1);
+  const hookY = jibY + 6 + q * (T - FH - jibY - 6);
+  const markY = 142 - ((floors + q) / TOWER_CYCLE) * 132;
+  const word = (n: number) => (n === 1 ? 'Stock' : 'Stockwerke');
+  const title = st.restarted ? 'Das UFO hat den Turm geholt!' : st.reached ? `${st.stage.name} erreicht!` : floors ? `Stock ${floors}` : 'Baugrube';
+  const sub = st.next ? `Noch ${st.left} ${word(st.left)} ${st.next.to}` : `Noch ${st.left} ${word(st.left)}, dann holt das UFO den Turm`;
+  return (
+    <div class="tower-row" aria-hidden="true">
+      <svg class={`tower st-${st.stage.key}`} viewBox={`0 0 240 ${VIEW_H}`} style={{ background: `linear-gradient(${sky.top}, ${sky.bottom})` }}>
+        <g class="tw-stars" opacity={sky.stars}>{STAR_PTS.map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} />)}</g>
+        <StageThings k={st.stage.key} top={T} />
+        {G < VIEW_H + 4 && (
           <g>
-            <line class="rb-cable" x1="75" y1="6" x2="75" y2={hookY} />
-            <rect class="rb-floor is-next" x="40" y={hookY} width="70" height={floorH - 1.5} />
+            <rect class="tw-ground" x="0" y={G} width="240" height={VIEW_H - G + 2} />
+            <rect class="tw-tape" x="0" y={G - 3} width="240" height="3" />
+            {floors === 0 && <rect class="tw-pit" x={TW_X - 4} y={G} width={TW_W + 8} height="5" />}
           </g>
         )}
-        <path class="rb-jib" d="M60 6 H196" />
+        {Array.from({ length: Math.max(0, floors - first) }, (_, k) => {
+          const i = first + k;
+          const y = G - (i + 1) * FH;
+          const key = stageAt(i).key;
+          return (
+            <g key={i} class={`tw-fl fl-${key}${fresh && i === floors - 1 ? ' is-new' : ''}${STAGES.some((s) => s.at === i && i > 0) ? ' is-mark' : ''}`}>
+              <rect class="tw-floor" x={TW_X} y={y} width={TW_W} height={FH - 1.2} />
+              {[TW_X + 5, TW_X + 19, TW_X + 33].map((x) => <rect key={x} class="tw-win" x={x} y={y + 2.5} width="10" height={FH - 6} />)}
+            </g>
+          );
+        })}
+        {/* Kletterkran auf der Spitze */}
+        <g class="tw-crane">
+          <path class="tc-mast" d={lattice(140, T, 140, jibY, 5, 4)} />
+          <path class="tc-jib" d={lattice(84, jibY, 206, jibY, -4, 12)} />
+          <rect class="tc-weight" x="84" y={jibY} width="12" height="7" />
+          <rect class="tc-cab" x="133" y={jibY + 1} width="8" height="6" rx="1" />
+          {q > 0 ? (
+            <g>
+              <line class="tc-cable" x1="120" y1={jibY} x2="120" y2={hookY} />
+              <rect class="tw-floor is-next" x={TW_X} y={hookY} width={TW_W} height={FH - 1.2} />
+            </g>
+          ) : <line class="tc-cable" x1="120" y1={jibY} x2="120" y2={jibY + 10} />}
+        </g>
+        {st.restarted && <Ufo x={186} y={30} cls="leave" beam={false} />}
+        {/* Höhenmesser: ganzer Weg bis zum UFO */}
+        <g class="tw-alt">
+          <path class="ta-track" d="M230 10 V142" />
+          {STAGES.map((s) => <circle key={s.key} class={`ta-tick${floors >= s.at ? ' is-on' : ''}`} cx="230" cy={142 - (s.at / TOWER_CYCLE) * 132} r="2" />)}
+          <path class="ta-mark" d={`M223 ${markY} l5 -3.5 v7 Z`} />
+        </g>
       </svg>
-      <p class="meter-text"><b>{done >= N ? 'Aufrichte!' : `Stock ${done + 1} von ${N}`}</b><span>Rohbau</span></p>
+      <p class="meter-text">
+        <b>{title}</b>
+        <span>{sub}{st.round > 1 ? ` · Turm ${st.round}` : ''}</span>
+      </p>
     </div>
   );
 }

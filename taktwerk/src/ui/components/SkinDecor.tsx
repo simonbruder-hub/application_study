@@ -17,7 +17,7 @@ import { LERNLABOR_URL } from '../../app/lernlabor';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 import { ZugControls } from './ZugControls';
 import { JungleScene, JungleWreath, VineSwing } from './jungle';
-import { BaustelleScene, RohbauMeter } from './baustelle';
+import { BaustelleScene, TowerMeter } from './baustelle';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -329,6 +329,11 @@ function todaysPomodoros(): number {
   return entities.value.time_logs.filter((l) => l.counts_as_pomodoro && l.start_time >= start.getTime()).length;
 }
 
+/** Alle geschafften Pomodoros im aktuellen Bereich (Lernen oder Arbeit): Stockwerke des Turms im Stil Baustelle */
+function allPomodoros(): number {
+  return entities.value.time_logs.filter((l) => l.counts_as_pomodoro).length;
+}
+
 export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.frac, seek }: {
   skin: Skin; v: TimerView; say: string; set: UserSettings; yay: boolean; cycle: number; every: number;
   /** angezeigter Zeiger-Anteil (beim Ziehen die Vorschau) */
@@ -410,8 +415,11 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
       return <Cauldron p={p} />;
     case 'dschungel':
       return <VineSwing p={p} />;
-    case 'baustelle':
-      return <RohbauMeter p={p} />;
+    case 'baustelle': {
+      // Während des Fokus hebt der Kran das nächste Stockwerk; gespeichert wird es mit dem Pomodoro
+      const lifting = v.kind === 'pomodoro' && v.phase === 'focus' && v.active && !yay ? p : 0;
+      return <TowerMeter done={allPomodoros()} p={lifting} fresh={yay} />;
+    }
   }
 }
 

@@ -49,7 +49,7 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
   - **Weihnachten:** Lichterkette, geschmückter Baum, Schneefall, Schlitten mit Rentieren, verschneite Hütte, Tannenkranz um die Uhr, Adventskranz als Fortschritt.
   - **Halloween:** Spukhügel, Mond, Fledermäuse, Nebel, Kürbisse, Geister, Spinnennetz hinter der Uhr, Hexenkessel als Fortschritt; die Spinne am Faden lässt sich ziehen und federt zurück.
   - **Dschungel:** Lianen, Blätterwald und Glühwürmchen; Tiger, Schlangen, Affen und Papageien verstecken sich und tauchen kurz auf; Schlange als Zeiger, Affe an der Liane als Fortschritt.
-  - **Baustelle:** Kräne, Rohbau, Bagger, Lastwagen und Bauarbeiter; Lastwagen als Zeiger, der Rohbau wächst Stock um Stock. Im Hintergrund werkelt ein Elektriker am Verteilerkasten und bekommt am Ende jeder Session einen Stromschlag (Röntgenbild, Funken, Russ).
+  - **Baustelle:** Kräne, Rohbau, Bagger, Lastwagen und Bauarbeiter; Lastwagen als Zeiger. Im Hintergrund werkelt ein Elektriker am Verteilerkasten und bekommt am Ende jeder Session einen Stromschlag (Röntgenbild, Funken, Russ). Unter der Uhr wächst ein Turm: jeder geschaffte Pomodoro ist ein Stockwerk, während des Fokus hebt der Kran das nächste hoch. Der Turm wächst durch die Wolken, auf Flughöhe mit Flugzeug, ins Weltall zu den Satelliten, zum Mond, an Mars, Meteoriten, Jupiter und Saturn vorbei bis zum UFO. Nach 60 Stockwerken holt das UFO den Turm und der nächste beginnt am Boden.
 
 ### Tastenkürzel
 
