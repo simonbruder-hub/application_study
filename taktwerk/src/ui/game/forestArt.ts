@@ -41,26 +41,61 @@ export function trunk(ctx: Ctx, x: number, top: number, bottom: number, w: numbe
   }
 }
 
-/** Tanne aus gestuften, gezackten Astlagen; Lichtseite links, Schatten rechts */
-function fir(ctx: Ctx, x: number, base: number, h: number, spread: number, dark: string, light: string, seed: number): void {
-  const tiers = 6;
-  for (let t = 0; t < tiers; t++) {
+/** Umriss einer Astlage: Flanken hängen leicht durch, unten hängende Zweigspitzen */
+function tierPath(ctx: Ctx, x: number, top: number, bottom: number, half: number, seed: number): void {
+  const n = Math.max(6, Math.round(half / 4.5));
+  ctx.beginPath();
+  ctx.moveTo(x, top);
+  ctx.quadraticCurveTo(x + half * 0.42, top + (bottom - top) * 0.6, x + half, bottom + 2);
+  // feiner, unregelmässiger Saum aus Zweigspitzen
+  for (let k = 1; k <= n; k++) {
+    const px = x + half - (k / n) * half * 2;
+    const mid = x + half - ((k - 0.5) / n) * half * 2;
+    ctx.lineTo(mid, bottom - 1.5 - rnd(seed, k + 9) * 3.5);
+    ctx.lineTo(px, bottom + (k === n ? 2 : 1 + rnd(seed, k) * 4.5));
+  }
+  ctx.quadraticCurveTo(x - half * 0.42, top + (bottom - top) * 0.6, x, top);
+  ctx.closePath();
+}
+
+/**
+ * Tanne aus Astlagen von unten nach oben: jede obere Lage hängt über die untere, darunter Schatten,
+ * darauf Nadelstriche (hell auf der Lichtseite links, dunkel rechts)
+ */
+function fir(ctx: Ctx, x: number, bottom: number, h: number, spread: number, tones: { dark: string; mid: string; light: string; needle: string }, seed: number): void {
+  const tiers = 7;
+  for (let t = tiers - 1; t >= 0; t--) {
     const f = t / (tiers - 1);
-    const top = base - h + f * h * 0.78;
-    const half = spread * (0.25 + f * 0.75);
-    const bottom = top + h * 0.26;
-    ctx.fillStyle = lin(ctx, x - half, 0, x + half, 0, [[0, light], [0.5, dark], [1, dark]]);
-    ctx.beginPath();
-    ctx.moveTo(x, top);
-    const n = 7;
-    for (let k = 0; k <= n; k++) {
-      const px = x + half - (k / n) * half * 2;
-      const py = bottom + (k % 2 ? -5 : 2) + (rnd(seed + t, k) - 0.5) * 4;
-      if (k === 0) ctx.lineTo(x + half, bottom);
-      ctx.lineTo(px, py);
-    }
-    ctx.closePath();
+    const top = bottom - h + f * h * 0.7;
+    const bot = top + h * (0.2 + f * 0.1);
+    const half = spread * (0.2 + f * 0.8);
+    tierPath(ctx, x, top, bot, half, seed + t * 7);
+    ctx.fillStyle = lin(ctx, x - half, 0, x + half, 0, [[0, tones.light], [0.45, tones.mid], [1, tones.dark]]);
     ctx.fill();
+    ctx.save();
+    ctx.clip();
+    // Schatten der Lage darüber
+    ctx.fillStyle = lin(ctx, 0, top, 0, bot, [[0, 'rgba(10, 30, 15, 0.45)'], [0.45, 'rgba(10, 30, 15, 0.12)'], [1, 'rgba(10, 30, 15, 0)']]);
+    ctx.fillRect(x - half - 4, top, half * 2 + 8, bot - top + 6);
+    // Nadeln: kleine Zweigbüschel, die nach aussen unten fächern
+    ctx.lineWidth = 0.9;
+    const n = Math.round(half * 0.55);
+    for (let i = 0; i < n; i++) {
+      const u = rnd(seed + t * 31, i) * 2 - 1;
+      const v = 0.4 + rnd(seed + t * 17, i + 300) * 0.6;
+      const px = x + u * half * v;
+      const py = top + (bot - top) * v + (rnd(seed, i + t) - 0.5) * 4;
+      const out = Math.sign(u || 1);
+      ctx.strokeStyle = u < 0.1 ? tones.needle : 'rgba(5, 25, 12, 0.35)';
+      ctx.beginPath();
+      for (let k = 0; k < 4; k++) {
+        const a = 0.5 + k * 0.32 + (rnd(seed + i, k + t) - 0.5) * 0.3;
+        const len = 3 + rnd(seed + t, i * 4 + k) * 2.5;
+        ctx.moveTo(px, py); ctx.lineTo(px + out * Math.cos(a) * len, py + Math.sin(a) * len);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 }
 
@@ -142,21 +177,76 @@ export function backdrop(ctx: Ctx): void {
   }
 }
 
-/** Krone einer Tanne (liegt hinter Tieren derselben Ebene) */
-export function crown(ctx: Ctx, x: number, base: number, h: number, w: number, back: boolean): void {
-  // Stamm innerhalb der Krone, von den Ästen verdeckt
-  trunk(ctx, x, base - h * 0.9, base - h * 0.4, w * 0.6, back ? 1 : 0);
-  fir(ctx, x, base - h * 0.42, h * 0.68, w * 2.9, back ? '#3f6e4a' : '#24583a', back ? '#6f9e72' : '#4a8a55', x);
+/** Masse einer Tanne: Unterkante der Krone, Kronenhöhe, halbe Kronenbreite */
+const crownOf = (base: number, h: number, w: number) => ({ bottom: base - h * 0.36, height: h * 0.68, spread: w * 2.9 });
+
+/** Rahmen, in den eine Tanne passt (für den Bildspeicher) */
+export function treeBox(x: number, base: number, h: number, w: number): { x: number; y: number; w: number; h: number } {
+  const c = crownOf(base, h, w);
+  return { x: x - c.spread - 8, y: c.bottom - c.height - 6, w: c.spread * 2 + 16, h: base + 6 - (c.bottom - c.height - 6) };
 }
 
-/** Stamm mit Wurzelansatz (liegt vor Tieren derselben Ebene) */
+/** Ganze Tanne: Stamm mit Wurzelansatz und Aststummeln, darüber die Krone (der Stamm verschwindet im Grün) */
 export function tree(ctx: Ctx, x: number, base: number, h: number, w: number, back: boolean): void {
-  // sichtbarer Stamm unter der Krone
-  trunk(ctx, x, base - h * 0.4, base, w, back ? 1 : 0);
-  ctx.fillStyle = 'rgba(20, 40, 20, 0.35)';
-  ctx.beginPath(); ctx.ellipse(x, base - h * 0.4, w * 0.7, 5, 0, 0, Math.PI * 2); ctx.fill();
+  const c = crownOf(base, h, w);
+  trunk(ctx, x, c.bottom - c.height * 0.3, base, w, back ? 1 : 0);
+  // Schatten der Krone auf dem Stamm
+  ctx.fillStyle = lin(ctx, 0, c.bottom - 6, 0, c.bottom + 26, [[0, 'rgba(15, 25, 10, 0.55)'], [1, 'rgba(15, 25, 10, 0)']]);
+  ctx.fillRect(x - w / 2, c.bottom - 6, w, 32);
+  // trockene Aststummel
+  ctx.strokeStyle = back ? '#5b4a39' : '#4a3626';
+  ctx.lineCap = 'round';
+  for (const [k, side] of [[0.3, -1], [0.55, 1]] as const) {
+    const y = c.bottom + (base - c.bottom) * k;
+    ctx.lineWidth = Math.max(1.5, w * 0.12);
+    ctx.beginPath(); ctx.moveTo(x + side * w * 0.45, y); ctx.lineTo(x + side * w * 0.95, y - w * 0.3); ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
   ctx.fillStyle = back ? '#5b4a39' : '#4a3626';
   ctx.beginPath(); ctx.moveTo(x - w * 0.9, base); ctx.quadraticCurveTo(x - w * 0.4, base - 8, x - w / 2, base - 16); ctx.lineTo(x + w / 2, base - 16); ctx.quadraticCurveTo(x + w * 0.4, base - 8, x + w * 0.9, base); ctx.fill();
+  const tones = back
+    ? { dark: '#3d6a4a', mid: '#557f5c', light: '#7aa37a', needle: 'rgba(200, 230, 190, 0.32)' }
+    : { dark: '#173f28', mid: '#245a37', light: '#3f7d47', needle: 'rgba(170, 220, 150, 0.38)' };
+  fir(ctx, x, c.bottom, c.height, c.spread, tones, Math.round(x));
+}
+
+/**
+ * Busch aus vielen kleinen Blättern in drei Lagen: dunkler Grund mit ausgefranstem Rand, mittlere Blätter,
+ * helle Blätter oben links im Licht. Dazu ein paar Beeren oder Blüten.
+ */
+function shrub(ctx: Ctx, x: number, y: number, rx: number, ry: number, seed: number, dot: string | null): void {
+  const leafAt = (px: number, py: number, l: number, a: number, color: string) => {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(a);
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(-l, 0); ctx.quadraticCurveTo(0, -l * 0.55, l, 0); ctx.quadraticCurveTo(0, l * 0.55, -l, 0); ctx.fill();
+    ctx.restore();
+  };
+  ctx.fillStyle = '#1f3d1a';
+  ctx.beginPath(); ctx.ellipse(x, y, rx * 0.9, ry * 0.88, 0, Math.PI, 0); ctx.lineTo(x + rx * 0.9, y + 40); ctx.lineTo(x - rx * 0.9, y + 40); ctx.fill();
+  const passes: { n: number; a0: number; a1: number; d0: number; d1: number; size: number; colors: string[] }[] = [
+    { n: 240, a0: Math.PI, a1: Math.PI * 2, d0: 0.2, d1: 1.08, size: 4.2, colors: ['#24461d', '#2c5223', '#1d3a18'] },
+    { n: 170, a0: Math.PI * 1.02, a1: Math.PI * 1.9, d0: 0.15, d1: 0.95, size: 3.8, colors: ['#3b6b2c', '#447a31', '#356326'] },
+    { n: 80, a0: Math.PI * 1.08, a1: Math.PI * 1.55, d0: 0.45, d1: 0.98, size: 3.3, colors: ['#5f9a43', '#6faa4c', '#86bb5a'] },
+  ];
+  passes.forEach((p, k) => {
+    for (let i = 0; i < p.n; i++) {
+      const a = p.a0 + rnd(seed * 7 + k, i) * (p.a1 - p.a0);
+      const d = p.d0 + Math.sqrt(rnd(seed * 13 + k, i + 500)) * (p.d1 - p.d0);
+      const px = x + Math.cos(a) * rx * d;
+      const py = y + Math.sin(a) * ry * d + 2;
+      leafAt(px, py, p.size * (0.75 + rnd(seed + k, i + 900) * 0.5), rnd(seed + k * 3, i + 1300) * Math.PI, p.colors[i % p.colors.length]!);
+    }
+  });
+  if (dot) {
+    ctx.fillStyle = dot;
+    for (let i = 0; i < 9; i++) {
+      const a = Math.PI * 1.1 + rnd(seed, i + 40) * Math.PI * 0.8;
+      const d = 0.4 + rnd(seed, i + 60) * 0.5;
+      ctx.beginPath(); ctx.arc(x + Math.cos(a) * rx * d, y + Math.sin(a) * ry * d, 1.6, 0, Math.PI * 2); ctx.fill();
+    }
+  }
 }
 
 /** Büsche, Farne und Lichtstrahlen vorne (über den Tieren) */
@@ -171,19 +261,7 @@ export function foreground(ctx: Ctx): void {
   }
   ctx.restore();
 
-  const bush = (x: number, y: number, r: number, seed: number) => {
-    for (let i = 0; i < 9; i++) {
-      const a = Math.PI + (i / 8) * Math.PI;
-      const cx = x + Math.cos(a) * r * 0.8;
-      const cy = y + Math.sin(a) * r * 0.55;
-      const rr = r * (0.42 + rnd(seed, i) * 0.2);
-      ctx.fillStyle = rad(ctx, cx, cy, rr, [[0, '#5c9445'], [0.7, '#3f6b2f'], [1, '#2c5122']], cx - rr * 0.35, cy - rr * 0.45);
-      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.fillStyle = '#2c5122';
-    ctx.fillRect(x - r * 1.1, y - 2, r * 2.2, 40);
-  };
-  bush(30, 548, 32, 1); bush(118, 560, 28, 2); bush(212, 556, 34, 3); bush(335, 550, 30, 4);
+  shrub(ctx, 30, 548, 40, 30, 1, '#c1121f'); shrub(ctx, 118, 562, 34, 26, 2, null); shrub(ctx, 212, 558, 42, 32, 3, '#f8f4e3'); shrub(ctx, 335, 550, 38, 29, 4, null);
   // Farnwedel
   const frond = (x: number, y: number, len: number, ang: number) => {
     ctx.save();

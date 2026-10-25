@@ -55,13 +55,13 @@ export const GAMES: Record<GameId, GameMeta> = {
   },
   hummel: {
     id: 'hummel', title: 'Hummelflug', button: 'Hummelflug spielen', overTitle: 'Erschöpft',
-    intro: 'Flieg über die Wiese, sammle Nektar aus den Blüten und stich angreifende Wespen. Meide Spinnennetze und Vögel.',
+    intro: 'Flieg über die Wiese, sammle Nektar und stich angreifende Wespen und Libellen. Sonnenblumen geben dreimal Nektar, Goldblüten Turbo, Tautropfen einen Schild, Gelée royale macht kurz unbesiegbar. Ab 900 Punkten wartet das Hornissennest. Meide Spinnennetze und Vögel.',
     help: [
       [['↑', '↓', '←', '→', '/W', 'A', 'S', 'D'], 'fliegen'],
       [['Leertaste'], 'sticht (kurzer Vorstoss)'],
       [['P', '/Esc'], 'pausiert'],
     ],
-    legend: 'Am Handy: Finger ziehen, Antippen sticht. Blüte 10 · Wespe 30 · Hornisse 60 · 10 Blüten = Honigtopf',
+    legend: 'Am Handy: Finger ziehen, Antippen sticht. Blüte 10 · Sonnenblume 3 × 15 · Goldblüte 50 · Wespe 30 · Hornisse 60 · Libelle 80 · Nest 300 · Kette ab 8 Blüten ×2, ab 16 ×3',
     engine: hummel, mode: 'steer', autofire: false, lift: 50,
   },
   rennen: {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createForest, HOUSE, POINTS, stepForest } from './forest';
-import { createHummel, stepHummel } from './hummel';
+import { createHummel, makeWasp, stepHummel } from './hummel';
 import { centerAt, createRace, halfWidth, stepRace } from './racer';
 import { NO_INPUT, seeded } from './types';
 
@@ -10,7 +10,7 @@ describe('Hummelflug', () => {
     g.flowers = [];
     g.next.flower = 999; g.next.wasp = 999;
     g.nectar = 9;
-    g.flowers.push({ x: g.bee.x, y: g.bee.y, r: 12, color: '#fff', nectar: true, petals: 5, spin: 0 });
+    g.flowers.push({ x: g.bee.x, y: g.bee.y, r: 12, color: '#fff', nectar: 1, petals: 5, spin: 0, kind: 'blume', sip: 0 });
     const events = stepHummel(g, 0.01, NO_INPUT);
     expect(events).toContain('nectar');
     expect(events).toContain('honey');
@@ -20,14 +20,70 @@ describe('Hummelflug', () => {
   it('besiegt eine Wespe nur mit dem Stachel, sonst kostet sie ein Leben', () => {
     const g = createHummel(seeded(4));
     g.flowers = []; g.next.flower = 999; g.next.wasp = 999; g.bee.inv = 0;
-    g.wasps.push({ x: g.bee.x, y: g.bee.y - 14, hp: 1, big: false, t: 0, vx: 0, vy: 0 });
+    g.wasps.push(makeWasp(g.rng, g.bee.x, g.bee.y - 14, 'jaeger'));
     expect(stepHummel(g, 0.01, { ...NO_INPUT, press: true })).toContain('kill');
     expect(g.score).toBe(30);
     expect(g.lives).toBe(3);
     g.bee.sting = 0; g.bee.inv = 0;
-    g.wasps.push({ x: g.bee.x, y: g.bee.y, hp: 1, big: false, t: 0, vx: 0, vy: 0 });
+    g.wasps.push(makeWasp(g.rng, g.bee.x, g.bee.y, 'jaeger'));
     expect(stepHummel(g, 0.01, NO_INPUT)).toContain('hit');
     expect(g.lives).toBe(2);
+  });
+
+  it('verteilt die Wespen, statt sie an einem Ort zu stapeln', () => {
+    const g = createHummel(seeded(11));
+    g.flowers = []; g.next.flower = 999; g.next.wasp = 999; g.bee.inv = 999;
+    for (let i = 0; i < 6; i++) g.wasps.push(makeWasp(g.rng, 180, 120, 'jaeger'));
+    for (let i = 0; i < 80; i++) stepHummel(g, 0.05, NO_INPUT);
+    expect(g.wasps.length).toBe(6);
+    let min = Infinity;
+    for (const a of g.wasps) for (const b of g.wasps) if (a !== b) min = Math.min(min, Math.hypot(a.x - b.x, a.y - b.y));
+    expect(min).toBeGreaterThan(14);
+  });
+
+  it('Tautropfen fängt einen Stich ab, Gelée royale sticht von selbst', () => {
+    const g = createHummel(seeded(12));
+    g.flowers = []; g.next.flower = 999; g.next.wasp = 999; g.bee.inv = 0;
+    g.bee.shield = true;
+    g.wasps.push(makeWasp(g.rng, g.bee.x, g.bee.y, 'jaeger'));
+    expect(stepHummel(g, 0.01, NO_INPUT)).toContain('shield');
+    expect(g.lives).toBe(3);
+    expect(g.bee.shield).toBe(false);
+    g.wasps = []; g.bee.inv = 0; g.bee.royal = 5;
+    g.wasps.push(makeWasp(g.rng, g.bee.x, g.bee.y, 'jaeger', true));
+    expect(stepHummel(g, 0.01, NO_INPUT)).toContain('kill');
+    expect(g.lives).toBe(3);
+  });
+
+  it('Sonnenblume gibt dreimal Nektar', () => {
+    const g = createHummel(seeded(13));
+    g.flowers = []; g.next.flower = 999; g.next.wasp = 999;
+    const f = { x: g.bee.x, y: g.bee.y, r: 22, color: '#ffc300', nectar: 3, petals: 16, spin: 0, kind: 'sonne' as const, sip: 0 };
+    g.flowers.push(f);
+    for (let i = 0; i < 24; i++) stepHummel(g, 0.05, { ...NO_INPUT, target: { x: f.x, y: f.y } });
+    expect(f.nectar).toBe(0);
+    expect(g.nectar).toBe(3);
+    expect(g.score).toBe(45);
+  });
+
+  it('Hornissennest erscheint ab 900 Punkten und fällt nach genug Stichen', () => {
+    const g = createHummel(seeded(14));
+    g.flowers = []; g.next.flower = 999; g.next.wasp = 999; g.next.power = 999; g.next.web = 999; g.next.bird = 999; g.next.fly = 999;
+    g.score = 900;
+    expect(stepHummel(g, 0.01, NO_INPUT)).toContain('boss');
+    const nest = g.nest!;
+    nest.y = 80;
+    const events: string[] = [];
+    for (let i = 0; i < 40 && g.nest; i++) {
+      g.bee.x = nest.x; g.bee.y = nest.y + 22; g.bee.cool = 0; g.bee.inv = 99;
+      events.push(...stepHummel(g, 0.01, { ...NO_INPUT, press: true }));
+      g.bee.y = 400;
+      for (let k = 0; k < 7; k++) stepHummel(g, 0.05, NO_INPUT);
+    }
+    expect(events).toContain('nesthit');
+    expect(events).toContain('nestdown');
+    expect(g.nest).toBeNull();
+    expect(g.lives).toBe(4);
   });
 });
 

@@ -215,7 +215,7 @@ export function stepForest(g: Forest, dt: number, input: Input): string[] {
 
 /* ---------- Zeichnen ---------- */
 
-/* Bäume nach Tiefe: Krone hinter, Stamm vor den Tieren derselben Ebene, damit Tiere teils verdeckt werden */
+/* Bäume nach Tiefe: ganze Tanne vor den Tieren derselben Ebene, damit Tiere teils verdeckt werden */
 const TREES = TRUNKS.filter((t, i) => TRUNKS.findIndex((u) => u.x === t.x) === i).map((t) => {
   const base = t.z < 0.6 ? 400 : t.z < 0.78 ? 445 : 470;
   const h = t.z < 0.6 ? 150 : 280;
@@ -223,13 +223,14 @@ const TREES = TRUNKS.filter((t, i) => TRUNKS.findIndex((u) => u.x === t.x) === i
 });
 
 /** Hintergrund und Vordergrund einmal pro Massstab zeichnen und wiederverwenden */
-const cache: { k: number; bg: HTMLCanvasElement | null; fg: HTMLCanvasElement | null } = { k: 0, bg: null, fg: null };
-function layer(k: number, paint: (c: CanvasRenderingContext2D) => void): HTMLCanvasElement {
+const cache: { k: number; bg: HTMLCanvasElement | null; fg: HTMLCanvasElement | null; trees: HTMLCanvasElement[] } = { k: 0, bg: null, fg: null, trees: [] };
+function layer(k: number, paint: (c: CanvasRenderingContext2D) => void, box = { x: 0, y: 0, w: W, h: H }): HTMLCanvasElement {
   const el = document.createElement('canvas');
-  el.width = Math.round(W * k);
-  el.height = Math.round(H * k);
+  el.width = Math.round(box.w * k);
+  el.height = Math.round(box.h * k);
   const c = el.getContext('2d')!;
   c.scale(k, k);
+  c.translate(-box.x, -box.y);
   paint(c);
   return el;
 }
@@ -277,15 +278,16 @@ export function drawForest(ctx: CanvasRenderingContext2D, g: Forest): void {
     cache.k = k;
     cache.bg = layer(k, (c) => art.backdrop(c));
     cache.fg = layer(k, (c) => art.foreground(c));
+    cache.trees = TREES.map((t) => layer(k, (c) => art.tree(c, t.x, t.base, t.h, t.w, t.back), art.treeBox(t.x, t.base, t.h, t.w)));
   }
   ctx.drawImage(cache.bg, 0, 0, W, H);
-  // Tiefe: Tiere, Kronen (etwas weiter hinten) und Stämme (etwas weiter vorn) gemeinsam sortiert
+  // Tiefe: Tiere und Tannen (etwas weiter vorn als ihre Ebene) gemeinsam sortiert
   type Item = { z: number; draw: () => void };
   const items: Item[] = g.critters.map((c) => ({ z: c.z, draw: () => critter(ctx, c) }));
-  for (const t of TREES) {
-    items.push({ z: t.z - 0.02, draw: () => art.crown(ctx, t.x, t.base, t.h, t.w, t.back) });
-    items.push({ z: t.z + 0.01, draw: () => art.tree(ctx, t.x, t.base, t.h, t.w, t.back) });
-  }
+  TREES.forEach((t, i) => {
+    const b = art.treeBox(t.x, t.base, t.h, t.w);
+    items.push({ z: t.z + 0.01, draw: () => ctx.drawImage(cache.trees[i]!, b.x, b.y, b.w, b.h) });
+  });
   items.push({
     z: 0.765, draw: () => {
       ctx.save();

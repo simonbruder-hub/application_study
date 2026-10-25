@@ -36,6 +36,8 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 - Pausenspiele für alle Stile (`src/ui/game/`): Space Rider mit Boss, Hummelflug, Grand Prix, Waldjagd, Sudoku,
   Geschenkejagd, Kürbismann, Memory. Neue Stile Weihnachten und Halloween. Elemente-Spektakel und Elementwahl,
   Technik-Oszilloskop interaktiv, Zug mit SBB-Uhren, Zugwahl und Zug zum Anfassen, Zeiger behält seinen Massstab.
+- Hummelflug erweitert (Wespen mit Flugmustern statt Klumpen, Sonnenblumen, Goldblüten, Libellen, Schild, Gelée royale,
+  Nektarkette, Hornissennest), Waldjagd mit neuen Tannen und Blätterbüschen, Grand Prix mit neuer Strecke und weicher Lenkung.
 
 ## Offen
 
@@ -44,8 +46,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
    Supabase Site-URL/Redirects und `desktop/loader/index.html` anpassen. Neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
 2. Technik ausbauen: Cursor auch in Y-Richtung (Umschalter X/Y, Anzeige ΔU), Frequenz, Amplitude und Offset der
    Kurve einstellbar, Freeze-Taste zum Ablesen.
-3. Pausenspiel Technik: Schaltungsbaukasten (Widerstand, Spule, Kondensator, Quellen), der korrekte Werte berechnet.
-   Vor dem Bau mit dem Nutzer klären: Gleich- oder Wechselstrom, Zeitverläufe (RC, RL, RLC), Symbole nach IEC,
-   Aufgabenstellungen, Lösungsweg mit Formeln, Anbindung an das Oszilloskop.
+3. **Lernapp als eigene App** (Plan in `docs/LERNAPP.md`): Schaltungen aufbauen mit Strom- und Spannungsverlauf,
+   Fächer Elektrotechnik, Elektromagnetismus, Physik, Chemie, Mathematik in Stufen. In dieser App ein Link dorthin.
 4. Optional: eigener Superhelden-Stil (eigene Figur).
 5. Ziel danach: Website mit mehreren Apps (diese ist eine davon), eigene Accounts, online und offline auf allen Geräten.

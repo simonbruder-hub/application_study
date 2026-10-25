@@ -21,9 +21,9 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
 - **Zeiger ziehen** – den Zeiger auf dem Zifferblatt mit Maus oder Finger verschieben: vorspringen oder verlängern (auch über eine volle Runde hinaus), auf die Sekunde genau bis hinunter auf 5 Sekunden; Pfeiltasten ±1 Minute, mit Umschalt ±10 Sekunden, Bild auf/ab ±5 Minuten.
 - **Pausenspiele:** In jeder Pause öffnet der Knopf unter dem Zifferblatt das Spiel des Stils (Vollbild, Tasten gehen nur ans Spiel, endet die Pause, hält das Spiel an; Rekord je Spiel):
   - **Space Rider** (Sci-Fi): Weltraum-Shooter mit Extras und Mutterschiff als Boss.
-  - **Hummelflug** (Flora): Nektar sammeln, Wespen stechen, Netze und Vögel meiden.
-  - **Grand Prix** (Rennen): auf der Strecke bleiben, überholen, Boost-Felder, Ölflecken.
-  - **Waldjagd** (Forest): nach Moorhuhn-Art mit Zapfen-Schleuder, Tiere teils hinter Bäumen; Wanderer, Igel, Vogelhaus nicht treffen.
+  - **Hummelflug** (Flora): Nektar sammeln (Sonnenblumen dreimal, Goldblüten mit Turbo), Nektarkette bis ×3, Wespen mit eigenen Flugmustern, Libellen, Tautropfen als Schild, Gelée royale, Hornissennest als Boss; Netze und Vögel meiden.
+  - **Grand Prix** (Rennen): Strecke mit Randsteinen, Kiesbett, Reifenstapeln, Tribüne und Startampel; weiche Lenkung; überholen, Boost-Felder, Ölflecken.
+  - **Waldjagd** (Forest): nach Moorhuhn-Art mit Zapfen-Schleuder, Tiere teils hinter Tannen und Büschen; Wanderer, Igel, Vogelhaus nicht treffen.
   - **Sudoku** (Amtlich): vier Stufen, Tipps mit Begründung, gesperrte Felder für die gewählte Zahl, Notizen, Spielstand bleibt.
   - **Geschenkejagd** (Weihnachten): Elf fängt Geschenke, Kohle meiden. **Kürbismann** (Halloween): nachts im Wald rechtzeitig reagieren.
   - **Memory** (alle übrigen Stile): Motive passend zum Stil, 6, 8 oder 12 Paare.
