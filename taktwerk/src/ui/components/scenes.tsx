@@ -283,27 +283,118 @@ export function SbbClock({ class: cls = '', hands = true }: { class?: string; ha
   );
 }
 
-/** Zug auf dem Gleis unten: zwei Wagen und eine Lok, Räder drehen sich während der Fahrt */
-function Train() {
-  const wheels = [10, 26, 44, 60, 82, 98, 116, 132, 152, 168, 192, 208];
+/** Wählbare Züge (alle elektrisch) */
+export const TRAINS = [
+  { id: 're460', label: 'Re 460 mit IC-Wagen' },
+  { id: 'giruno', label: 'Giruno' },
+  { id: 'flirt', label: 'FLIRT' },
+  { id: 'krokodil', label: 'Krokodil' },
+  { id: 'glacier', label: 'Glacier Express' },
+] as const;
+export type TrainId = (typeof TRAINS)[number]['id'];
+
+const WHEELS = [10, 26, 44, 60, 82, 98, 116, 132, 152, 168, 192, 208];
+
+/** Stromabnehmer mit Funken (elektrisch: kein Dampf) */
+const Panto = ({ x }: { x: number }) => (
+  <g>
+    <path class="z-panto" d={`M${x - 10} 10 L${x} 2 L${x + 10} 10 M${x - 6} 2 H${x + 8}`} />
+    <circle class="z-spark" cx={x + 1} cy="1.5" r="3.2" />
+  </g>
+);
+
+/** Wagen mit Fensterreihe (allgemein) */
+const Coach = ({ x, w, cls, win = 5, band = true }: { x: number; w: number; cls: string; win?: number; band?: boolean }) => (
+  <g>
+    <rect class={`z-car ${cls}`} x={x} y="10" width={w} height="26" rx="4" />
+    {band && <rect class="z-band" x={x} y="27" width={w} height="3" />}
+    {Array.from({ length: win }, (_, i) => <rect key={i} class="z-win" x={x + 5 + i * ((w - 10) / win)} y="14" width={(w - 10) / win - 3.4} height="9" rx="1.5" />)}
+  </g>
+);
+
+/** Zug auf dem Gleis unten, Modell wählbar; Räder drehen sich während der Fahrt */
+function Train({ model }: { model: TrainId }) {
+  let body;
+  switch (model) {
+    case 'giruno':
+      body = (
+        <g class="tr-giruno">
+          <Coach x={0} w={72} cls="z-white" win={6} band={false} />
+          <Coach x={74} w={72} cls="z-white" win={6} band={false} />
+          <path class="z-car z-white" d="M148 10 H192 Q214 12 220 31 V36 H148 Z" />
+          <path class="z-win" d="M188 13 Q206 15 214 27 H190 Z" />
+          {[0, 74, 148].map((x) => <rect key={x} class="z-reddoor" x={x + 30} y="13" width="8" height="21" rx="1" />)}
+          <rect class="z-redline" x="0" y="31" width="220" height="2" />
+          <Panto x={110} />
+        </g>
+      );
+      break;
+    case 'flirt':
+      body = (
+        <g class="tr-flirt">
+          <path class="z-car z-red" d="M2 36 V16 Q2 10 12 10 H100 V36 Z" />
+          <path class="z-win" d="M5 24 Q5 14 16 14 H20 V24 Z" />
+          <Coach x={104} w={70} cls="z-red" win={5} />
+          <path class="z-car z-red" d="M176 10 H198 Q216 12 220 31 V36 H176 Z" />
+          <path class="z-win" d="M196 13 Q209 15 214 26 H198 Z" />
+          {[24, 40, 56, 72, 88].map((x) => <rect key={x} class="z-win" x={x} y="14" width="12" height="9" rx="1.5" />)}
+          <rect class="z-band" x="2" y="27" width="218" height="3" />
+          <Panto x={140} />
+        </g>
+      );
+      break;
+    case 'krokodil':
+      body = (
+        <g class="tr-kroko">
+          <Coach x={0} w={92} cls="z-green" win={7} band={false} />
+          <path class="z-car z-brown" d="M96 36 V22 Q96 19 100 19 H130 V36 Z" />
+          <path class="z-car z-brown" d="M128 36 V10 H184 V36 Z" />
+          <path class="z-car z-brown" d="M182 36 V19 H212 Q218 20 219 26 V36 Z" />
+          <rect class="z-win" x="134" y="14" width="10" height="9" rx="1" /><rect class="z-win" x="168" y="14" width="10" height="9" rx="1" />
+          <rect class="z-grille" x="102" y="23" width="24" height="8" /><rect class="z-grille" x="186" y="23" width="26" height="8" />
+          <path class="z-rod" d="M100 39 L130 39 M182 39 L212 39" />
+          <Panto x={146} /><Panto x={166} />
+        </g>
+      );
+      break;
+    case 'glacier':
+      body = (
+        <g class="tr-glacier">
+          {[0, 74].map((x) => (
+            <g key={x}>
+              <rect class="z-car z-red" x={x} y="12" width="70" height="24" rx="5" />
+              <path class="z-pano" d={`M${x + 4} 22 Q${x + 4} 8 ${x + 12} 8 H${x + 58} Q${x + 66} 8 ${x + 66} 22 Z`} />
+              {[1, 2, 3].map((k) => <rect key={k} class="z-panoframe" x={x + k * 17.5} y="9" width="1.6" height="13" />)}
+              <rect class="z-band" x={x} y="27" width="70" height="2" />
+            </g>
+          ))}
+          <path class="z-car z-red" d="M148 10 H196 Q214 12 218 30 V36 H148 Z" />
+          <path class="z-win" d="M198 14 Q209 16 213 26 H198 Z" />
+          <rect class="z-band" x="148" y="27" width="70" height="3" />
+          <Panto x={170} />
+        </g>
+      );
+      break;
+    default:
+      body = (
+        <g class="tr-re460">
+          <Coach x={0} w={68} cls="" />
+          <Coach x={72} w={68} cls="" />
+          <path class="z-car z-loco" d="M144 10 H194 Q213 12 218 30 V36 H144 Z" />
+          <path class="z-win" d="M198 14 Q209 16 213 26 H198 Z" />
+          <rect class="z-band" x="144" y="27" width="72" height="3" />
+          <rect class="z-door" x="182" y="14" width="9" height="16" rx="1" />
+          <Panto x={168} />
+        </g>
+      );
+  }
   return (
     <svg class="z-train" viewBox="0 0 222 46">
       <g class="z-body">
-        {[0, 72].map((x) => (
-          <g key={x}>
-            <rect class="z-car" x={x} y="10" width="68" height="26" rx="4" />
-            <rect class="z-band" x={x} y="27" width="68" height="3" />
-            {[0, 1, 2, 3, 4].map((i) => <rect key={i} class="z-win" x={x + 5 + i * 12.4} y="14" width="9" height="9" rx="1.5" />)}
-          </g>
-        ))}
-        <path class="z-car z-loco" d="M144 10 H194 Q213 12 218 30 V36 H144 Z" />
-        <path class="z-win" d="M198 14 Q209 16 213 26 H198 Z" />
-        <rect class="z-band" x="144" y="27" width="72" height="3" />
-        <rect class="z-door" x="182" y="14" width="9" height="16" rx="1" />
-        <path class="z-panto" d="M158 10 L168 2 L178 10 M162 2 H176" />
+        {body}
         <circle class="z-lamp" cx="215" cy="31" r="1.6" />
       </g>
-      {wheels.map((x) => (
+      {WHEELS.map((x) => (
         <g key={x} transform={`translate(${x} 39)`}>
           <g class="z-wheel"><circle r="5" /><path d="M-3.5 0 H3.5 M0 -3.5 V3.5" /></g>
         </g>
@@ -312,6 +403,27 @@ function Train() {
   );
 }
 
+/** Waldstück, das ab und zu vorbeizieht (dichte Tannen vor den Hügeln) */
+const FOREST = Array.from({ length: 70 }, (_, i) => {
+  const x = i * 17 + (i % 3) * 5;
+  const h = 46 + ((i * 13) % 5) * 12;
+  return `M${x - 10} 120 L${x} ${120 - h} L${x + 10} 120 Z`;
+}).join(' ');
+
+/** Viadukt: Talblick mit Fluss, Steinbögen in der Ferne, Pfeiler an den Enden */
+function Viaduct() {
+  return (
+    <svg class="z-bridge" viewBox="0 0 1000 130" preserveAspectRatio="none">
+      <rect class="zb-gap" x="40" y="0" width="920" height="130" />
+      <path class="zb-valley" d="M40 130 V70 Q200 40 360 78 T700 70 T960 74 V130 Z" />
+      <path class="zb-river" d="M40 118 Q300 104 520 116 T960 112 V130 H40 Z" />
+      <path class="zb-far" d="M180 70 H820 V76 H180 Z" />
+      {Array.from({ length: 9 }, (_, i) => <path key={i} class="zb-far" d={`M${200 + i * 70} 76 V112 H${212 + i * 70} V86 Q${235 + i * 70} 76 ${258 + i * 70} 86 V112 H${270 + i * 70} V76 Z`} />)}
+      <rect class="zb-pier" x="0" y="20" width="48" height="110" />
+      <rect class="zb-pier" x="952" y="20" width="48" height="110" />
+    </svg>
+  );
+}
 /** Kleiner Bahnhof (kurze Pause): Haus, Bahnsteig, Ortsschild, Bahnhofsuhr */
 function Station({ name }: { name: string }) {
   return (
@@ -359,7 +471,7 @@ function MainStation() {
  * Der Zug fährt mit dem Fortschritt (p 0..1) über die Karte und steht in der Pause am Bahnsteig rechts;
  * beginnt die nächste Fahrt, steht er wieder vorne (neuer Schlüssel: kein Zurückgleiten).
  */
-export function ZugScene({ station, p, stage }: { station: string; p: number; stage: string }) {
+export function ZugScene({ station, p, stage, model }: { station: string; p: number; stage: string; model: TrainId }) {
   return (
     <Deco>
       <div class="sky-day" />
@@ -371,14 +483,16 @@ export function ZugScene({ station, p, stage }: { station: string; p: number; st
       <svg class="peaks" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={PEAKS} /></svg>
       <svg class="hills" viewBox="0 0 800 80" preserveAspectRatio="none"><path d={HILLS} /></svg>
       <svg class="firs" viewBox="0 0 800 40" preserveAspectRatio="none"><path d={FIRS} /></svg>
+      <svg class="z-forest" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d={FOREST} /></svg>
       <div class="poles">{many(3)}</div>
+      <Viaduct />
       <Station name={station} />
       <MainStation />
       <div class="rails"><i class="sleepers" /><i class="rail" /><i class="rail" /></div>
       <div key={stage} class="z-consist" style={{ '--zp': Math.min(1, Math.max(0, p)).toFixed(4) }}>
-        <Train />
-        <div class="steam">{many(6)}</div>
+        <Train model={model} />
       </div>
+      <div class="z-parapet" />
     </Deco>
   );
 }

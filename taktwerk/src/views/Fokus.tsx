@@ -121,7 +121,7 @@ function TimerCard() {
 
   return (
     <div class="card timer-card">
-      <SkinBackdrop skin={skin} v={v} cycle={s.cycle} />
+      <SkinBackdrop skin={skin} v={v} cycle={s.cycle} frac={shownFrac} seek={seek} />
       {cut && <PhaseCutIn key={cut.n} skin={skin} phase={cut.phase} late={cut.late} />}
       <div class="kind-row">
         <Seg

@@ -14,6 +14,7 @@ import { AdventWreath, Bouquet, Cauldron, DepthGauge, ElementOrbs, Hourglass, Jo
 import { ElementeScene, ElementMarks, FloraScene, FloraWreath, HalloweenScene, MeerScene, SbbClock, ScifiScene, SpiderToy, SpiderWeb, WeihnachtScene, XmasWreath, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
+import { ZugControls } from './ZugControls';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 
@@ -37,7 +38,7 @@ export const DIAL_STYLE: Partial<Record<Skin, { numerals?: boolean; knob?: DialK
  * Szenen je Phase: Alle Elemente sind im DOM, CSS blendet je nach :root[data-phase] (focus/short/long)
  * und :root[data-run] (läuft) ein und startet die Animationen.
  */
-export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cycle: number }) {
+export function SkinBackdrop({ skin, v, cycle, frac = v.frac, seek }: { skin: Skin; v: TimerView; cycle: number; frac?: number; seek?: Seek }) {
   switch (skin) {
     case 'klassisch':
       return (
@@ -117,8 +118,13 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
     case 'halloween': return <><HalloweenScene /><SpiderToy phase={v.phase} still={prefs.value.motion === 'aus'} /></>;
     case 'zug': {
       // Fahrt im Fokus mit dem Fortschritt, in der Pause steht der Zug am Bahnsteig (ganz rechts)
-      const p = v.kind === 'stopwatch' ? v.frac : v.phase !== 'focus' ? 1 : !v.active && v.frac >= 1 ? 0 : 1 - v.frac;
-      return <ZugScene station={pick(ZUG_STOPS, Math.max(0, cycle - 1))} p={p} stage={`${v.phase}-${v.active}`} />;
+      const p = v.kind === 'stopwatch' ? frac : v.phase !== 'focus' ? 1 : !v.active && frac >= 1 ? 0 : 1 - Math.min(1, frac);
+      return (
+        <>
+          <ZugScene station={pick(ZUG_STOPS, Math.max(0, cycle - 1))} p={p} stage={`${v.phase}-${v.active}`} model={prefs.value.train} />
+          <ZugControls v={v} p={p} seek={seek} />
+        </>
+      );
     }
     case 'amtlich':
       return (

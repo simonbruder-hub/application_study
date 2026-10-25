@@ -175,4 +175,24 @@ test.describe('Timer', () => {
     expect(x2).toBeLessThan(176);
   });
 
+
+  test('Zug festhalten hält an, nach vorne schieben spult vor (Stil Zug)', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'zug', notifyAsked: true })));
+    await openApp(page);
+    await page.locator('.btn-start').click();
+    await page.locator('.z-grab').scrollIntoViewIfNeeded();
+    const g = (await page.locator('.z-grab').boundingBox())!;
+    await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+    await page.mouse.down();
+    await expect(page.locator('html')).toHaveAttribute('data-run', '0');
+    await page.mouse.move(g.x + g.width / 2 + 160, g.y + g.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect(page.locator('html')).toHaveAttribute('data-run', '1');
+    const left = await clock(page).innerText();
+    expect(Number(left.split(':')[0])).toBeLessThan(23);
+    // Zug wechseln
+    const before = await page.locator('.z-pick').innerText();
+    await page.locator('.z-pick').click();
+    await expect(page.locator('.z-pick')).not.toHaveText(before);
+  });
 });

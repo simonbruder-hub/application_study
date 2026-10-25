@@ -188,13 +188,13 @@ function build(skin: Skin) {
       const puffs = thrown(18, () => [rand(30, 70), 70], () => ({
         '--dx': `${rand(-20, 20).toFixed(1)}vw`, '--up': `${-rand(25, 45).toFixed(0)}vh`, '--fall': `${-rand(45, 60).toFixed(0)}vh`,
         '--rot': '0deg', '--t': `${rand(2.6, 3.6).toFixed(2)}s`,
-      }), ['#ffffff']);
+      }), ['#c8f3ff', '#4cc9f0', '#ffffff']);
       const confetti = thrown(50, (i) => (i % 2 ? [102, 100] : [-2, 100]), (i) => ({
         '--dx': `${((i % 2 ? -1 : 1) * rand(15, 60)).toFixed(1)}vw`, '--up': `${-rand(45, 90).toFixed(0)}vh`, '--fall': `${rand(-5, 25).toFixed(0)}vh`,
         '--rot': `${rand(-720, 720).toFixed(0)}deg`, '--t': `${rand(2.6, 3.6).toFixed(2)}s`,
       }), ['var(--tomato)', '#ffffff', 'var(--sage)', '#f4a261']);
       return [
-        ...puffs.map((b, i) => <span key={`s${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="puff" /></span>),
+        ...puffs.map((b, i) => <span key={`s${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="spark-z" /></span>),
         ...confetti.map((b, i) => <span key={`c${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="conf" /></span>),
       ];
     }
