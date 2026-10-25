@@ -47,6 +47,23 @@ test.describe('Stile', () => {
     await expect(tree.locator('.t-stump')).toHaveCount(1);
   });
 
+  test('Baustelle: der Kran hebt im Fokus ein Stockwerk, nach dem Pomodoro steht Stock 1', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pomodoro-planer.v2.prefs', JSON.stringify({ skin: 'baustelle', notifyAsked: true })));
+    await page.clock.install();
+    await openApp(page);
+    const tower = page.locator('.tower-row');
+    await expect(tower).toContainText('Baugrube');
+    await expect(tower).toContainText('Noch 6 Stockwerke zu den Wolken');
+    await expect(tower.locator('.tw-floor.is-next')).toHaveCount(0);
+    await page.locator('.btn-start').click();
+    await page.clock.fastForward('10:00');
+    await expect(tower.locator('.tw-floor.is-next')).toHaveCount(1);
+    await page.clock.fastForward('15:02');
+    await expect(tower).toContainText('Stock 1');
+    await expect(tower).toContainText('Noch 5 Stockwerke zu den Wolken');
+    await expect(tower.locator('.tw-fl')).toHaveCount(1);
+  });
+
   test('Auswahl in den Einstellungen wechselt den Stil', async ({ page }) => {
     await openApp(page, 'einstellungen');
     await page.locator('.skin-opt', { hasText: 'Barock' }).click();

@@ -51,6 +51,9 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   Fläche, Bild wird in die Spielfläche kopiert; ohne WebGL zeichnen die Spiele eine 2D-Ansicht. Ohne Grafikkarte
   (Software-Renderer) kleinere Auflösung, keine Schatten und nur alle 0,4 s ein neues Bild.
 - Gemeinsame Startseite (`/index.html`) für Taktwerk und Lernlabor mit Vorschaubildern.
+- Baustelle: Turm unter der Uhr wächst mit jedem Pomodoro des aktuellen Bereichs (Lernen oder Arbeit) bis ins
+  Weltall, Abschnitte in `src/ui/components/tower.ts` (Wolken 6, Flughöhe 12, Weltall 18, Mond 24, Mars 30,
+  Meteoriten 36, Jupiter 42, Saturn 48, UFO 54); nach 60 Stockwerken beginnt ein neuer Turm.
 
 ## Offen
 

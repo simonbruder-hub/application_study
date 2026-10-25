@@ -204,15 +204,89 @@
 .bs-cones i { position: absolute; bottom: 0; width: 18px; height: 24px; background: linear-gradient(180deg, #ff6b00 0 30%, #ffffff 30% 45%, #ff6b00 45% 70%, #ffffff 70% 82%, #ff6b00 82%); clip-path: polygon(40% 0, 60% 0, 100% 92%, 100% 100%, 0 100%, 0 92%); }
 .bs-cones i:nth-child(1) { left: 36%; } .bs-cones i:nth-child(2) { left: 60%; height: 20px; width: 15px; } .bs-cones i:nth-child(3) { left: 94%; }
 
-/* Begleiter: Rohbau wächst */
-.rohbau-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
-.rohbau { width: 190px; height: 88px; overflow: visible; }
-.rb-ground { fill: #8a6f4c; }
-.rb-floor { fill: color-mix(in srgb, #a7a39a 85%, var(--surface)); stroke: #6b7280; stroke-width: 0.8; }
-.rb-floor.is-next { fill: #ffb000; stroke: #8a6100; }
-.rb-win { fill: color-mix(in srgb, #4b5563 40%, var(--surface)); }
-.rb-crane, .rb-jib { fill: none; stroke: #f2a900; stroke-width: 2.4; stroke-linecap: round; }
-.rb-cable { stroke: #3a3c40; stroke-width: 1; }
+/* Begleiter: Turm wächst mit jedem Pomodoro bis ins Weltall */
+.tower-row { display: grid; justify-items: center; gap: 8px; }
+.tower { width: min(100%, 280px); height: auto; aspect-ratio: 240 / 150; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent); }
+.tower-row .meter-text { text-align: center; }
+.tw-stars circle { fill: #ffffff; }
+.tw-sun { fill: #ffd34d; filter: drop-shadow(0 0 6px #ffe48a); }
+.tw-cloud ellipse { fill: #ffffff; opacity: 0.92; }
+.st-flug .tw-cloud ellipse { opacity: 0.85; }
+.tw-birds { fill: none; stroke: #2d3a4a; stroke-width: 1.2; stroke-linecap: round; }
+.tw-ground { fill: #8a6f4c; }
+.tw-tape { fill: #ffb000; }
+.tw-pit { fill: #5c4630; }
+.tw-floor { fill: #b3aea3; stroke: #6b7280; stroke-width: 0.6; }
+.tw-win { fill: #59636f; }
+.fl-wolken .tw-floor { fill: #c9cfd8; }
+.fl-flug .tw-floor { fill: #9fb7d9; }
+.fl-flug .tw-win, .fl-wolken .tw-win { fill: #3c5d8a; }
+.fl-orbit .tw-floor, .fl-mond .tw-floor { fill: #d6dbe4; stroke: #8a93a3; }
+.fl-mars .tw-floor, .fl-meteore .tw-floor { fill: #c9b8a6; stroke: #8a7766; }
+.fl-jupiter .tw-floor, .fl-saturn .tw-floor, .fl-ufo .tw-floor { fill: #b9c3d8; stroke: #6f7d99; }
+:is(.st-orbit, .st-mond, .st-mars, .st-meteore, .st-jupiter, .st-saturn, .st-ufo) .tw-win { fill: #ffd977; filter: drop-shadow(0 0 2px #ffcf4d); }
+.tw-fl.is-mark .tw-floor { fill: #ffb000; stroke: #8a6100; }
+.tw-floor.is-next { fill: #ffb000; stroke: #8a6100; }
+.tw-fl.is-new .tw-floor { animation: tw-new 1.6s ease-out 3; }
+@keyframes tw-new { 50% { fill: #fff2a8; } }
+.tc-mast, .tc-jib { fill: none; stroke: #f2a900; stroke-width: 1.3; stroke-linejoin: round; }
+.tc-weight { fill: #6b7280; }
+.tc-cab { fill: #f2a900; stroke: #8a6100; stroke-width: 0.6; }
+.tc-cable { stroke: #3a3c40; stroke-width: 0.8; }
+:is(.st-orbit, .st-mond, .st-mars, .st-meteore, .st-jupiter, .st-saturn, .st-ufo) .tc-cable { stroke: #c8ccd4; }
+/* Abschnitte */
+.tw-drift { animation: tw-drift 14s ease-in-out infinite alternate; }
+.tw-drift.d2 { animation-duration: 18s; animation-delay: -6s; }
+.tw-drift.d3 { animation-duration: 22s; animation-delay: -11s; }
+@keyframes tw-drift { from { translate: -10px 0; } to { translate: 12px 0; } }
+.tw-plane { animation: tw-fly 9s linear infinite; }
+@keyframes tw-fly { from { translate: -200px 8px; } to { translate: 130px -6px; } }
+.tp-trail { stroke: #ffffff; stroke-width: 1.6; stroke-linecap: round; opacity: 0.7; }
+.tp-body { fill: #f4f6fa; stroke: #5b6b80; stroke-width: 0.6; }
+.tp-wing { fill: #c9d3e0; stroke: #5b6b80; stroke-width: 0.5; }
+.tp-win { fill: #3c5d8a; }
+.tw-earth { fill: #2f7bd6; }
+.tw-atmo { fill: none; stroke: #8fd0ff; stroke-width: 5; opacity: 0.45; }
+.ts-panel { fill: #2b4c9a; stroke: #9fb7ff; stroke-width: 0.5; }
+.ts-body { fill: #d9b54a; }
+.ts-arm { stroke: #c8ccd4; stroke-width: 1; }
+.ts-dish { fill: #e8ecf2; }
+.tw-sat { animation: tw-float 7s ease-in-out infinite alternate; }
+.tw-sat.s2 { animation-duration: 9s; animation-delay: -3s; }
+@keyframes tw-float { from { translate: -6px 3px; rotate: -4deg; } to { translate: 8px -4px; rotate: 6deg; } }
+.tm-disc { fill: #dcd8cc; filter: drop-shadow(0 0 8px rgb(255 248 220 / 0.5)); }
+.tm-crater { fill: #bdb7a8; }
+.tp-mars { fill: #c1440e; filter: drop-shadow(0 0 6px rgb(255 120 60 / 0.4)); }
+.tp-mars-spot { fill: none; stroke: #8f2f08; stroke-width: 2.4; stroke-linecap: round; opacity: 0.7; }
+.tm-tail { stroke: #ffd9a0; stroke-width: 2; stroke-linecap: round; opacity: 0.8; }
+.tm-rock, .tw-rock { fill: #7a6a5c; stroke: #4a3f36; stroke-width: 0.6; }
+.tw-meteor { animation: tw-meteor 3.2s linear infinite; }
+.tw-meteor.m1 { animation-delay: -0.8s; animation-duration: 4s; }
+.tw-meteor.m2 { animation-delay: -1.9s; }
+.tw-meteor.m3 { animation-delay: -2.6s; animation-duration: 3.8s; }
+@keyframes tw-meteor { from { translate: 40px -30px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { translate: -150px 90px; opacity: 0; } }
+.tw-rock { animation: tw-tumble 12s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes tw-tumble { to { rotate: 360deg; } }
+.tj-disc { fill: #d9b38c; }
+.tj-band { fill: #a8714a; opacity: 0.75; }
+.tj-spot { fill: #c2502f; }
+.tsat-disc { fill: #e3c98f; }
+.tsat-ring { fill: none; stroke: #cdb27a; stroke-width: 3; }
+.tsat-ring.back { opacity: 0.55; }
+.tu-dome { fill: #a8f0ff; opacity: 0.85; }
+.tu-disc { fill: #8a93a3; stroke: #3d4452; stroke-width: 0.8; }
+.tu-light { fill: #7cfc5a; filter: drop-shadow(0 0 2px #7cfc5a); }
+.tu-beam { fill: #b6ff9e; opacity: 0.28; animation: tw-beam 1.6s ease-in-out infinite alternate; }
+.tw-ufo { animation: tw-hover 2.4s ease-in-out infinite alternate; }
+@keyframes tw-hover { from { translate: -4px 0; } to { translate: 4px -3px; } }
+@keyframes tw-beam { to { opacity: 0.5; } }
+.tw-ufo.leave { animation: tw-leave 3.2s ease-in 0.4s both; }
+@keyframes tw-leave { from { translate: -60px 60px; opacity: 1; } to { translate: 80px -70px; opacity: 0; } }
+.ta-track { stroke: rgb(255 255 255 / 0.55); stroke-width: 1.4; stroke-dasharray: 2 2; }
+.st-boden .ta-track, .st-wolken .ta-track { stroke: rgb(30 40 60 / 0.35); }
+.ta-tick { fill: rgb(255 255 255 / 0.45); stroke: rgb(30 40 60 / 0.4); stroke-width: 0.5; }
+.ta-tick.is-on { fill: #ffb000; }
+.ta-mark { fill: #ff6b00; stroke: #ffffff; stroke-width: 0.6; }
 
 /* Einblendung */
 .cutin-baustelle .cutin-band { background: #1b1c1e; border: 3px solid transparent; border-image: repeating-linear-gradient(135deg, #ffb000 0 10px, #1b1c1e 10px 20px) 3; border-radius: 4px; }
