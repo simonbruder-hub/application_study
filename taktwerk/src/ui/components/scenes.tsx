@@ -3,7 +3,7 @@
  * Zifferblatt). Wie in SkinDecor: alles liegt im DOM, CSS blendet je Phase ein und startet Animationen.
  */
 import type { ComponentChildren } from 'preact';
-import { useMemo } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 
 const many = (n: number) => Array.from({ length: n }, (_, i) => <i key={i} />);
 const Deco = ({ children }: { children: ComponentChildren }) => <div class="deco" aria-hidden="true">{children}</div>;
@@ -524,10 +524,119 @@ export function HalloweenScene() {
         {([[440, 52], [470, 50], [500, 53], [640, 54]] as const).map(([x, y], i) => <path key={i} class="hw-grave" d={`M${x} ${y} V${y - 10} Q${x + 6} ${y - 18} ${x + 12} ${y - 10} V${y} Z`} />)}
       </svg>
       <div class="hw-bats">{[0, 1, 2, 3, 4].map((i) => <svg key={i} viewBox="-16 -10 32 20"><path d="M0 -3 Q3 -6 5 -2 Q9 -9 16 -9 Q13 -5 15 -1 Q11 -2 10 2 Q7 -1 5 3 Q2 6 0 9 Q-2 6 -5 3 Q-7 -1 -10 2 Q-11 -2 -15 -1 Q-13 -5 -16 -9 Q-9 -9 -5 -2 Q-3 -6 0 -3 Z" /></svg>)}</div>
-      <div class="hw-spider"><i /></div>
       <div class="hw-ghosts">{[0, 1].map((i) => <svg key={i} viewBox="0 0 40 50"><path d="M4 22 Q4 2 20 2 Q36 2 36 22 V46 L31 41 L26 46 L20 41 L14 46 L9 41 L4 46 Z" /><circle cx="14" cy="20" r="3" /><circle cx="26" cy="20" r="3" /><ellipse cx="20" cy="30" rx="3" ry="4" /></svg>)}</div>
       <div class="hw-fog"><i /><i /><i /></div>
       <div class="hw-pumpkins"><Pumpkin size={54} /><Pumpkin size={38} /><Pumpkin size={46} /></div>
     </Deco>
+  );
+}
+
+/**
+ * Halloween: Spinne am Faden zum Anfassen. Nach unten ziehen und loslassen: sie federt hoch. Nach oben schieben
+ * und loslassen: sie fällt, fängt sich am Faden und klettert zurück an ihren Platz. Seitlich gezogen pendelt sie aus.
+ */
+export function SpiderToy({ phase, still }: { phase: string; still: boolean }) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const s = useRef({ L: 60, v: 0, x: 0, vx: 0, mode: 'idle' as 'idle' | 'drag' | 'spring' | 'fall' | 'catch' | 'climb', catchAt: 0, t: 0, py: 0, px: 0, grab: 0 });
+
+  useEffect(() => {
+    const el = wrap.current!;
+    const card = el.parentElement!;
+    let raf = 0;
+    let last = performance.now();
+    const restFor = (H: number, t: number) => (phaseRef.current === 'short_break' ? H * (0.36 + Math.sin(t * 0.5) * 0.06) : phaseRef.current === 'long_break' ? H * 0.22 : H * 0.14);
+    const frame = (now: number) => {
+      const dt = Math.min(0.04, (now - last) / 1000);
+      last = now;
+      const st = s.current;
+      st.t += dt;
+      const H = card.clientHeight;
+      const rest = restFor(H, st.t);
+      if (st.mode === 'drag') {
+        const r = card.getBoundingClientRect();
+        st.L = Math.max(16, Math.min(H * 0.9, st.py - r.top - st.grab));
+        const anchor = r.left + r.width * 0.78;
+        st.x = Math.max(-80, Math.min(80, st.px - anchor));
+      } else {
+        if (st.mode === 'idle') { st.L += (rest - st.L) * Math.min(1, dt * 1.5); }
+        else if (st.mode === 'spring') {
+          st.v += (-(st.L - rest) * 70 - st.v * 4.2) * dt;
+          st.L += st.v * dt;
+          if (Math.abs(st.L - rest) < 0.6 && Math.abs(st.v) < 6) st.mode = 'idle';
+        } else if (st.mode === 'fall') {
+          st.v += 1700 * dt;
+          st.L += st.v * dt;
+          if (st.L >= st.catchAt) { st.mode = 'catch'; st.t = 0; }
+        } else if (st.mode === 'catch') {
+          // der Faden fängt sie auf: kurz nachfedern
+          st.v += (-(st.L - st.catchAt) * 120 - st.v * 6) * dt;
+          st.L += st.v * dt;
+          if (st.t > 0.7) { st.mode = 'climb'; st.v = 0; }
+        } else if (st.mode === 'climb') {
+          st.L -= 46 * dt;
+          if (st.L <= rest) { st.L = rest; st.mode = 'idle'; }
+        }
+        st.vx += (-st.x * 28 - st.vx * 2.2) * dt;
+        st.x += st.vx * dt;
+      }
+      const bob = st.mode === 'idle' && !still ? Math.sin(st.t * 1.6) * 2 : 0;
+      const L = st.L + bob;
+      const angle = Math.atan2(st.x, Math.max(20, L)) * (180 / Math.PI);
+      el.style.setProperty('--len', `${Math.hypot(L, st.x).toFixed(1)}px`);
+      el.style.setProperty('--ang', `${(-angle).toFixed(2)}deg`);
+      el.dataset.mode = st.mode;
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [still]);
+
+  const release = () => {
+    const st = s.current;
+    if (st.mode !== 'drag') return;
+    const H = wrap.current!.parentElement!.clientHeight;
+    const rest = phaseRef.current === 'short_break' ? H * 0.36 : phaseRef.current === 'long_break' ? H * 0.22 : H * 0.14;
+    st.v = 0;
+    if (st.L < rest - 6) { st.mode = 'fall'; st.catchAt = rest + Math.max(40, (rest - st.L) * 0.6); }
+    else st.mode = 'spring';
+  };
+
+  return (
+    <div class="spider-toy" ref={wrap} aria-hidden="true">
+      <div class="spider-arm">
+        <i class="spider-thread" />
+        <button
+          type="button" class="spider-body" tabIndex={-1}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            const st = s.current;
+            const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            st.grab = e.clientY - (r.top + r.height * 0.35);
+            st.py = e.clientY;
+            st.px = e.clientX;
+            st.mode = 'drag';
+          }}
+          onPointerMove={(e) => { if (s.current.mode === 'drag') { s.current.py = e.clientY; s.current.px = e.clientX; } }}
+          onPointerUp={release}
+          onPointerCancel={release}
+        >
+          <svg viewBox="-30 -24 60 52">
+            <g class="sp-legs">
+              {[-1, 1].map((side) => [0, 1, 2, 3].map((k) => (
+                <path key={`${side}${k}`} class={`sp-leg l${k}`} d={`M${side * 5} ${-2 + k * 3} L${side * (15 + k)} ${-12 + k * 6} L${side * (24 + k * 0.5)} ${-2 + k * 7}`} />
+              )))}
+            </g>
+            <ellipse class="sp-abdomen" cx="0" cy="9" rx="10" ry="12" />
+            <path class="sp-mark" d="M0 3 L3 8 L0 13 L-3 8 Z" />
+            <circle class="sp-head" cx="0" cy="-6" r="6.5" />
+            <circle class="sp-eye" cx="-2.4" cy="-7" r="1.4" /><circle class="sp-eye" cx="2.4" cy="-7" r="1.4" />
+            <ellipse class="sp-shine" cx="-3.5" cy="4" rx="2.5" ry="4" />
+          </svg>
+        </button>
+      </div>
+    </div>
   );
 }

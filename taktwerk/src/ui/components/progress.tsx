@@ -236,15 +236,24 @@ export const ELEMENTS = [
   { id: 'feuer', label: 'Feuer' }, { id: 'wasser', label: 'Wasser' }, { id: 'luft', label: 'Luft' }, { id: 'erde', label: 'Erde' },
 ] as const;
 
-export function ElementOrbs({ p, active }: { p: number; active: number }) {
+/** Vier Kugeln: zeigen das Element und den Fortschritt; antippen wählt das Element fest, «Auto» folgt der Phase */
+export function ElementOrbs({ p, active, fixed, onPick }: { p: number; active: number; fixed: number | null; onPick: (i: number | null) => void }) {
   const q = clamp01(p);
   return (
-    <div class="orbs" aria-hidden="true">
-      {ELEMENTS.map((e, i) => (
-        <span key={e.id} class={`orb orb-${e.id}${i === active ? ' is-active' : ''}`} style={{ '--fill': `${(i === active ? q : 0) * 100}%` }}>
-          <i /><small>{e.label}</small>
-        </span>
-      ))}
+    <div class="orbs-wrap">
+      <div class="orbs" role="group" aria-label="Element wählen">
+        {ELEMENTS.map((e, i) => (
+          <button
+            key={e.id} type="button" class={`orb orb-${e.id}${i === active ? ' is-active' : ''}`} aria-pressed={fixed === i}
+            style={{ '--fill': `${(i === active ? q : 0) * 100}%` }} onClick={() => onPick(fixed === i ? null : i)}
+          >
+            <i /><small>{e.label}</small>
+          </button>
+        ))}
+      </div>
+      <button type="button" class={`orb-auto${fixed === null ? ' is-on' : ''}`} aria-pressed={fixed === null} onClick={() => onPick(null)}>
+        {fixed === null ? 'Auto: Element folgt der Phase' : 'Auto'}
+      </button>
     </div>
   );
 }

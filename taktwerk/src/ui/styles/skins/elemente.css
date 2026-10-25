@@ -26,7 +26,11 @@
   --surface: #1c1814; --surface-2: #241f19; --surface-3: #312a21; --ink: #f5ece0; --ink-2: #d6c8b4; --muted: #a38f78; --line: #312a21; --line-strong: #54473a; --outline: #f5ece0;
   --tomato: #ff7043; --on-tomato: #2a0b02; --sage: #64b5f6; --on-sage: #031628; --indigo: #4db6ac; --on-indigo: #04201d; --link: #ffab91; --dial-track: #2a241d; --tick: #54473a; --tick-major: #f5ece0;
 }
-:root[data-skin="elemente"][data-active="0"], :root[data-skin="elemente"][data-active="0"] .focus-grid { --phase: #8d6e63; }
+/* Farbe folgt dem Element (fest gewählt oder nach Phase) */
+:root[data-skin="elemente"][data-element="0"], :root[data-skin="elemente"][data-element="0"] .focus-grid { --phase: var(--tomato); }
+:root[data-skin="elemente"][data-element="1"], :root[data-skin="elemente"][data-element="1"] .focus-grid { --phase: var(--sage); }
+:root[data-skin="elemente"][data-element="2"], :root[data-skin="elemente"][data-element="2"] .focus-grid { --phase: var(--indigo); }
+:root[data-skin="elemente"][data-element="3"], :root[data-skin="elemente"][data-element="3"] .focus-grid { --phase: #8d6e63; }
 [data-skin="elemente"] .view-head h1 { font-weight: 800; letter-spacing: 0.04em; }
 [data-skin="elemente"] .clock { font-family: var(--font-display); font-weight: 800; letter-spacing: 0.02em; }
 [data-skin="elemente"] .dial-track { stroke-width: 8; }
@@ -40,14 +44,14 @@
 .el-water { left: 79%; top: 50%; } .el-water svg { stroke: #1e88e5; }
 .el-air { left: 50%; top: 79%; } .el-air svg { stroke: #26a69a; }
 .el-earth { left: 21%; top: 50%; } .el-earth svg { stroke: #8d6e63; }
-:root[data-active="1"][data-phase="focus"] .el-fire, :root[data-active="1"][data-phase="short"] .el-water,
-:root[data-active="1"][data-phase="long"] .el-air, :root[data-active="0"] .el-earth { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+:root[data-element="0"] .el-fire, :root[data-element="1"] .el-water,
+:root[data-element="2"] .el-air, :root[data-element="3"] .el-earth { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
 .el-aura { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--phase) 20%, transparent), transparent 70%); animation: breathe 6s ease-in-out infinite; }
 
 /* Feuer (Fokus): Glut steigt auf, Feuerschein flackert */
 .fire-glow { left: 0; right: 0; bottom: 0; height: 45%; display: none; background: radial-gradient(ellipse 70% 90% at 50% 100%, rgb(255 112 67 / 0.45), rgb(255 183 77 / 0.15) 45%, transparent 70%); animation: glow-flick 1.8s ease-in-out infinite alternate; }
 .embers { inset: 0; display: none; }
-:root[data-active="1"][data-phase="focus"] :is(.fire-glow, .embers) { display: block; }
+:root[data-element="0"] :is(.fire-glow, .embers) { display: block; }
 .embers i { position: absolute; bottom: -10px; width: 5px; height: 5px; border-radius: 50%; background: #ffb74d; box-shadow: 0 0 8px 2px rgb(255 112 67 / 0.8); animation: ember 5s ease-in infinite paused; }
 :root[data-run="1"] .embers i { animation-play-state: running; }
 @keyframes ember { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx, 20px), -70cqh) scale(0.3); opacity: 0; } }
@@ -92,22 +96,22 @@
 .pebbles i:nth-child(6) { left: 88%; top: 54%; width: 15px; height: 10px; animation-delay: -4.14s; }
 /* Wasser (kurze Pause): Wellen und Tropfen */
 .waves { left: 0; bottom: 0; width: 200%; height: 70px; display: none; animation: drift 7s linear infinite; }
-:root[data-active="1"][data-phase="short"] .waves { display: block; }
+:root[data-element="1"] .waves { display: block; }
 .wave-a { fill: color-mix(in srgb, var(--sage) 45%, transparent); }
 .wave-b { fill: color-mix(in srgb, var(--sage) 25%, transparent); animation: wave-shift 3.5s ease-in-out infinite alternate; }
 @keyframes wave-shift { to { transform: translateX(-50px); } }
 .droplets { inset: 0; display: none; }
-:root[data-active="1"][data-phase="short"] .droplets { display: block; }
+:root[data-element="1"] .droplets { display: block; }
 .droplets i { position: absolute; top: -20px; width: 6px; height: 9px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: color-mix(in srgb, var(--sage) 70%, #ffffff); animation: drop 2s cubic-bezier(0.5, 0, 1, 1) infinite; }
 @keyframes drop { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(85cqh); opacity: 0.3; } }
 /* Luft (lange Pause): Windböen ziehen in Bögen vorbei */
 .wind { inset: 0; display: none; }
-:root[data-active="1"][data-phase="long"] .wind { display: block; }
+:root[data-element="2"] .wind { display: block; }
 .wind i { position: absolute; left: 0; height: 18px; border-top: 2px solid color-mix(in srgb, var(--indigo) 55%, transparent); border-radius: 50%; animation: gust 3.6s ease-in-out infinite; }
 @keyframes gust { from { transform: translateX(-160px) scaleX(0.6); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(calc(100cqw + 40px)) scaleX(1.2); opacity: 0; } }
 /* Erde (Ruhe): schwebende Steine */
 .pebbles { inset: 0; display: none; }
-:root[data-active="0"] .pebbles { display: block; }
+:root[data-element="3"] .pebbles { display: block; }
 .pebbles i { position: absolute; border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%; background: linear-gradient(135deg, #a1887f, #6d4c41); box-shadow: 0 6px 10px -6px rgb(0 0 0 / 0.5); animation: float 7s ease-in-out infinite; opacity: 0.75; }
 .cutin-elemente .cutin-band b { letter-spacing: 0.06em; }
 /* Feier: vier Wirbel in den Elementfarben */

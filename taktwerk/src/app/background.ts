@@ -3,7 +3,8 @@
  * Medien-Steuerung (Android-Benachrichtigung, Sperrbildschirm), Hinweise nach einer Phase.
  */
 import { effect } from '@preact/signals';
-import { playSpectacle } from '../ui/components/Spectacle';
+import { elementOf } from './element';
+import { playSpectacle, type SpxKind } from '../ui/components/Spectacle';
 import { toast } from '../ui/toast';
 import { targetTitle } from './selectors';
 import { app, phaseEvents } from './services';
@@ -16,13 +17,14 @@ import { celebration, flashMood, PHASE_ATTR, readTimer } from './timer/view';
 export function initBackground(): () => void {
   let lastKey = '';
   /** Vorheriger Stand für das Elemente-Spektakel: welches Element gerade endet */
-  let prev: { phase: string; active: boolean; kind: string } | null = null;
+  let prev: { phase: string; active: boolean; kind: string; element: number } | null = null;
+  const SPX: SpxKind[] = ['fire', 'water', 'air', 'earth'];
   const disposeTitle = effect(() => {
     const v = readTimer();
     const title = targetTitle(timerState.value);
     const p = prefs.value;
     // Der Anzeigetakt ist 250 ms – Titel und Medien-Steuerung nur bei sichtbarer Änderung aktualisieren
-    const key = [v.clock, v.running, v.active, v.phaseLabel, title, p.background].join('|');
+    const key = [v.clock, v.running, v.active, v.phaseLabel, title, p.background, p.skin, p.element].join('|');
     if (key === lastKey) return;
     lastKey = key;
     document.title = v.active ? `${v.clock} · ${v.paused ? 'Pausiert' : v.phaseLabel} – ${title}` : 'Taktwerk';
@@ -31,13 +33,17 @@ export function initBackground(): () => void {
     root.dataset.phase = PHASE_ATTR[v.phase];
     root.dataset.run = v.running ? '1' : '0';
     root.dataset.active = v.active ? '1' : '0';
-    // Elemente: Erde endet beim Start aus der Ruhe, Wasser und Luft mit dem Ende der kurzen und langen Pause
+    // Stil Elemente: angezeigtes Element (fest gewählt oder nach Phase)
+    const element = elementOf(v);
+    if (p.skin === 'elemente') root.dataset.element = String(element); else delete root.dataset.element;
+    // Spektakel, wenn ein Element endet. Nach Phase: Erde beim Start aus der Ruhe, Wasser und Luft am Ende der
+    // kurzen und langen Pause. Fest gewählt: das gewählte Element am Ende jeder Pause.
     if (prev) {
-      if (!prev.active && v.active) playSpectacle('earth');
-      else if (prev.active && prev.phase !== v.phase && prev.phase === 'short_break') playSpectacle('water');
-      else if (prev.active && prev.phase !== v.phase && prev.phase === 'long_break') playSpectacle('air');
+      const fixed = p.element !== 'auto';
+      if (!fixed && !prev.active && v.active) playSpectacle('earth');
+      else if (prev.active && prev.phase !== v.phase && prev.phase !== 'focus') playSpectacle(SPX[fixed ? prev.element : prev.phase === 'short_break' ? 1 : 2]!);
     }
-    prev = { phase: v.phase, active: v.active, kind: v.kind };
+    prev = { phase: v.phase, active: v.active, kind: v.kind, element };
     syncMediaSession({
       enabled: p.background && v.active,
       running: v.running,
@@ -64,7 +70,7 @@ export function initBackground(): () => void {
   // Jede gespeicherte Session (Pomodoro geschafft, «Fertig & speichern», Stechuhr gestoppt) wird gefeiert
   const onLogged = () => {
     // Elemente: Feuer endet mit dem Fokus (die Stechuhr gehört zur Erde)
-    playSpectacle(prev?.kind === 'stopwatch' ? 'earth' : 'fire');
+    playSpectacle(prefs.value.element !== 'auto' ? SPX[prev?.element ?? 0]! : prev?.kind === 'stopwatch' ? 'earth' : 'fire');
     flashMood.value = 'yay';
     celebration.value += 1;
     if (yayTimer) clearTimeout(yayTimer);

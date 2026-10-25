@@ -2,11 +2,11 @@
  * Elemente: grosses Spektakel, wenn ein Element endet. Feuer (Fokus vorbei): Flammenmeer über das ganze Fenster,
  * danach Brandspuren. Wasser (kurze Pause vorbei): ein Schwall fegt durch, danach tropft es. Luft (lange Pause
  * vorbei): eine Böe stösst alles weg, dann federt es zurück. Erde (Start aus der Ruhe): Felssturz, die Karten
- * verrutschen, die Uhr bekommt einen Sprung.
+ * verrutschen, das Zifferblatt bricht (Sprung im Glas, SkinDialFx).
  * Während des Spektakels steht data-spx am <html> (für die Karten), danach kurz data-spx-after (Spuren).
  */
 import { signal } from '@preact/signals';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { prefs } from '../../app/prefs';
 
 export type SpxKind = 'fire' | 'water' | 'air' | 'earth';
@@ -39,8 +39,6 @@ const many = <T,>(n: number, f: (i: number) => T) => Array.from({ length: n }, (
 
 function Spectacle({ kind }: { kind: SpxKind }) {
   const [phase, setPhase] = useState<'main' | 'after'>('main');
-  // Erde: der Sprung sitzt über dem Zifferblatt
-  const dial = useMemo(() => document.querySelector('.dial-wrap')?.getBoundingClientRect() ?? null, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -109,11 +107,6 @@ function Spectacle({ kind }: { kind: SpxKind }) {
             }} />
           ))}
           {many(10, (i) => <i key={`p${i}`} class="dust" style={{ '--x': `${rnd(i, 5) * 100}%`, '--d': `${(0.6 + rnd(i, 6) * 0.9).toFixed(2)}s` }} />)}
-          {dial && (
-            <svg class="crack" viewBox="0 0 100 100" style={{ left: `${dial.left}px`, top: `${dial.top}px`, width: `${dial.width}px`, height: `${dial.height}px` }}>
-              <path d="M50 4 L46 22 L54 31 L44 47 L52 58 L41 74 L48 86 L43 97 M46 22 L33 26 L24 20 M54 31 L69 34 L77 28 M44 47 L28 52 M52 58 L66 66 L74 79 M41 74 L30 80" />
-            </svg>
-          )}
         </>
       )}
     </div>

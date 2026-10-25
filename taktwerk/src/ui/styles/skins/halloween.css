@@ -58,15 +58,23 @@
 .hw-bats svg:nth-child(1) { --y: 12%; --s: 34px; --t: 11s; --d: -2s; } .hw-bats svg:nth-child(2) { --y: 20%; --s: 24px; --t: 14s; --d: -7s; }
 .hw-bats svg:nth-child(3) { --y: 30%; --s: 28px; --t: 9s; --d: -4s; } .hw-bats svg:nth-child(4) { --y: 8%; --s: 20px; --t: 16s; --d: -11s; }
 .hw-bats svg:nth-child(5) { --y: 40%; --s: 30px; --t: 12s; --d: -9s; }
-/* Kurze Pause: Spinne seilt sich ab */
-.hw-spider { left: 78%; top: 0; width: 2px; height: 0; display: none; }
-:root[data-phase="short"] .hw-spider { display: block; animation: thread 6s ease-in-out infinite alternate; }
-.hw-spider::before { content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: color-mix(in srgb, var(--ink) 60%, transparent); }
-.hw-spider i { position: absolute; left: -9px; bottom: -14px; width: 18px; height: 16px; border-radius: 50%; background: #1a1024;
-  box-shadow: -8px 2px 0 -6px #1a1024, 8px 2px 0 -6px #1a1024; }
-.hw-spider i::before, .hw-spider i::after { content: ""; position: absolute; top: 4px; width: 26px; height: 10px; left: -4px; border: 2px solid #1a1024; border-bottom: 0; border-radius: 50% 50% 0 0; }
-.hw-spider i::after { top: 8px; }
-@keyframes thread { from { height: 18cqh; } to { height: 46cqh; } }
+/* Spinne am Faden zum Anfassen (SpiderToy): Faden von oben, Länge und Winkel per JS */
+.timer-card > .spider-toy { position: absolute; left: 78%; top: 0; width: 0; height: 0; z-index: 3; pointer-events: none; }
+.spider-arm { position: absolute; left: 0; top: 0; transform-origin: 0 0; rotate: var(--ang, 0deg); }
+.spider-thread { position: absolute; left: -0.5px; top: 0; width: 1px; height: var(--len, 60px); background: color-mix(in srgb, var(--ink) 55%, transparent); }
+.spider-body { position: absolute; left: -22px; top: calc(var(--len, 60px) - 8px); width: 44px; height: 40px; padding: 0; border: 0; background: none; cursor: grab; pointer-events: auto; touch-action: none; rotate: calc(var(--ang, 0deg) * -0.6); }
+.spider-toy[data-mode="drag"] .spider-body { cursor: grabbing; }
+.spider-body svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.35)); }
+.sp-leg { fill: none; stroke: color-mix(in srgb, #5a4074 calc(var(--night) * 100%), #1a1024); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transform-box: view-box; transform-origin: 0 0; }
+.sp-abdomen { fill: color-mix(in srgb, #4a3360 calc(var(--night) * 100%), #1a1024); }
+.sp-head { fill: color-mix(in srgb, #3d2a50 calc(var(--night) * 100%), #241532); }
+.sp-mark { fill: #ff4d1a; }
+.sp-eye { fill: #ff3b3b; filter: drop-shadow(0 0 2px #ff3b3b); }
+.sp-shine { fill: rgb(255 255 255 / 0.22); }
+.spider-toy[data-mode="climb"] .sp-leg, .spider-toy[data-mode="drag"] .sp-leg { animation: sp-crawl 0.18s ease-in-out infinite alternate; }
+.spider-toy[data-mode="climb"] .sp-leg.l1, .spider-toy[data-mode="climb"] .sp-leg.l3, .spider-toy[data-mode="drag"] .sp-leg.l1, .spider-toy[data-mode="drag"] .sp-leg.l3 { animation-direction: alternate-reverse; }
+.spider-toy[data-mode="fall"] .sp-leg { transform: rotate(0deg) scale(1.15, 0.8); }
+@keyframes sp-crawl { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
 /* Lange Pause: Geister schweben */
 .hw-ghosts { inset: 0; display: none; }
 :root[data-phase="long"] .hw-ghosts { display: block; }
@@ -117,5 +125,3 @@
 /* Nachts: Silhouetten heben sich vom dunklen Grund ab (Mondlicht-Kante) */
 :root[data-skin="halloween"] .hw-hill { fill: color-mix(in srgb, #000000 calc(var(--night) * 55%), #1a1024); }
 :root[data-skin="halloween"] .hw-bats svg { fill: color-mix(in srgb, #4a3360 calc(var(--night) * 100%), #1a1024); filter: drop-shadow(0 0 calc(var(--night) * 4px) rgb(255 214 140 / 0.45)); }
-:root[data-skin="halloween"] .hw-spider i { background: color-mix(in srgb, #5a4074 calc(var(--night) * 100%), #1a1024); box-shadow: 0 0 calc(var(--night) * 6px) rgb(124 252 0 / 0.4); }
-:root[data-skin="halloween"] .hw-spider i::before, :root[data-skin="halloween"] .hw-spider i::after { border-color: color-mix(in srgb, #5a4074 calc(var(--night) * 100%), #1a1024); }

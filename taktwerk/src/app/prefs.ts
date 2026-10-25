@@ -45,6 +45,10 @@ export interface DevicePrefs {
   lastProject: Partial<Record<Workspace, string>>;
   /** Mini-Ansicht in der App aktiv */
   mini: boolean;
+  /** Stil Elemente: Element fest wählen oder automatisch nach Phase */
+  element: 'auto' | 'feuer' | 'wasser' | 'luft' | 'erde';
+  /** Stil Zug: gewählter Zug */
+  train: 're460' | 'giruno' | 'flirt' | 'krokodil' | 'glacier';
 }
 
 export const DEFAULT_PRESETS: TimerPreset[] = [
@@ -74,6 +78,8 @@ const DEFAULTS: DevicePrefs = {
   presets: DEFAULT_PRESETS,
   lastProject: {},
   mini: false,
+  element: 'auto',
+  train: 're460',
 };
 
 const KEY = 'pomodoro-planer.v2.prefs';

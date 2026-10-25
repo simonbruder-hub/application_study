@@ -7,9 +7,11 @@ import type { UserSettings } from '../../data/types';
 import type { Skin } from '../skins';
 import { PHASE_CHANNEL, PHASE_KANJI, PHASE_LATIN, type TimerView } from '../../app/timer/view';
 import { entities } from '../../app/store';
+import { ELEMENT_IDS, elementOf } from '../../app/element';
+import { prefs, setPrefs } from '../../app/prefs';
 import { Mascot, type DialKnob } from './Dial';
 import { AdventWreath, Bouquet, Cauldron, DepthGauge, ElementOrbs, Hourglass, Journey, LedBar, PaperStack, PowerBar, type Seek, TomatoFill, Tree, TREE_KINDS } from './progress';
-import { ElementeScene, ElementMarks, FloraScene, FloraWreath, HalloweenScene, MeerScene, SbbClock, ScifiScene, SpiderWeb, WeihnachtScene, XmasWreath, ZugScene } from './scenes';
+import { ElementeScene, ElementMarks, FloraScene, FloraWreath, HalloweenScene, MeerScene, SbbClock, ScifiScene, SpiderToy, SpiderWeb, WeihnachtScene, XmasWreath, ZugScene } from './scenes';
 import { GAME_OF_SKIN, GAMES, gameOpen } from '../game/games';
 import { ScopeCursors, ScopeTrace, ScopeXY } from './Scope';
 
@@ -112,7 +114,7 @@ export function SkinBackdrop({ skin, v, cycle }: { skin: Skin; v: TimerView; cyc
     case 'scifi': return <ScifiScene />;
     case 'elemente': return <ElementeScene />;
     case 'weihnacht': return <WeihnachtScene />;
-    case 'halloween': return <HalloweenScene />;
+    case 'halloween': return <><HalloweenScene /><SpiderToy phase={v.phase} still={prefs.value.motion === 'aus'} /></>;
     case 'zug': {
       // Fahrt im Fokus mit dem Fortschritt, in der Pause steht der Zug am Bahnsteig (ganz rechts)
       const p = v.kind === 'stopwatch' ? v.frac : v.phase !== 'focus' ? 1 : !v.active && v.frac >= 1 ? 0 : 1 - v.frac;
@@ -160,7 +162,18 @@ export function SkinDialFx({ skin }: { skin: Skin }) {
         </div>
       );
     case 'elemente':
-      return <div class="dial-fx" aria-hidden="true"><ElementMarks /><div class="el-aura" /></div>;
+      return (
+        <>
+          <div class="dial-fx" aria-hidden="true"><ElementMarks /><div class="el-aura" /></div>
+          {/* Erde-Spektakel: Sprung im Glas des Zifferblatts */}
+          <svg class="el-crack" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M50 3 L46 21 L54 30 L44 46 L52 57 L41 73 L48 86 L43 97 M46 21 L33 25 L24 19 M54 30 L69 33 L78 27 M44 46 L28 51 L18 49 M52 57 L66 65 L75 79 M41 73 L30 79" />
+            <path class="shard" d="M44 46 L52 57 L47 58 Z" style={{ '--dx': '-8px', '--r': '-50deg' }} />
+            <path class="shard" d="M54 30 L60 31 L57 36 Z" style={{ '--dx': '10px', '--r': '70deg' }} />
+            <path class="shard" d="M41 73 L45 71 L44 77 Z" style={{ '--dx': '4px', '--r': '30deg' }} />
+          </svg>
+        </>
+      );
     case 'scifi':
       return <div class="dial-fx" aria-hidden="true"><div class="holo"><i /><i /><i /></div></div>;
     case 'flora':
@@ -283,7 +296,7 @@ const MOTTO: Record<TimerView['mood'], string> = {
 };
 
 /** Elemente-Stil: Feuer im Fokus, Wasser in der kurzen, Luft in der langen Pause, Erde in Ruhe und bei der Stechuhr */
-const ELEMENT_OF = (v: TimerView): number => (!v.active || v.kind === 'stopwatch' ? 3 : v.phase === 'focus' ? 0 : v.phase === 'short_break' ? 1 : 2);
+const ELEMENT_OF = elementOf;
 const pick = <T,>(list: readonly T[], i: number): T => list[((i % list.length) + list.length) % list.length]!;
 /** Ziele der Bahnfahrt (Zug): Fokus fährt hin, die Pause danach hält dort */
 const ZUG_STOPS = ['Bern', 'Luzern', 'Chur', 'Lugano', 'Genève', 'St. Gallen'] as const;
@@ -362,7 +375,12 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
     case 'scifi':
       return <Journey p={p} from="Erde" to={pick(['Mond', 'Mars', 'Jupiter', 'Saturn', 'Neptun'], cycle)} vehicle="ship" detail={`Warp ${(1 + p * 8).toFixed(1)}`} seek={seek} />;
     case 'elemente':
-      return <ElementOrbs p={p} active={ELEMENT_OF(v)} />;
+      return (
+        <ElementOrbs
+          p={p} active={ELEMENT_OF(v)} fixed={prefs.value.element === 'auto' ? null : ELEMENT_OF(v)}
+          onPick={(i) => setPrefs({ element: i === null ? 'auto' : ELEMENT_IDS[i]! })}
+        />
+      );
     case 'zug':
       return <Journey p={p} from="Zürich HB" to={pick(ZUG_STOPS, cycle)} vehicle="train" stops={3} seek={seek} />;
     case 'weihnacht':
