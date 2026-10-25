@@ -348,7 +348,7 @@ export function SkinCompanion({ skin, v, say, set, yay, cycle, every, frac = v.f
       // In der Pause steht der zuletzt gewachsene Baum, aber nur wenn heute schon einer gewachsen ist
       const grown = !focus && v.kind === 'pomodoro' && done > 0;
       const kind = grown ? cycle - 1 : cycle;
-      const growth = yay ? 1 : v.kind === 'stopwatch' ? p : grown ? 1 : focus && v.active ? p : 0.04;
+      const growth = yay ? 1 : v.kind === 'stopwatch' ? p : grown ? 1 : focus && v.active ? p : 0;
       return (
         <div class="forest-row" aria-hidden="true">
           <Tree kind={((kind % 6) + 6) % 6} growth={growth} />

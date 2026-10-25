@@ -77,13 +77,23 @@
 .forest-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
 .forest-info { display: grid; gap: 4px; justify-items: start; }
 .forest-info .motto { text-align: left; }
-.tree-big { width: 86px; height: 104px; overflow: visible; }
+.tree-big { width: 112px; height: 104px; overflow: visible; }
 .tree-mini { width: 18px; height: 22px; }
 .mini-forest { display: flex; flex-wrap: wrap; gap: 1px; max-width: 220px; min-height: 22px; }
 .t-ground { fill: color-mix(in srgb, #6b5432 30%, transparent); }
 .t-trunk { fill: #7a5634; transition: transform 0.6s ease; }
 .t-trunk.is-birch { fill: #f2efe6; stroke: #3a3a3a; stroke-width: 0.6; stroke-dasharray: 2 5; }
 .t-crown { transform-box: fill-box; }
+.t-young { transition: transform 0.8s ease; }
+.st-bark { fill: #6e4b2c; }
+.st-root { fill: #5c3e24; }
+.st-grain { fill: none; stroke: #3f2a17; stroke-width: 0.7; stroke-linecap: round; opacity: 0.55; }
+.st-cut { fill: #dcb57f; stroke: #4a3019; stroke-width: 1.3; }
+.st-ring { fill: none; stroke: #a87b48; stroke-width: 0.55; }
+.st-crack { fill: none; stroke: #6b4a2a; stroke-width: 0.6; stroke-linecap: round; }
+.st-moss { fill: #6f9a3a; }
+.t-seed ellipse { fill: #6b5432; opacity: 0.55; }
+.t-seed .t-seed-core { fill: #8a6a3c; opacity: 1; }
 .t-fir { fill: #2f6b3a; }
 .t-oak { fill: #4f8a3a; }
 .t-birch { fill: #8fbf5a; }
