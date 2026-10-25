@@ -1,6 +1,6 @@
 # Taktwerk
 
-Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertung, 15 Stile und ein Pausenspiel zu jedem Stil. Läuft im Browser auf Laptop und Handy, lässt sich als App installieren, funktioniert offline und synchronisiert auf Wunsch zwischen deinen Geräten.
+Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertung, 17 Stile und ein Pausenspiel zu jedem Stil, zwei davon in 3D. Läuft im Browser auf Laptop und Handy, lässt sich als App installieren, funktioniert offline und synchronisiert auf Wunsch zwischen deinen Geräten.
 
 | | |
 |---|---|
@@ -25,11 +25,14 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
   - **Grand Prix** (Rennen): Strecke mit Randsteinen, Kiesbett, Reifenstapeln, Tribüne und Startampel; weiche Lenkung; überholen, Boost-Felder, Ölflecken.
   - **Waldjagd** (Forest): nach Moorhuhn-Art mit Zapfen-Schleuder, Tiere teils hinter Tannen und Büschen; Wanderer, Igel, Vogelhaus nicht treffen.
   - **Sudoku** (Amtlich): vier Stufen, Tipps mit Begründung, gesperrte Felder für die gewählte Zahl, Notizen, Spielstand bleibt.
-  - **Geschenkejagd** (Weihnachten): Elf fängt Geschenke, Kohle meiden. **Kürbismann** (Halloween): nachts im Wald rechtzeitig reagieren.
+  - **Geschenkejagd** (Weihnachten): Elf fängt Geschenke, Kohle meiden.
+  - **Kürbismann** (Halloween, 3D): nachts im Nebelwald das richtige Spukhaus finden (Licht und Merkmal stehen oben). Gehen und umsehen mit Pfeilen oder WASD, am Handy wie ein Joystick ziehen; beim Umsehen tritt die Figur zur Seite. Vor der Tür stehen öffnet sie: im falschen Haus wartet der Kürbismann und alles beginnt neu angeordnet von vorn. Draussen schleicht er nach, der Lichtkegel der Taschenlampe vertreibt ihn. Münzen bleiben gespeichert und kaufen Upgrades (hellere Laterne, Schuhe, Amulett, Krähe).
+  - **Dschungelschlange** (Dschungel): Snake mit Mangos, Bananen, Goldfrüchten und Käfern, Felsen ab Stufe 2 und einem Tiger, der den Schwanz abbeisst.
+  - **Baustellen-Run** (Baustelle, 3D): Lauf als Elektriker über die Baustelle wie in Temple Run: drei Spuren, springen, rutschen, an Kreuzungen abbiegen; Absperrungen, Träger, Gräben und Kabel meiden, Blitze sammeln, Helm, Kaffee und Magnet als Extras; hinten rollt die Walze.
   - **Memory** (alle übrigen Stile): Motive passend zum Stil, 6, 8 oder 12 Paare.
 - **Tags und Farben** – Projekte mit Tags (z. B. «Coding», «Lernen», «Admin») und freier Farbe; Tags in Projektkarten, Auswertung «Nach Tag», Verwaltung unter Einstellungen → Tags.
 - **Signale** – sieben synthetische Töne (Glocke, Marimba, Gong, Harfe, Kristall, Vogelruf, Digital), je für Ende Fokus, kurze und lange Pause; Restzeit auf Wunsch ausblenden (nur Zifferblatt).
-- **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 15 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
+- **Darstellung** – Tag, Nacht oder automatisch, «Bewegung» (Aus, Dezent, Lebendig) und 17 Stile. Jeder Stil hat eigene Szenen für Fokus, kurze und lange Pause, ein Bild, das mit dem Fortschritt wächst, eine Einblendung beim Phasenwechsel und eine Feier nach jeder gespeicherten Session:
   - **Klassisch:** Glas-Karten, leuchtendes Zifferblatt, Atemkreis in der Pause, Tomate füllt sich; Konfetti.
   - **Anime:** Tomaten-Chan, Blitze, Herzen, Laternenfest, Power-Leiste; «やった!».
   - **Technik:** Oszilloskop: Kurve zieht beim Überfahren elastisch mit, Messcursor X1/X2 mit ΔX, Δt, 1/Δt, RUN/STOP-Taste, in der langen Pause XY-Modus mit Strahl und Nachleuchten; Kennwerte, LED-Pegel; Funkenregen.
@@ -45,6 +48,8 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
   - **Zug:** SBB-Bahnhofsuhr als Zifferblatt (Kelle mit Halt bei 12), Lok auf dem Gleisring, blauer Himmel mit Wolken oder Sterne. Ein elektrischer Zug (Re 460, Giruno, FLIRT, Krokodil oder Glacier Express) fährt mit dem Fortschritt, durch Wald und über ein Viadukt; festhalten hält den Timer an, nach vorne schieben spult vor. Kurze Pause: Halt an einem Bahnhof, lange Pause: Zürich HB mit Halle, SBB-Uhr und Abfahrtstafel.
   - **Weihnachten:** Lichterkette, geschmückter Baum, Schneefall, Schlitten mit Rentieren, verschneite Hütte, Tannenkranz um die Uhr, Adventskranz als Fortschritt.
   - **Halloween:** Spukhügel, Mond, Fledermäuse, Nebel, Kürbisse, Geister, Spinnennetz hinter der Uhr, Hexenkessel als Fortschritt; die Spinne am Faden lässt sich ziehen und federt zurück.
+  - **Dschungel:** Lianen, Blätterwald und Glühwürmchen; Tiger, Schlangen, Affen und Papageien verstecken sich und tauchen kurz auf; Schlange als Zeiger, Affe an der Liane als Fortschritt.
+  - **Baustelle:** Kräne, Rohbau, Bagger, Lastwagen und Bauarbeiter; Lastwagen als Zeiger, der Rohbau wächst Stock um Stock. Im Hintergrund werkelt ein Elektriker am Verteilerkasten und bekommt am Ende jeder Session einen Stromschlag (Röntgenbild, Funken, Russ).
 
 ### Tastenkürzel
 
@@ -97,6 +102,7 @@ taktwerk/
 │   ├── app/               Zustand (Signals), Aktionen, Timer-Steuerung, Mini-Player, Tastatur
 │   ├── views/             Fokus, Aufgaben, Projekte, Auswertung, Einstellungen
 │   ├── ui/                Bausteine, Dialoge, Stile (skins.ts, styles/skins/*.css, SkinDecor.tsx)
+│   │   └── game/          Pausenspiele; three/ mit den 3D-Ansichten (three.js, wird erst beim Spielen geladen)
 │   ├── data/              Datenmodell, lokale Datenbank, Repository, Datenübernahme
 │   ├── sync/              Sync-Engine, Live-Timer, Supabase-Anbindung
 │   ├── domain/            Timer-Berechnung, Kennzahlen, Plan-Status (Health)

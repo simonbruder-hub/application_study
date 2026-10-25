@@ -56,7 +56,7 @@ jobs:
           cp -r taktwerk/dist/app _site/taktwerk/app
           cp taktwerk/dist/single/index.html _site/taktwerk/taktwerk.html
           cp -r lernlabor/dist/app _site/lernlabor/app
-          cp lernlabor/site/index.html _site/lernlabor/index.html
+          cp -r lernlabor/site/. _site/lernlabor/
           # Frühere Adresse (/pomodoro-planer/v2/) leitet auf die App weiter
           cp -r .github/pages-legacy/. _site/
       - uses: actions/configure-pages@v5

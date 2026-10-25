@@ -8,6 +8,8 @@ import { useMemo } from 'preact/hooks';
 import { prefs } from '../../app/prefs';
 import { celebration, flashMood } from '../../app/timer/view';
 import type { Skin } from '../skins';
+import { Electrician } from './baustelle';
+import { Parrot } from './jungle';
 
 type Vars = Record<string, string | number>;
 
@@ -46,6 +48,8 @@ const TEXT: Record<Skin, [string, string]> = {
   zug: ['Pünktlich angekommen!', 'Endstation erreicht'],
   weihnacht: ['Ho ho ho!', 'Geschenk ausgepackt'],
   halloween: ['Schaurig gut!', 'Pomodoro geschafft'],
+  dschungel: ['Dschungelkönig!', 'Pomodoro geschafft'],
+  baustelle: ['Bzzzt! Geschafft', 'Stromschlag inklusive'],
 };
 
 export function CelebrationLayer() {
@@ -224,6 +228,30 @@ function build(skin: Skin) {
         <div key="ghost" class="cel-ghost"><svg viewBox="0 0 40 50"><path d="M4 22 Q4 2 20 2 Q36 2 36 22 V46 L31 41 L26 46 L20 41 L14 46 L9 41 L4 46 Z" /><circle cx="14" cy="20" r="3" /><circle cx="26" cy="20" r="3" /><ellipse cx="20" cy="30" rx="3" ry="4" /></svg></div>,
         ...rays(22, [160, 460], ['#1a1024', '#2d1b3d']).map((r, i) => <span key={`b${i}`} class="p ray" style={r.style}><i class="bat-p" /></span>),
         ...candy.map((b, i) => <span key={`c${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="candy-p" /></span>),
+      ];
+    }
+    case 'dschungel': {
+      // Blätter wirbeln aus der Mitte, Bananen und Blüten fliegen, ein Papagei zieht quer übers Bild
+      const fruit = thrown(26, () => [50, 64], () => ({
+        '--dx': `${rand(-45, 45).toFixed(1)}vw`, '--up': `${-rand(30, 62).toFixed(0)}vh`, '--fall': `${rand(20, 45).toFixed(0)}vh`,
+        '--rot': `${rand(-540, 540).toFixed(0)}deg`, '--t': `${rand(2.4, 3.4).toFixed(2)}s`,
+      }), ['#ff5d8f', '#ffd60a', '#f15bb5', '#ff8c42']);
+      return [
+        <div key="parrot" class="cel-parrot"><Parrot /></div>,
+        ...rays(28, [140, 440], ['#2d8a3e', '#52b788', '#1f5e2a', '#95d5b2']).map((r, i) => <span key={`l${i}`} class="p ray" style={r.style}><i class="leaf-p" /></span>),
+        ...fruit.map((b, i) => <span key={`f${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class={i % 3 ? 'flower-p' : 'banana-p'} /></span>),
+      ];
+    }
+    case 'baustelle': {
+      // Blitze schlagen aus, Funken sprühen, der Elektriker steht im Röntgenblitz, sein Helm fliegt
+      const sparks = thrown(30, () => [50, 62], () => ({
+        '--dx': `${rand(-40, 40).toFixed(1)}vw`, '--up': `${-rand(25, 55).toFixed(0)}vh`, '--fall': `${rand(25, 50).toFixed(0)}vh`,
+        '--rot': '0deg', '--t': `${rand(1.6, 2.6).toFixed(2)}s`,
+      }), ['#fff2a8']);
+      return [
+        ...rays(16, [160, 460], ['#ffe14d', '#ffffff', '#ffb000']).map((r, i) => <span key={`b${i}`} class="p ray" style={r.style}><i class="bolt-p" /></span>),
+        ...sparks.map((b, i) => <span key={`s${i}`} class="p throw" style={{ left: `${b.x}vw`, top: `${b.y}vh`, ...b.style }}><i class="spark-p" /></span>),
+        <div key="elec" class="cel-elec"><Electrician zap box={false} /></div>,
       ];
     }
     case 'amtlich': {

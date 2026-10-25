@@ -1,0 +1,198 @@
+/* Dschungel: Blätterwald mit Lianen. Die Tiere verstecken sich und zeigen sich nur zeitweise:
+ * Fokus = Tiger lugt hinter dem Busch hervor, die Schlange gleitet die Liane herab, der Affe späht von oben;
+ * kurze Pause = Papageien fliegen, der Affe schwingt an der Liane; lange Pause = Dschungelnacht mit
+ * Glühwürmchen und leuchtenden Augen. Zeiger: eine Schlange. */
+:root[data-skin="dschungel"] {
+  --bg: #edf2df;
+  --bg-layers: radial-gradient(ellipse 70% 50% at 18% -10%, rgb(255 236 150 / 0.45), transparent 70%),
+    radial-gradient(circle at 20px 20px, rgb(47 107 58 / 0.07) 0 3px, transparent 3.5px) 0 0 / 52px 52px, linear-gradient(180deg, #eef5dc, #e6efd6);
+  --surface: #fbfdf4; --surface-2: #f0f5e2; --surface-3: #e0ead0;
+  --ink: #142a19; --ink-2: #2f4a33; --muted: #5f7461; --line: #dbe5c9; --line-strong: #b8c9a2; --outline: #142a19;
+  --tomato: #e8590c; --on-tomato: #ffffff; --sage: #2d8a3e; --on-sage: #ffffff; --indigo: #b5179e; --on-indigo: #ffffff;
+  --link: #1f6f30; --focus-ring: #1f6f30; --dial-track: #e2ebcf; --tick: #b8c9a2; --tick-major: #142a19;
+  --radius: 18px; --card-shadow: 0 16px 34px -22px rgb(20 50 20 / 0.5);
+  --font-display: "Lilita One", "Nunito", ui-rounded, system-ui, sans-serif;
+  --night: 0;
+  --scene-short: radial-gradient(ellipse 80% 50% at 50% 0%, color-mix(in srgb, #ffd60a 22%, transparent), transparent 70%);
+  --scene-long: linear-gradient(180deg, color-mix(in srgb, #0b3d2e 30%, transparent), color-mix(in srgb, #051a10 18%, transparent));
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="dschungel"]:not([data-theme="light"]):not([data-mode="tag"]) {
+    color-scheme: dark; --night: 1;
+    --bg: #07140c; --bg-layers: radial-gradient(ellipse 60% 40% at 80% -10%, rgb(120 255 170 / 0.12), transparent 70%), linear-gradient(180deg, #0b1d12, #050f08);
+    --surface: #0f2216; --surface-2: #142b1c; --surface-3: #1c3826; --ink: #e8f3df; --ink-2: #c4d6bb; --muted: #8fa68a; --line: #1c3826; --line-strong: #2f5139; --outline: #e8f3df;
+    --tomato: #ff8c42; --on-tomato: #2b1000; --sage: #52d273; --on-sage: #062b10; --indigo: #f15bb5; --on-indigo: #2e0522; --link: #8be0a0; --dial-track: #17301f; --tick: #2f5139; --tick-major: #e8f3df;
+  }
+}
+:root[data-skin="dschungel"][data-theme="dark"]:not([data-mode="tag"]), :root[data-skin="dschungel"][data-mode="nacht"] {
+  color-scheme: dark; --night: 1;
+  --bg: #07140c; --bg-layers: radial-gradient(ellipse 60% 40% at 80% -10%, rgb(120 255 170 / 0.12), transparent 70%), linear-gradient(180deg, #0b1d12, #050f08);
+  --surface: #0f2216; --surface-2: #142b1c; --surface-3: #1c3826; --ink: #e8f3df; --ink-2: #c4d6bb; --muted: #8fa68a; --line: #1c3826; --line-strong: #2f5139; --outline: #e8f3df;
+  --tomato: #ff8c42; --on-tomato: #2b1000; --sage: #52d273; --on-sage: #062b10; --indigo: #f15bb5; --on-indigo: #2e0522; --link: #8be0a0; --dial-track: #17301f; --tick: #2f5139; --tick-major: #e8f3df;
+}
+[data-skin="dschungel"] .view-head h1 { font-weight: 400; letter-spacing: 0.02em; }
+[data-skin="dschungel"] .clock { font-family: "Lilita One", ui-rounded, system-ui, sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+[data-skin="dschungel"] .timer-card { padding-bottom: 78px; }
+[data-skin="dschungel"] .dial-track { stroke: color-mix(in srgb, var(--sage) 30%, var(--dial-track)); stroke-width: 10; }
+[data-skin="dschungel"] .dial-arc { stroke-width: 11; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--phase) 50%, transparent)); }
+[data-skin="dschungel"] .dial-knob { fill: #3f8f2f; stroke: #e9c46a; stroke-width: 1.3; }
+[data-skin="dschungel"] .theme-badge { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.05em; background: var(--phase); color: #ffffff; }
+
+/* Himmel und Lichtstrahlen durch das Blätterdach */
+.dj-sky { inset: 0; background: linear-gradient(180deg, color-mix(in srgb, #c9e7a7 calc((1 - var(--night)) * 55%), color-mix(in srgb, #0b2a1a calc(var(--night) * 70%), transparent)), transparent 75%); }
+:root[data-phase="long"] .dj-sky { background: linear-gradient(180deg, color-mix(in srgb, #0d2b20 55%, transparent), transparent 80%); }
+.dj-rays { inset: 0; opacity: calc((1 - var(--night)) * 0.9); transition: opacity 1.4s; }
+:root[data-phase="long"] .dj-rays { opacity: 0; }
+.dj-rays i { position: absolute; top: -20%; width: 46px; height: 120%; transform: rotate(18deg); transform-origin: top; background: linear-gradient(180deg, rgb(255 248 190 / 0.4), transparent 80%); filter: blur(4px); animation: dj-ray 9s ease-in-out infinite alternate; }
+.dj-rays i:nth-child(1) { left: 20%; } .dj-rays i:nth-child(2) { left: 38%; width: 28px; animation-delay: -3s; }
+.dj-rays i:nth-child(3) { left: 56%; width: 60px; animation-delay: -6s; } .dj-rays i:nth-child(4) { left: 74%; width: 24px; animation-delay: -1.5s; }
+@keyframes dj-ray { from { opacity: 0.35; } to { opacity: 1; } }
+
+/* Ferne Baumkronen, im Dunst */
+.dj-canopy { left: 0; bottom: 0; width: 100%; height: 38%; fill: color-mix(in srgb, #3c7a3f 38%, var(--surface)); }
+.dj-canopy .dj-trunks { fill: color-mix(in srgb, #4a3a22 30%, var(--surface)); }
+
+/* Lianen hängen vom Blätterdach und schwingen leicht */
+.dj-lianas { inset: 0; }
+.dj-liana { position: absolute; top: -4px; width: 40px; overflow: visible; transform-origin: 50% 0; animation: dj-sway 5.5s ease-in-out infinite alternate; animation-delay: var(--d); }
+.dj-vine { fill: none; stroke: #5e7d2b; stroke-width: 3.2; stroke-linecap: round; }
+.dj-lleaf { fill: #4b8a2c; }
+@keyframes dj-sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+
+/* Schlange: gleitet an der ersten Liane herab, züngelt und verschwindet wieder */
+.dj-snake { left: calc(22% - 30px); top: 30px; width: 60px; height: 170px; overflow: visible; transform: translateY(-120%); animation: dj-snake 23s ease-in-out infinite; animation-delay: -9s; }
+:root[data-phase="long"] .dj-snake { animation-duration: 15s; }
+@keyframes dj-snake { 0%, 52% { transform: translateY(-120%); } 60%, 74% { transform: translateY(0); } 66% { transform: translateY(-4%) rotate(-3deg); } 84%, 100% { transform: translateY(-120%); } }
+.sn-body { fill: none; stroke: #22b04b; stroke-width: 11; stroke-linecap: round; }
+.sn-pattern { fill: none; stroke: #f4f9d0; stroke-width: 3.4; stroke-linecap: round; stroke-dasharray: 1 11; }
+.sn-skull { fill: #22b04b; }
+.sn-eye { fill: #f4e04d; } .sn-slit { fill: #111; }
+.sn-tongue { fill: none; stroke: #d62828; stroke-width: 1.6; stroke-linecap: round; transform-origin: 0 10px; animation: dj-tongue 0.9s steps(1) infinite; }
+@keyframes dj-tongue { 0%, 40% { transform: scaleY(1); opacity: 1; } 50%, 100% { transform: scaleY(0.2); opacity: 0; } }
+
+/* Affe: späht im Fokus kurz aus dem Blätterdach, schwingt in den Pausen an der Liane */
+.dj-monkey { left: calc(71% - 40px); top: -6px; width: 80px; height: 220px; transform-origin: 50% 0; transform: translateY(-100%); animation: dj-monkey-peek 31s ease-in-out infinite; animation-delay: -4s; }
+.dj-monkey svg { width: 100%; height: 100%; overflow: visible; }
+:root[data-phase="short"] .dj-monkey { transform: none; animation: dj-swing 2.4s ease-in-out infinite alternate; }
+:root[data-phase="long"] .dj-monkey { animation-duration: 40s; }
+@keyframes dj-monkey-peek { 0%, 60% { transform: translateY(-100%); } 66%, 78% { transform: translateY(-22%) rotate(4deg); } 72% { transform: translateY(-20%) rotate(-4deg); } 86%, 100% { transform: translateY(-100%); } }
+@keyframes dj-swing { from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+.mk-rope { fill: none; stroke: #5e7d2b; stroke-width: 3; stroke-linecap: round; }
+.mk-arm, .mk-leg { fill: none; stroke: #7b4b22; stroke-width: 4.5; stroke-linecap: round; }
+.mk-tail { fill: none; stroke: #7b4b22; stroke-width: 3.5; stroke-linecap: round; }
+.mk-torso, .mk-head, .mk-ear { fill: #8b5a2b; }
+.mk-belly, .mk-face { fill: #e8c393; }
+.mk-eye { fill: #1a120a; }
+.mk-mouth { fill: none; stroke: #5a3414; stroke-width: 1.2; stroke-linecap: round; }
+
+/* Tukan auf dem Ast: dreht ab und zu den Kopf */
+.dj-toucan { right: 4%; top: 15%; width: 96px; height: 75px; overflow: visible; }
+.tc-branch { fill: none; stroke: #5b3a1e; stroke-width: 5; stroke-linecap: round; }
+.tc-body, .tc-skull, .tc-tail { fill: #161616; }
+.tc-chest { fill: #fff1b8; }
+.tc-beak { fill: #ff8c1a; } .tc-beak-tip { fill: #161616; }
+.tc-eye-ring { fill: #6fd3ff; } .tc-eye { fill: #111; }
+.tc-feet { stroke: #6b7cff; stroke-width: 2; }
+.tc-head { transform-box: fill-box; transform-origin: 30% 60%; animation: dj-head 7s ease-in-out infinite; }
+@keyframes dj-head { 0%, 70%, 100% { transform: none; } 74%, 86% { transform: rotate(-14deg) scaleX(-1); } 90% { transform: rotate(6deg); } }
+:root[data-phase="long"] .tc-head { animation: none; transform: rotate(28deg) translateY(4px); }
+
+/* Papageien fliegen quer (Fokus nur einer, in den Pausen alle) */
+.dj-birds { inset: 0; }
+.dj-birds svg { position: absolute; left: 0; top: var(--y); width: var(--s); height: calc(var(--s) * 0.6); overflow: visible; animation: across var(--t) linear infinite, bat-bob 1.6s ease-in-out infinite alternate; animation-delay: var(--d); }
+.dj-birds svg:nth-child(1) { --y: 26%; --s: 46px; --t: 13s; --d: -5s; }
+.dj-birds svg:nth-child(2) { --y: 12%; --s: 34px; --t: 10s; --d: -2s; }
+.dj-birds svg:nth-child(3) { --y: 36%; --s: 40px; --t: 15s; --d: -9s; }
+:root[data-phase="focus"] .dj-birds svg:nth-child(n + 2), :root[data-phase="long"] .dj-birds { display: none; }
+.pr-body, .pr-head { fill: #e63946; } .pr-tail { fill: #1d4ed8; } .pr-beak { fill: #f1e7d0; }
+.pr-wing { fill: #ffd60a; transform-box: fill-box; transform-origin: 70% 90%; animation: dj-flap 0.26s ease-in-out infinite alternate; }
+.pr-wing-b { fill: #1d4ed8; animation-delay: -0.13s; }
+@keyframes dj-flap { to { transform: scaleY(-0.6); } }
+.dj-birds svg:nth-child(2) .pr-body, .dj-birds svg:nth-child(2) .pr-head { fill: #2a9d8f; }
+.dj-birds svg:nth-child(2) .pr-wing { fill: #e9c46a; }
+
+/* Tiger: hinter dem Busch unten links, taucht auf, blinzelt und duckt sich wieder */
+.dj-tiger-wrap { left: max(4%, 14px); bottom: 34px; width: 120px; height: 120px; overflow: hidden; }
+.dj-bush { left: -2%; bottom: 0; width: min(46%, 220px); height: 110px; overflow: visible; }
+.dj-tiger { position: absolute; left: 0; bottom: 0; width: 120px; height: 110px; transform: translateY(105%); animation: dj-peek 19s ease-in-out infinite; animation-delay: -2s; }
+:root[data-phase="long"] .dj-tiger { animation-duration: 13s; }
+@keyframes dj-peek { 0%, 48% { transform: translateY(105%); } 56%, 70% { transform: translateY(26%); } 62% { transform: translateY(24%) rotate(-3deg); } 78%, 100% { transform: translateY(105%); } }
+.tg-head, .tg-ear { fill: #f08c1e; } .tg-ear-in { fill: #2a1a0e; } .tg-cheek { fill: #fff6e6; }
+.tg-stripe { fill: #1b1208; }
+.tg-eye { fill: #d8f06a; } .tg-pupil { fill: #10140a; }
+.tg-eyes { transform-box: fill-box; transform-origin: center; animation: dj-blink 4.5s infinite; }
+@keyframes dj-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.tg-nose { fill: #e5737c; } .tg-mouth, .tg-whisker { fill: none; stroke: #2a1a0e; stroke-width: 1.4; stroke-linecap: round; }
+.tg-whisker { stroke: #fff6e6; stroke-width: 1; }
+/* Nachts leuchten die Augen */
+:root[data-phase="long"] .tg-eye { filter: drop-shadow(0 0 4px #e9ff70); }
+:root[data-skin="dschungel"] .tg-eye { filter: drop-shadow(0 0 calc(var(--night) * 5px) #e9ff70); }
+
+/* Leuchtende Augenpaare im Unterholz, nur nachts und in der langen Pause */
+.dj-eyes { inset: 0; opacity: var(--night); transition: opacity 1.2s; }
+:root[data-phase="long"] .dj-eyes { opacity: 1; }
+.dj-eyes i { position: absolute; width: 22px; height: 6px; animation: dj-glow 6s ease-in-out infinite; }
+.dj-eyes i::before, .dj-eyes i::after { content: ""; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 50%; background: #f3ff8a; box-shadow: 0 0 8px 2px rgb(240 255 120 / 0.7); }
+.dj-eyes i::before { left: 0; } .dj-eyes i::after { right: 0; }
+.dj-eyes i:nth-child(1) { left: 30%; bottom: 22%; } .dj-eyes i:nth-child(2) { left: 64%; bottom: 30%; animation-delay: -2s; width: 16px; }
+.dj-eyes i:nth-child(3) { left: 84%; bottom: 14%; animation-delay: -4s; }
+@keyframes dj-glow { 0%, 30%, 100% { opacity: 0; } 40%, 80% { opacity: 1; } 84% { opacity: 0.1; } 86% { opacity: 1; } }
+
+/* Vordergrund: grosse Blätter verdecken die Tiere */
+.dj-front { bottom: 0; width: min(44%, 320px); height: 54%; overflow: visible; }
+.dj-front-l { left: 0; } .dj-front-r { right: 0; }
+.dj-fan-a path:not(.dj-rib) { fill: color-mix(in srgb, #1f5e2a calc(100% - var(--night) * 40%), #04110a); }
+.dj-fan-b path:not(.dj-rib) { fill: color-mix(in srgb, #3a8a3a calc(100% - var(--night) * 40%), #04110a); }
+.dj-fan-c path:not(.dj-rib) { fill: color-mix(in srgb, #2b6e30 calc(100% - var(--night) * 40%), #04110a); }
+.dj-fan-d path:not(.dj-rib) { fill: color-mix(in srgb, #4c9a3c calc(100% - var(--night) * 40%), #04110a); }
+.dj-mon > path:first-child { fill: color-mix(in srgb, #24592a calc(100% - var(--night) * 40%), #04110a); }
+.dj-cut { fill: var(--surface); opacity: 0.85; }
+.dj-rib { fill: none; stroke: rgb(255 255 255 / 0.18); stroke-width: 1.3; }
+.dj-front-l { transform-origin: 0 100%; } .dj-front-r { transform-origin: 100% 100%; }
+:root[data-run="1"] .dj-front { animation: dj-rustle 3.6s ease-in-out infinite alternate; }
+:root[data-run="1"] .dj-front-r { animation-delay: -1.8s; }
+@keyframes dj-rustle { from { transform: rotate(-0.8deg); } to { transform: rotate(1deg); } }
+.dj-top { left: 0; top: 0; width: 100%; height: 70px; overflow: visible; }
+
+/* Glühwürmchen: nachts und in der langen Pause */
+.dj-fireflies { inset: 0; opacity: var(--night); transition: opacity 1.2s; }
+:root[data-phase="long"] .dj-fireflies { opacity: 1; }
+.dj-fireflies i { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #f4ffa8; box-shadow: 0 0 8px 3px rgb(230 255 120 / 0.55); animation: float 7s ease-in-out infinite, twinkle 2.6s ease-in-out infinite; }
+.dj-fireflies i:nth-child(1) { left: 12%; top: 40%; } .dj-fireflies i:nth-child(2) { left: 82%; top: 34%; animation-delay: -2s, -1s; }
+.dj-fireflies i:nth-child(3) { left: 24%; top: 70%; animation-delay: -4s, -0.5s; } .dj-fireflies i:nth-child(4) { left: 70%; top: 62%; animation-delay: -1s, -1.8s; }
+.dj-fireflies i:nth-child(5) { left: 48%; top: 28%; animation-delay: -5s, -0.2s; } .dj-fireflies i:nth-child(6) { left: 92%; top: 76%; animation-delay: -3s, -2.2s; }
+.dj-fireflies i:nth-child(7) { left: 6%; top: 82%; animation-delay: -6s, -1.2s; } .dj-fireflies i:nth-child(8) { left: 36%; top: 52%; animation-delay: -2.5s, -0.8s; }
+.dj-fireflies i:nth-child(9) { left: 60%; top: 86%; animation-delay: -4.5s, -1.6s; }
+
+/* Lianenkranz hinter dem Zifferblatt */
+.djw { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.djw-vine { fill: none; stroke: color-mix(in srgb, #5e7d2b 70%, transparent); stroke-width: 3.5; }
+.djw-vine.thin { stroke-width: 1.4; stroke-dasharray: 18 10; }
+.djw-leaf { fill: color-mix(in srgb, #3f8f2f 80%, transparent); }
+.djw-flower { fill: #ff5d8f; filter: drop-shadow(0 0 3px #ff5d8f); } .djw-flower.b { fill: #ffd60a; filter: drop-shadow(0 0 3px #ffd60a); }
+
+/* Begleiter: Affe an der Liane */
+.vine-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.vine-swing { width: 190px; height: 84px; overflow: visible; }
+.vs-trunk { fill: #6b4a2a; }
+.vs-liana { fill: none; stroke: #5e7d2b; stroke-width: 3; stroke-linecap: round; }
+.vs-bananas path { fill: #ffd60a; stroke: #b58900; stroke-width: 0.8; }
+.vs-monkey { transition: transform 0.8s ease; }
+:root[data-run="1"] .vs-monkey .mk-arm { animation: dj-reach 0.6s ease-in-out infinite alternate; }
+@keyframes dj-reach { to { transform: translateY(-1.5px); } }
+.vs-monkey.is-done { animation: dj-hop 0.5s ease-in-out infinite alternate; }
+@keyframes dj-hop { to { translate: 0 -4px; } }
+
+/* Einblendung und Feier */
+.cutin-dschungel .cutin-band { background: color-mix(in srgb, #1f5e2a 92%, transparent); border: 2px solid #e9c46a; }
+.cutin-dschungel .cutin-band b { font-family: var(--font-display); font-weight: 400; color: #ffd60a; letter-spacing: 0.02em; text-shadow: 0 3px 0 #0b2a12; }
+.cutin-dschungel .cutin-band small { color: #e8f3df; }
+.cel-dschungel .cel-flash { background: #ffd60a; opacity: 0.35; }
+.cel-dschungel .p.ray { left: 50%; top: 44%; }
+.cel-dschungel .p i.leaf-p { width: 34px; height: 14px; border-radius: 100% 0; background: var(--c); }
+.cel-dschungel .p i.banana-p { width: 26px; height: 14px; border-radius: 0 0 100% 100% / 0 0 100% 100%; border-bottom: 6px solid #ffd60a; }
+.cel-dschungel .p i.flower-p { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle, #ffd60a 0 25%, var(--c) 26%); }
+.cel-parrot { position: absolute; left: -120px; top: 30%; width: 110px; animation: cel-parrot 3.4s ease-in both; }
+.cel-parrot svg { width: 100%; height: auto; overflow: visible; }
+@keyframes cel-parrot { 0% { transform: translate(0, 40px); } 100% { transform: translate(calc(100vw + 240px), -200px); } }
+.cel-dschungel .cel-text b { font-family: var(--font-display); font-weight: 400; color: #ffd60a; -webkit-text-stroke: 2px #1f5e2a; text-shadow: 0 5px 0 #1f5e2a; }
