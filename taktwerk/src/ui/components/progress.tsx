@@ -157,19 +157,56 @@ function TreeShape({ kind }: { kind: number }) {
   }
 }
 
+function TreeBody({ kind }: { kind: number }) {
+  return (
+    <>
+      <path class={`t-trunk${kind % TREE_KINDS.length === 2 ? ' is-birch' : ''}`} d="M34.5 92 Q37.5 89 38 82 L38.6 50 Q40 46 41.4 50 L42 82 Q42.5 89 45.5 92 Z" />
+      <TreeShape kind={kind} />
+    </>
+  );
+}
+
+/** Alter Baumstrunk mit Wurzeln, Rinde und Jahresringen; daneben wächst der neue Baum */
+function Stump() {
+  return (
+    <g class="t-stump">
+      <path class="st-root" d="M15 89.5 C11 89.6 7 90.8 2.5 93.2 C7 92.6 11 92.7 16 92.4 Z" />
+      <path class="st-root" d="M17.5 87 C13.5 84.8 9.5 85.6 6.5 88.2 C9.6 87.6 13 88.2 16.6 90.2 Z" />
+      <path class="st-root" d="M33 89.5 C37.5 89.4 41.5 90.8 46 93.2 C41.5 92.7 37.5 92.6 32 92.4 Z" />
+      <path class="st-root" d="M30.5 87 C34.5 85.2 38.5 85.8 41.5 88.4 C38.4 87.8 35 88.3 31.4 90.2 Z" />
+      <path class="st-bark" d="M13.5 92.5 C15.4 88.6 16.2 84.5 16.2 77 L16.2 74.6 H31.8 L31.8 77 C31.8 84.5 32.6 88.6 34.5 92.5 Z" />
+      <path class="st-grain" d="M19.5 77.4 C19 82.2 18.6 86.2 17.6 90.4 M24 78 V91 M28.6 77.4 C29 82.2 29.4 86.2 30.4 90.4 M21.6 80 v4 M26.4 82 v5" />
+      <ellipse class="st-cut" cx="24" cy="74.6" rx="7.8" ry="2.6" />
+      <ellipse class="st-ring" cx="24" cy="74.6" rx="5.4" ry="1.75" />
+      <ellipse class="st-ring" cx="24" cy="74.6" rx="2.9" ry="0.95" />
+      <path class="st-crack" d="M24 74.6 L29.4 73.4" />
+      <path class="st-moss" d="M16.2 75.6 q1.6 -1.6 3.6 -0.6 q1.6 -1.1 3.2 0.2 q-0.8 1.6 -3.4 1.4 q-2.2 0.6 -3.4 -1 Z" />
+    </g>
+  );
+}
+
 export function Tree({ kind, growth, size = 'big' }: { kind: number; growth: number; size?: 'big' | 'mini' }) {
   const g = clamp01(growth);
-  const trunk = Math.max(0.12, g);
-  const crown = Math.max(0, (g - 0.18) / 0.82);
+  if (size === 'mini') {
+    return (
+      <svg class={`tree tree-mini kind-${kind % TREE_KINDS.length}`} viewBox="0 0 80 96" aria-hidden="true"><TreeBody kind={kind} /></svg>
+    );
+  }
+  // Der neue Baum wächst als Ganzes (Stamm und Krone im gleichen Verhältnis) vom Boden aus, so formt sich nichts um.
+  const s = 0.1 + 0.9 * g;
+  const tx = 36 + 40 * (1 - s);
+  const ty = 92 * (1 - s);
   return (
-    <svg class={`tree tree-${size} kind-${kind % TREE_KINDS.length}`} viewBox="0 0 80 96" aria-hidden="true">
-      {size === 'big' && <ellipse class="t-ground" cx="40" cy="92" rx="30" ry="4" />}
-      <g style={{ transform: `scaleY(${trunk.toFixed(3)})`, transformOrigin: '40px 92px' }}>
-        <path class={`t-trunk${kind % TREE_KINDS.length === 2 ? ' is-birch' : ''}`} d="M37 92 L38 50 Q40 46 42 50 L43 92 Z" />
-      </g>
-      <g style={{ transform: `scale(${crown.toFixed(3)})`, transformOrigin: '40px 62px', transition: 'transform 0.8s cubic-bezier(.2,1.4,.4,1)' }}>
-        <TreeShape kind={kind} />
-      </g>
+    <svg class={`tree tree-big kind-${kind % TREE_KINDS.length}`} viewBox="0 0 104 96" aria-hidden="true">
+      <ellipse class="t-ground" cx="52" cy="92" rx="50" ry="4" />
+      <Stump />
+      {g > 0 ? (
+        <g class="t-young" style={{ transform: `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${s.toFixed(4)})`, transformOrigin: '0 0' }}>
+          <TreeBody kind={kind} />
+        </g>
+      ) : (
+        <g class="t-seed"><ellipse cx="76" cy="91.4" rx="6" ry="1.8" /><ellipse class="t-seed-core" cx="76" cy="90" rx="1.4" ry="1" /></g>
+      )}
     </svg>
   );
 }
