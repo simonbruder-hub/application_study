@@ -254,7 +254,7 @@ function SyncCard() {
       <section class="card" id="sync">
         <h2>Sync & Konto</h2>
         <p class="small">Deine Daten liegen nur auf diesem Gerät. Mit einem kostenlosen Supabase-Projekt synchronisieren Laptop und Handy –{' '}
-          <a href="https://github.com/simonbruder-hub/application_study/blob/main/taktwerk/supabase/README.md" target="_blank" rel="noopener">Anleitung</a>.</p>
+          <a href="https://github.com/simonbruder-hub/apps/blob/main/taktwerk/supabase/README.md" target="_blank" rel="noopener">Anleitung</a>.</p>
         <form class="stack" onSubmit={(e) => { e.preventDefault(); if (!valid) return; saveBackendConfig({ url: url.trim().replace(/\/$/, ''), anonKey: key.trim() }); location.reload(); }}>
           <div class="field"><label for="sbUrl">Supabase-URL</label>
             <input id="sbUrl" type="url" placeholder="https://xxxx.supabase.co" value={url} onInput={(e) => setUrl(e.currentTarget.value)} /></div>
@@ -303,7 +303,7 @@ function SyncCard() {
           <p class="small muted">
             Steht in der Mail nur ein Link und kein Code? Dann verschickt Supabase noch die Standardvorlage. Einmalig
             in Supabase unter <b>Authentication → Emails → Templates</b> beide Vorlagen auf den Code umstellen
-            (<a href="https://github.com/simonbruder-hub/application_study/blob/main/taktwerk/supabase/README.md#32-e-mail-vorlagen-auf-code-umstellen" target="_blank" rel="noopener">Anleitung</a>),
+            (<a href="https://github.com/simonbruder-hub/apps/blob/main/taktwerk/supabase/README.md#32-e-mail-vorlagen-auf-code-umstellen" target="_blank" rel="noopener">Anleitung</a>),
             danach neuen Code anfordern.
           </p>
         </form>

@@ -1,5 +1,5 @@
-# application_study
-diverse apps zur unterstützung
+# apps
+Eigene Apps für Studium und Alltag, alle auf einer gemeinsamen Website. Das Repo hiess bis Oktober 2026 `application_study`.
 
 | App | Beschreibung |
 |---|---|
@@ -7,4 +7,4 @@ diverse apps zur unterstützung
 | [Lernlabor](lernlabor/) | Elektrotechnik lernen: Schaltungen aufbauen, Strom und Spannung im Oszilloskop, Zeiger, Frequenzgang, Theorie und Aufgaben in Stufen. Installierbar und offline. |
 | [Kochbuch](kochbuch/) | Rezepte aus dem privaten Kochbuch-Repo nach Art, Ernährung, Jahreszeit und Magen-Ampel filtern, Portionen umrechnen, Einkaufszettel mit Übergabe an Kasse unterwegs. Die Rezepte bleiben auf dem Gerät. Installierbar und offline. |
 
-Website: <https://simonbruder-hub.github.io/application_study/> (gemeinsame Startseite, `index.html`), Taktwerk unter `/taktwerk/app/`, Lernlabor unter `/lernlabor/app/`, Kochbuch unter `/kochbuch/app/`.
+Website: <https://simonbruder-hub.github.io/apps/> (gemeinsame Startseite, `index.html`), Taktwerk unter `/taktwerk/app/`, Lernlabor unter `/lernlabor/app/`, Kochbuch unter `/kochbuch/app/`.

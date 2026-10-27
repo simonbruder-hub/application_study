@@ -4,7 +4,7 @@ Eigenständige Lernapp neben Taktwerk. Zuerst Elektrotechnik: Schaltungen aus R,
 aufbauen und Strom und Spannung im Oszilloskop sehen. Dazu Theorie und Aufgaben in drei Stufen.
 Elektromagnetismus, Physik, Chemie und Mathematik sind als Fächer mit Stufen angelegt und folgen.
 
-Adresse: `https://simonbruder-hub.github.io/application_study/lernlabor/app/` (Arbeitsname, Umbenennung später zusammen mit Taktwerk).
+Adresse: `https://simonbruder-hub.github.io/apps/lernlabor/app/` (Arbeitsname, Umbenennung später zusammen mit Taktwerk).
 
 ## Bedienung Baukasten
 

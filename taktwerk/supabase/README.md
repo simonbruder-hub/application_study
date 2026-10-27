@@ -100,9 +100,9 @@ Technisch: `supabase.auth.signInWithOtp({ email })` und danach
 
 **Authentication → URL Configuration**
 
-- **Site URL:** `https://simonbruder-hub.github.io/application_study/taktwerk/app/`
+- **Site URL:** `https://simonbruder-hub.github.io/apps/taktwerk/app/`
 - **Redirect URLs** (mit «Add URL»):
-  - `https://simonbruder-hub.github.io/application_study/taktwerk/**`
+  - `https://simonbruder-hub.github.io/apps/taktwerk/**`
   - für die Entwicklung zusätzlich `http://localhost:5173/**` (Vite) und `http://localhost:4173/**` (Vorschau)
 
 Mit Codes werden diese Adressen kaum gebraucht. Supabase lehnt aber Anfragen ab, deren

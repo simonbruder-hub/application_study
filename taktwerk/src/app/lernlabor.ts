@@ -4,4 +4,4 @@
  */
 export const LERNLABOR_URL = location.hostname.endsWith('github.io')
   ? '../../lernlabor/app/'
-  : 'https://simonbruder-hub.github.io/application_study/lernlabor/app/';
+  : 'https://simonbruder-hub.github.io/apps/lernlabor/app/';

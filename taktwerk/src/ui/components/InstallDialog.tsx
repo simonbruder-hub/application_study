@@ -8,7 +8,7 @@ import { useInstallPrompt } from '../../app/install';
 import { DialogFrame, openDialog } from '../dialog';
 import { Icon } from '../Icon';
 
-const RELEASES = 'https://github.com/simonbruder-hub/application_study/releases/latest';
+const RELEASES = 'https://github.com/simonbruder-hub/apps/releases/latest';
 const download = (file: string) => `${RELEASES}/download/${file}`;
 
 type Platform = 'ios' | 'android-firefox' | 'android' | 'desktop-firefox' | 'mac-safari' | 'desktop';
