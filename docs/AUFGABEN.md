@@ -34,6 +34,8 @@ Startsatz für einen neuen Chat:
 - Entscheide zu Aufgabe 5: Die Rezepte kommen nicht auf die öffentliche Website. Die App lädt `rezepte.json` oder das
   ZIP aus der Kochbuch-CI einmal pro Gerät. Die neue Haushalt-App hat noch keine Einkaufsliste (M6), darum gehen die
   Zutaten direkt in die Liste der alten «Kasse unterwegs» (gleiche Website, gleicher Speicher; vorher schliessen).
+- Repo-Name: `apps` (bis 27.10.2026 `application_study`), damit der Name zum Inhalt passt. Website jetzt unter
+  `https://simonbruder-hub.github.io/apps/`; die alte Adresse leitet GitHub nicht weiter.
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
   aber darauf auslegen.
 
@@ -66,7 +68,7 @@ Startsatz für einen neuen Chat:
    nur Finanzen und Einkauf) einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen.
    Einheitliches Design, später gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
    Das Kochbuch steht seit Aufgabe 5 auf der Startseite (Abschnitt «Für den Alltag»).
-5. **Kochbuch-App** (erledigt: PR `simonbruder-hub/application_study#8`, App `kochbuch/`, siehe STATUS.md und
+5. **Kochbuch-App** (erledigt: PR `simonbruder-hub/apps#8`, App `kochbuch/`, siehe STATUS.md und
    `kochbuch/README.md`). Offen: auf dem Handy
    prüfen (ZIP aus der Kochbuch-CI laden, an Kasse unterwegs senden), Grundvorrat-Liste in `src/logic/einkauf.ts`
    nach Bedarf anpassen.

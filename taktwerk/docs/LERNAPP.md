@@ -1,7 +1,7 @@
 # Lernapp (Spin-off): Plan und Stand
 
 Eigenständige Lern-App neben der Pomodoro-App, Arbeitsname **Lernlabor**, Code in [`../../lernlabor/`](../../lernlabor/).
-Adresse: `https://simonbruder-hub.github.io/application_study/lernlabor/app/`.
+Adresse: `https://simonbruder-hub.github.io/apps/lernlabor/app/`.
 Taktwerk verlinkt sie in den Einstellungen (Karte «App») und im Stil Technik mit einem Knopf in den Pausen.
 
 ## Geklärt (Oktober 2026)

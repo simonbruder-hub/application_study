@@ -2,7 +2,7 @@ import { href } from '../router';
 import { SUBJECTS } from '../learn/subjects';
 
 /** Adresse von Taktwerk (Pomodoro): auf GitHub Pages relativ, sonst die veröffentlichte Adresse */
-export const TAKTWERK_URL = location.hostname.endsWith('github.io') ? '../../taktwerk/app/' : 'https://simonbruder-hub.github.io/application_study/taktwerk/app/';
+export const TAKTWERK_URL = location.hostname.endsWith('github.io') ? '../../taktwerk/app/' : 'https://simonbruder-hub.github.io/apps/taktwerk/app/';
 
 export function Home() {
   return (

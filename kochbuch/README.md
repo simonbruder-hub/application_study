@@ -4,7 +4,7 @@ Die Rezepte aus dem Kochbuch-Repo auf Handy und Laptop: suchen, nach Art, Ernäh
 filtern, Portionen umrechnen und die Zutaten auf einen Einkaufszettel setzen. Von dort gehen sie direkt in die
 Einkaufsliste von Kasse unterwegs oder als Text weiter.
 
-Adresse: `https://simonbruder-hub.github.io/application_study/kochbuch/app/`
+Adresse: `https://simonbruder-hub.github.io/apps/kochbuch/app/`
 
 ## Die Rezepte bleiben privat
 

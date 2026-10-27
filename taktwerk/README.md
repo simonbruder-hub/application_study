@@ -4,8 +4,8 @@ Pomodoro-Timer und Stechuhr für Lernen und Arbeit: Projekte, Aufgaben, Auswertu
 
 | | |
 |---|---|
-| Startseite | [simonbruder-hub.github.io/application_study/taktwerk/](https://simonbruder-hub.github.io/application_study/taktwerk/) |
-| App | [simonbruder-hub.github.io/application_study/taktwerk/app/](https://simonbruder-hub.github.io/application_study/taktwerk/app/) |
+| Startseite | [simonbruder-hub.github.io/apps/taktwerk/](https://simonbruder-hub.github.io/apps/taktwerk/) |
+| App | [simonbruder-hub.github.io/apps/taktwerk/app/](https://simonbruder-hub.github.io/apps/taktwerk/app/) |
 | Einzeldatei (Notfall, offline) | [`download/taktwerk.html`](download/taktwerk.html) |
 
 Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App weiter.

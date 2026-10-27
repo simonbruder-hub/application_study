@@ -9,7 +9,7 @@ import { DialogFrame, openDialog } from '../dialog';
 import { Icon } from '../Icon';
 import { toast } from '../toast';
 
-const SETUP_URL = 'https://github.com/simonbruder-hub/application_study/releases/latest/download/Taktwerk-Setup.exe';
+const SETUP_URL = 'https://github.com/simonbruder-hub/apps/releases/latest/download/Taktwerk-Setup.exe';
 
 function UpdateDialog({ close }: { close: () => void }) {
   const u = desktopUpdate.value;

@@ -3,7 +3,7 @@
 Für die Weiterarbeit in einem neuen Chat: Dieses Dokument, [`ARCHITEKTUR.md`](ARCHITEKTUR.md), [`../README.md`](../README.md)
 und die Aufgabenliste [`../../docs/AUFGABEN.md`](../../docs/AUFGABEN.md) lesen.
 Taktwerk (früher Pomodoro-Planer) liegt auf `main`. GitHub Pages veröffentlicht
-die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/`.
+die App unter `https://simonbruder-hub.github.io/apps/taktwerk/app/`.
 
 ## Fertig (Phase 0 + Phase 1)
 - Datenmodell, lokale Datenbank (Dexie), Repository, Sync-Engine mit Supabase, Live-Timer über Geräte und Tabs,
@@ -85,10 +85,15 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   «Kasse unterwegs» (gleiche Website, IndexedDB `kasse-unterwegs`, Schlüssel `listeNeu`, ohne Doppelte) oder teilt sie
   als Text. Startseite mit Abschnitt «Für den Alltag». Tests: Vitest und Playwright mit erfundenen Rezepten, die das
   echte Skript erzeugt hat; CI-Job `kochbuch`, Pages baut `/kochbuch/app/`.
+- **Repo heisst `apps`** (bis 27.10.2026 `application_study`): alle Adressen unter `https://simonbruder-hub.github.io/apps/`.
+  GitHub leitet die alte Website-Adresse nicht weiter. Die Daten im Browser bleiben (gleiche Origin
+  `simonbruder-hub.github.io`), installierte Web-Apps einmal von der neuen Adresse neu installieren. In Supabase
+  Site URL und Redirect URLs auf `/apps/` umstellen (`../supabase/README.md`, Abschnitt 4). Die Desktop-App 1.1.0 findet
+  Updates weiter, weil GitHub Repo- und Release-Adressen umleitet; die neue Adresse steckt ab dem nächsten Release drin.
 
 ## Offen
 
-1. **Name und Domain:** «Taktwerk» ist schon vergeben (auch als Firma). Neuen Namen wählen, prüfen (nic.ch, swissreg.ch),
+1. **Name und Domain:** Das Repo heisst schon `apps`. «Taktwerk» ist vergeben (auch als Firma). Neuen Namen wählen, prüfen (nic.ch, swissreg.ch),
    dann umbenennen (Texte, Manifest, Startseite, Desktop), Pages auf `/` und `/app/` umbauen, Custom Domain und DNS,
    Supabase Site-URL/Redirects anpassen. Die Desktop-App ist davon unabhängig (eingebaut); nur die Adresse für Updates
    (`plugins.updater.endpoints` in `desktop/src-tauri/tauri.conf.json`) zeigt auf GitHub Releases. Neue Adresse = neuer
