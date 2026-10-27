@@ -4,6 +4,7 @@
  * Medien-Steuerung (Android-Benachrichtigung / Sperrbildschirm, hält die App im Hintergrund aktiv).
  */
 
+import { signal } from '@preact/signals';
 import { prefs } from '../prefs';
 import { playSound, type SoundId } from './sounds';
 
@@ -12,19 +13,49 @@ let scheduled: { at: number; nodes: OscillatorNode[] } | null = null;
 
 export type ChimeKind = 'focusEnd' | 'shortEnd' | 'longEnd' | 'test';
 
-/** Muss in einer Nutzeraktion (Klick, Taste) aufgerufen werden, sonst blockiert der Browser den Ton. */
+/** Läuft Web Audio? Ohne Klick oder Taste seit dem Laden sperren die meisten Browser den Ton. */
+export const audioReady = signal(false);
+const readyListeners = new Set<() => void>();
+
+/** Rückruf, sobald Web Audio läuft (Ton für die laufende Phase nachplanen) */
+export function onAudioReady(fn: () => void): () => void {
+  readyListeners.add(fn);
+  return () => { readyListeners.delete(fn); };
+}
+
+function updateReady(): void {
+  const ready = audio?.state === 'running';
+  if (ready === audioReady.value) return;
+  audioReady.value = ready;
+  if (ready) readyListeners.forEach((fn) => fn());
+}
+
+/** Wirkt sicher nur in einer Nutzeraktion (Klick, Taste); ohne Sperre (Desktop-App) auch sonst. */
 export function ensureAudio(): AudioContext | null {
   try {
     if (!audio) {
       const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!Ctx) return null;
       audio = new Ctx();
+      audio.onstatechange = updateReady;
     }
-    if (audio.state === 'suspended') void audio.resume();
+    if (audio.state !== 'running') void audio.resume().then(updateReady, () => undefined);
   } catch {
     audio = null;
   }
+  updateReady();
   return audio;
+}
+
+/**
+ * Ton freischalten: gleich beim Start versuchen (klappt, wo der Browser es erlaubt) und danach bei
+ * jedem Klick oder Tastendruck im Fenster, auch im schwebenden Fenster. Wer nach dem Neuladen nur
+ * irgendwo klickt, hat damit wieder Ton.
+ */
+export function armAudio(target: Window = window): void {
+  const unlock = () => { if (audio?.state !== 'running') ensureAudio(); };
+  for (const type of ['pointerdown', 'pointerup', 'keydown'] as const) target.addEventListener(type, unlock, { capture: true });
+  if (target === window) ensureAudio();
 }
 
 /** Klang je Ereignis aus den Geräte-Einstellungen; «test» spielt einen bestimmten Klang zur Vorschau */
@@ -77,7 +108,7 @@ export function notify(title: string, body: string): void {
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     // renotify: gleiche Kennung ersetzt die alte Meldung, soll aber trotzdem wieder klingeln/vibrieren
-    const opts = { body, tag: 'pomodoro', icon: './icon-192.png', renotify: true, vibrate: [200, 100, 200] } as NotificationOptions;
+    const opts = { body, tag: 'pomodoro', icon: './icon-192.png', renotify: true, silent: false, vibrate: [200, 100, 200] } as NotificationOptions;
     if (navigator.serviceWorker?.controller) {
       void navigator.serviceWorker.ready.then((reg) => reg.showNotification(title, opts)).catch(() => undefined);
     } else new Notification(title, opts);

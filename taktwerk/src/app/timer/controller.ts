@@ -10,7 +10,8 @@ import {
   adjustPlannedSeconds, elapsedMs, finishesAt, isFinished, pauseTimer, remainingMs, resumeTimer,
   sessionToTimeLog, startTimer, stopTimer,
 } from '../../domain/timerMath';
-import { cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, scheduleChime, type ChimeKind } from './signals';
+import { onAlarm, setAlarm } from './alarm';
+import { audioReady, cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, onAudioReady, scheduleChime, type ChimeKind } from './signals';
 import type { DevicePrefs } from '../prefs';
 
 /** Kürzeste Restzeit beim Anpassen (Zeiger ziehen, −5): einige Sekunden, damit die Phase nicht sofort endet */
@@ -56,6 +57,7 @@ export class TimerController {
   private ticker: ReturnType<typeof setInterval> | null = null;
   private completing = false;
   private unsub: (() => void) | null = null;
+  private unsubAudio: (() => void) | null = null;
 
   constructor(private readonly o: TimerControllerOptions) {}
 
@@ -72,6 +74,9 @@ export class TimerController {
     if (this.ticker) return;
     this.ticker = setInterval(() => void this.check(), 250);
     this.unsub = this.o.timerSync.subscribe(() => this.applySideEffects());
+    // Ton erst nach dem ersten Klick frei (z. B. nach dem Neuladen): dann für die laufende Phase nachplanen
+    this.unsubAudio = onAudioReady(() => this.applySideEffects());
+    onAlarm(() => void this.check());
     this.applySideEffects();
     document.addEventListener('visibilitychange', this.onVisible);
   }
@@ -80,6 +85,9 @@ export class TimerController {
     if (this.ticker) clearInterval(this.ticker);
     this.ticker = null;
     this.unsub?.();
+    this.unsubAudio?.();
+    onAlarm(null);
+    setAlarm(null);
     document.removeEventListener('visibilitychange', this.onVisible);
   }
 
@@ -263,13 +271,15 @@ export class TimerController {
       const end = finishesAt(s) ?? now;
       const rang = chimeWasScheduledFor(end);
       const p = this.o.getPrefs();
-      if (!rang && p.sound) chimeNow(chimeFor(s.phase), p.volume);
+      // gesperrter Ton würde sonst erst beim nächsten Klick verspätet nachklingen
+      if (!rang && p.sound && audioReady.value) chimeNow(chimeFor(s.phase), p.volume);
       const seconds = s.phase === 'focus' ? await this.writeLog(s, end) : null;
       const next = await this.advance(s, end, true);
       const message = s.phase === 'focus'
         ? `${seconds ? 'Pomodoro geschafft' : 'Fokus beendet'} – ${PHASE_LABEL[next]} (${Math.round(this.phaseSeconds(next) / 60)} min)`
         : 'Pause vorbei – weiter geht’s mit Fokus';
-      if (p.notify && document.hidden) notify(s.phase === 'focus' ? 'Fokus beendet' : 'Pause vorbei', message);
+      // auch wenn das Fenster offen, aber hinter einem anderen Programm liegt
+      if (p.notify && (document.hidden || !document.hasFocus())) notify(s.phase === 'focus' ? 'Fokus beendet' : 'Pause vorbei', message);
       this.o.onPhaseComplete?.({ phase: s.phase, next, loggedSeconds: seconds, message });
     } finally {
       this.completing = false;
@@ -320,13 +330,15 @@ export class TimerController {
     if (task && task.status === 'todo') await this.o.repo.update('tasks', id, { status: 'in_progress' });
   }
 
-  /** Ton planen, Wake Lock halten – bei jeder Zustandsänderung */
+  /** Ton planen, Wecker stellen, Wake Lock halten – bei jeder Zustandsänderung */
   private applySideEffects(): void {
     const s = this.state;
     const p = this.o.getPrefs();
     const running = s.status === 'running';
-    if (running && s.kind === 'pomodoro' && p.sound) {
-      scheduleChime(finishesAt(s), chimeFor(s.phase), p.volume);
+    const end = running && s.kind === 'pomodoro' ? finishesAt(s) : null;
+    setAlarm(end === null ? null : end - this.now() + 50);
+    if (end !== null && p.sound) {
+      scheduleChime(end, chimeFor(s.phase), p.volume);
     } else cancelChime();
     void holdWakeLock(running && p.wakeLock);
   }

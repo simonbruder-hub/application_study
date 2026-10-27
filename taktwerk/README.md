@@ -73,6 +73,13 @@ Die frühere Adresse `…/pomodoro-planer/v2/` leitet automatisch auf die App we
 
 Auf dem Handy ist der **«Hintergrund-Modus»** automatisch eingeschaltet: Der Timer bleibt aktiv, wenn die App minimiert oder der Bildschirm gesperrt ist, klingelt pünktlich und lässt sich über die Benachrichtigung starten und pausieren. Beim ersten Start des Timers fragt die App einmal, ob sie Benachrichtigungen senden darf: **Zulassen** wählen, sonst meldet sie sich bei gesperrtem Handy nicht.
 
+**Ton am Laptop (einmal einrichten):** Benachrichtigungen erlauben (fragt die App beim ersten Start des Timers;
+in Windows unter *Einstellungen → System → Benachrichtigungen* für Chrome, Firefox bzw. Taktwerk eingeschaltet lassen
+und «Nicht stören» aus). Chrome: unter *Einstellungen → Leistung → Diese Websites immer aktiv lassen* die Adresse der
+App eintragen. Firefox: Schloss in der Adressleiste → *Automatische Wiedergabe* auf «Audio und Video erlauben». Nach dem
+Neuladen genügt sonst ein Klick irgendwo in die App, bis dahin zeigt sie «Ton aktivieren». Die Desktop-App spielt den
+Ton ab Version 1.0.2 auch ohne Klick und im Hintergrund.
+
 **Einzeldatei:** [`download/taktwerk.html`](download/taktwerk.html) herunterladen (auf GitHub «Download raw file») und per Doppelklick öffnen. Läuft ohne Internet; die Daten liegen dann im Browser für genau diese Datei.
 
 ## Sync einrichten (optional, einmalig)

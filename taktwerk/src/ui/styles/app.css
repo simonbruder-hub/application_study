@@ -646,6 +646,12 @@ ul.task-list.card { padding: 4px 12px; }
 }
 .toast.is-out { opacity: 0; transform: translateY(6px); }
 .toast-btn { border: 0; background: transparent; color: inherit; font-weight: 700; font-size: 14px; text-decoration: underline; padding: 6px 8px; white-space: nowrap; }
+.sound-hint {
+  position: fixed; z-index: 121; left: 50%; transform: translateX(-50%); top: calc(12px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; width: max-content; max-width: calc(100vw - 32px);
+  background: var(--ink); color: var(--surface); padding: 8px 8px 8px 16px; border-radius: 12px; box-shadow: var(--shadow); font-size: 14px;
+}
+.sound-hint .toast-btn { display: inline-flex; align-items: center; gap: 6px; }
 
 /* ---------- Mini-Ansicht & schwebendes Fenster ---------- */
 body.is-mini .app { display: none; }

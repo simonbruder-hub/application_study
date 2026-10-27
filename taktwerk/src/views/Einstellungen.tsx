@@ -298,6 +298,12 @@ function SyncCard() {
             <button type="submit" class="btn btn-primary" disabled={busy || code.length < 6}>Anmelden</button>
             <button type="button" class="btn btn-ghost" onClick={() => setStep('email')}>Andere E-Mail</button>
           </div>
+          <p class="small muted">
+            Steht in der Mail nur ein Link und kein Code? Dann verschickt Supabase noch die Standardvorlage. Einmalig
+            in Supabase unter <b>Authentication → Emails → Templates</b> beide Vorlagen auf den Code umstellen
+            (<a href="https://github.com/simonbruder-hub/application_study/blob/main/taktwerk/supabase/README.md#32-e-mail-vorlagen-auf-code-umstellen" target="_blank" rel="noopener">Anleitung</a>),
+            danach neuen Code anfordern.
+          </p>
         </form>
       )}
       <p style={{ marginTop: '14px' }}>
