@@ -5,6 +5,7 @@
  */
 
 import { signal } from '@preact/signals';
+import { isDesktop } from '../desktop';
 import { prefs } from '../prefs';
 import { playSound, type SoundId } from './sounds';
 
@@ -95,6 +96,8 @@ export function chimeNow(kind: ChimeKind, volume: number, sound?: SoundId): void
 /* ---------- Benachrichtigung ---------- */
 
 export async function requestNotifyPermission(): Promise<NotificationPermission | 'unsupported'> {
+  // Desktop-App: Benachrichtigungen kommen vom System (Rust), keine Rückfrage nötig
+  if (isDesktop()) return 'granted';
   try {
     if (!('Notification' in window)) return 'unsupported';
     if (Notification.permission === 'granted') return 'granted';

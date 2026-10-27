@@ -29,7 +29,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   werden beim Sync übersprungen und in den Einstellungen gemeldet).
 - 13 Stile mit Szenen je Phase, Fortschritts-Begleiter, Einblendungen und Feiern; Natur heisst jetzt Forest
   (ein Baum pro Pomodoro, jedes Mal eine andere Art). Neu: Meer, Flora, Sci-Fi, Elemente, Zug.
-- Desktop-App (Tauri) lädt die Online-Version und aktualisiert sich selbst.
+- Desktop-App (Tauri) bis 1.0.x: lädt die Online-Version (abgelöst durch 1.1, siehe unten).
 - Zeiger ziehen auf die Sekunde genau (min. 5 s), Umschalt+Pfeil ±10 s; `planned_seconds` immer ganzzahlig.
 - Flora blumiger (Blütenkranz, Kletterrosen, volle Wiese), Zug mit fahrendem Zug, Bahnhof (kurze Pause) und
   Zürich HB (lange Pause), Sci-Fi mit Raumgefecht und dem Pausenspiel Space Rider (`src/ui/game/`).
@@ -59,6 +59,16 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   1.0.2: WebView2 darf Ton ohne Klick abspielen und wird im Hintergrund nicht gebremst (`additionalBrowserArgs`).
   Tests: `signals.test.ts`, `alarm.test.ts`, `tests/e2e/sound.spec.ts`.
 - Anmeldung: Hinweis im Code-Schritt, falls die Mail nur einen Link enthält (Supabase-Vorlage umstellen).
+- **Desktop-App 1.1 als Hauptapp am Laptop** (Details in [`../desktop/README.md`](../desktop/README.md)): App fest eingebaut
+  (`npm run build:desktop`, läuft offline), Updates über den Tauri-Updater (Hinweis «Update» in der Kopfzeile, Signatur
+  mit Schlüssel aus den GitHub-Secrets, `latest.json` im Release). Widget als eigenes Fenster ohne Rahmen, immer im
+  Vordergrund, Höhe folgt dem Inhalt, frei verkleinerbar (unter 200 px nur Uhr und Start), merkt sich Ort und Breite,
+  startet wieder so, wie man die App verlassen hat; das Hauptfenster ist solange ausgeblendet (`src/ui/components/Widget.tsx`,
+  `desktop/src-tauri/src/windows.rs`). Ton und Benachrichtigung am Phasenende plant Rust (`alarm.rs`), auch bei
+  ausgeblendetem Fenster. Daten der bisherigen Desktop-App übernimmt sie beim ersten Start (`handover.rs`, `handover.js`).
+  Bild-im-Bild in Chrome öffnet in der Grösse des Inhalts und merkt sich die Breite. Die ältere Desktop-App zeigt
+  einmal einen Hinweis auf die neue Version. Empfehlungen zu Code-Signing, Android und iPhone in
+  [`PLATTFORMEN.md`](PLATTFORMEN.md). Tests: `src/app/desktop.test.ts`, `tests/e2e/desktop.spec.ts` (Projekt `desktop-app`).
 - Baustelle: Turm unter der Uhr wächst mit jedem Pomodoro des aktuellen Bereichs (Lernen oder Arbeit) bis ins
   Weltall, Abschnitte in `src/ui/components/tower.ts` (Wolken 6, Flughöhe 12, Weltall 18, Mond 24, Mars 30,
   Meteoriten 36, Jupiter 42, Saturn 48, UFO 54); nach 60 Stockwerken beginnt ein neuer Turm.
@@ -67,7 +77,9 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 
 1. **Name und Domain:** «Taktwerk» ist schon vergeben (auch als Firma). Neuen Namen wählen, prüfen (nic.ch, swissreg.ch),
    dann umbenennen (Texte, Manifest, Startseite, Desktop), Pages auf `/` und `/app/` umbauen, Custom Domain und DNS,
-   Supabase Site-URL/Redirects und `desktop/loader/index.html` anpassen. Neue Adresse = neuer Browser-Speicher, Daten kommen über Sync zurück.
+   Supabase Site-URL/Redirects anpassen. Die Desktop-App ist davon unabhängig (eingebaut); nur die Adresse für Updates
+   (`plugins.updater.endpoints` in `desktop/src-tauri/tauri.conf.json`) zeigt auf GitHub Releases. Neue Adresse = neuer
+   Browser-Speicher, Daten kommen über Sync zurück.
 2. Technik ausbauen: Cursor auch in Y-Richtung (Umschalter X/Y, Anzeige ΔU), Frequenz, Amplitude und Offset der
    Kurve einstellbar, Freeze-Taste zum Ablesen.
 3. **Lernlabor ausbauen** (nächste Schritte in `docs/LERNAPP.md`): Diode, Transistor, OP; mehr Aufgaben;
@@ -77,3 +89,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 6. Bekannt: der E2E-Test «läuft nach dem Neuladen an der richtigen Stelle weiter» schlägt lokal im Profil «mobile» fehl
    (auch ohne die neuen Änderungen), in CI prüfen.
 7. Dschungelschlange optional ebenfalls in 3D.
+8. Desktop-App 1.1 veröffentlichen: Secrets `TAURI_SIGNING_PRIVATE_KEY` und `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` eintragen,
+   Installer aus dem PR (Artefakt `taktwerk-windows`) am Laptop testen, nach dem Merge Release `1.1.0` starten.
+9. Android als App mit Tauri 2 (geplante Benachrichtigung zum Phasenende), iPhone: Web Push über Supabase
+   (siehe [`PLATTFORMEN.md`](PLATTFORMEN.md)).

@@ -672,9 +672,24 @@ body.is-mini .app { display: none; }
 .mini-ctrl { display: flex; justify-content: center; align-items: center; gap: 10px; }
 .btn-start-sm { height: 46px; min-width: 132px; font-size: 16px; padding: 0 22px; }
 .mini-hint { margin: 0; text-align: center; font-size: 11px; color: var(--muted); }
-body.pip { margin: 0; min-height: 100vh; overflow: hidden; }
-body.pip #pipRoot { min-height: 100vh; display: grid; place-items: center; padding: 6px; }
-body.pip .mini { width: 100%; border: 0; box-shadow: none; background: transparent; padding: 4px 10px; }
+/* Widget (Desktop-App) und Bild-im-Bild (Chrome): Inhalt in fester Grundbreite, per zoom auf die
+   Fensterbreite skaliert (Widget.tsx). Die Höhe ergibt sich aus dem Inhalt, nie aus dem Fenster. */
+body.pip, body.widget-doc { margin: 0; min-height: 0; overflow: hidden; background: var(--surface); }
+body.widget-doc { user-select: none; -webkit-user-select: none; cursor: default; }
+body.pip #pipRoot { min-height: 100vh; display: grid; align-items: center; }
+.widget { width: 100%; }
+.widget .mini { width: 100%; border: 0; border-radius: 0; box-shadow: none; background: transparent; padding: 8px 12px 14px; gap: 6px; }
+.widget .mini-hint { display: none; }
+.widget .mini-ctrl { gap: 6px; }
+.widget .mini-ctrl .btn-start-sm { height: 40px; min-width: 112px; padding: 0 18px; font-size: 15px; }
+.mini.is-compact { padding: 6px 4px 6px 10px; gap: 5px; }
+.mini-row { display: flex; align-items: center; gap: 2px; }
+.mini.is-compact .mini-phase i { width: 8px; height: 8px; }
+.mini.is-compact .mini-clock { flex: 1; min-width: 0; overflow: hidden; font-size: 25px; text-align: left; padding-left: 4px; }
+.mini.is-compact .icon-btn.sm { width: 28px; height: 28px; }
+.mini.is-compact .mini-bar { height: 4px; margin-right: 6px; }
+.mini-toggle { color: var(--phase); }
+[data-skin="anime"] .mini.is-compact .mini-clock { font-size: 24px; }
 
 /* ---------- Anime-Stil: Extras ---------- */
 [data-skin="anime"] .view-head h1, [data-skin="anime"] .brand, [data-skin="anime"] .wk-date, [data-skin="anime"] .tile-value, [data-skin="anime"] .big-num { font-weight: 400; }

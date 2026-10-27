@@ -18,6 +18,8 @@ import { SKINS } from '../ui/skins';
 import { allTags, deleteTag, renameTag, setTagColor, tagColor } from '../app/tags';
 import { missingSchemaColumns } from '../sync/supabaseRemote';
 import { LERNLABOR_URL } from '../app/lernlabor';
+import { isDesktop } from '../app/desktop';
+import { DesktopInfo } from '../ui/components/DesktopUpdate';
 
 type NumKey = 'focus_minutes' | 'short_break_minutes' | 'long_break_minutes' | 'long_break_every' | 'daily_goal_minutes';
 
@@ -368,9 +370,12 @@ function AppCard() {
   return (
     <section class="card">
       <h2>App</h2>
+      <DesktopInfo />
       {install.available && <button type="button" class="btn btn-primary" onClick={() => void install.install()}><Icon name="download" />App installieren</button>}
-      <p class="small">Android: in Chrome im Menü ⋮ «App installieren». Laptop: Installieren-Symbol in der Adressleiste von Chrome oder Edge.</p>
-      <p class="small"><a href="../taktwerk.html" download>Einzeldatei herunterladen</a> (Notfall-Variante, offline per Doppelklick) · <a href="../">Startseite</a></p>
+      {!isDesktop() && <>
+        <p class="small">Android: in Chrome im Menü ⋮ «App installieren». Laptop: Installieren-Symbol in der Adressleiste von Chrome oder Edge.</p>
+        <p class="small"><a href="../taktwerk.html" download>Einzeldatei herunterladen</a> (Notfall-Variante, offline per Doppelklick) · <a href="../">Startseite</a></p>
+      </>}
       <p class="small"><a href={LERNLABOR_URL} target="_blank" rel="noopener">Lernlabor öffnen</a>: Elektrotechnik mit Schaltungsbaukasten (R, L, C, Quellen, Schalter), Oszilloskop, Theorie und Aufgaben in Stufen.</p>
     </section>
   );
@@ -378,8 +383,8 @@ function AppCard() {
 
 function KeysCard() {
   const keys: [string, string][] = [
-    ['Leertaste', 'Start / Pause'], ['F', 'Fertig & speichern'], ['S', 'Pause überspringen'], ['M', 'Minimieren'],
-    ['W', 'Lernen ↔ Arbeit'], ['T', 'Tag ↔ Nacht'], ['N', 'Neue Aufgabe'], ['1–5', 'Ansichten'], ['Esc', 'Mini-Ansicht schliessen'],
+    ['Leertaste', 'Start / Pause'], ['F', 'Fertig & speichern'], ['S', 'Pause überspringen'], ['M', isDesktop() ? 'Widget' : 'Minimieren'],
+    ['W', 'Lernen ↔ Arbeit'], ['T', 'Tag ↔ Nacht'], ['N', 'Neue Aufgabe'], ['1–5', 'Ansichten'], ['Esc', isDesktop() ? 'Widget schliessen' : 'Mini-Ansicht schliessen'],
   ];
   return (
     <section class="card">

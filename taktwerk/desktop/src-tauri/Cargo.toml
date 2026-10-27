@@ -1,6 +1,6 @@
 [package]
 name = "taktwerk"
-version = "1.0.2"
+version = "1.1.0"
 description = "Taktwerk: Pomodoro-Timer und Stechuhr"
 edition = "2021"
 
@@ -9,6 +9,15 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+tauri-plugin-updater = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-window-state = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-opener = "2"
+rodio = { version = "0.20", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
 
 [profile.release]
 codegen-units = 1

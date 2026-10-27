@@ -3,6 +3,7 @@
  *   npm run dev          Entwicklungsserver (http://localhost:5173)
  *   npm run build        PWA nach dist/app (GitHub Pages: /taktwerk/app/)
  *   npm run build:single Eine einzige HTML-Datei ohne Service Worker (zum Herunterladen)
+ *   npm run build:desktop App für die Desktop-App (Tauri) nach dist/desktop, ohne Service Worker
  */
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
@@ -15,13 +16,14 @@ const out = (dir: string) => fileURLToPath(new URL(`./dist/${dir}`, import.meta.
 
 export default defineConfig(({ mode }) => {
   const single = mode === 'single';
+  const desktop = mode === 'desktop';
   return {
     root,
     base: './',
-    define: { __PP_BUILD__: JSON.stringify(single ? 'standalone' : 'web') },
+    define: { __PP_BUILD__: JSON.stringify(single ? 'standalone' : desktop ? 'desktop' : 'web') },
     plugins: [
       preact(),
-      single
+      desktop ? null : single
         ? viteSingleFile({ removeViteModuleLoader: true })
         : VitePWA({
           registerType: 'autoUpdate',
@@ -65,7 +67,7 @@ export default defineConfig(({ mode }) => {
         }),
     ],
     build: {
-      outDir: out(single ? 'single' : 'app'),
+      outDir: out(single ? 'single' : desktop ? 'desktop' : 'app'),
       emptyOutDir: true,
       target: 'es2022',
       chunkSizeWarningLimit: 1200,

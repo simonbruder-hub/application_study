@@ -31,10 +31,11 @@ jobs:
         run: npm test
       - name: Datenbank-Tests (PostgreSQL 16 des Runners)
         run: npm run db:test
-      - name: Build (PWA und Einzeldatei)
+      - name: Build (PWA, Einzeldatei und Desktop)
         run: |
           npm run build
           npm run build:single
+          npm run build:desktop
       - name: Browser installieren
         run: npx playwright install --with-deps chromium
       - name: End-to-End-Tests

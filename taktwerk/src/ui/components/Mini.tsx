@@ -1,6 +1,7 @@
 /**
- * Mini-Player: im Bild-im-Bild-Fenster (Desktop), als Mini-Ansicht in der App und als angedockte
- * Leiste über der Navigation (Handy). Alle zeigen denselben Zustand und dieselben Aktionen.
+ * Mini-Player: im Widget der Desktop-App, im Bild-im-Bild-Fenster (Chrome), als Mini-Ansicht in der
+ * App und als angedockte Leiste über der Navigation (Handy). Alle zeigen denselben Zustand und
+ * dieselben Aktionen. Kompakt (schmales Widget): nur Uhr, Start/Pause und Fortschritt in einer Zeile.
  */
 import { setTaskDone } from '../../app/actions';
 import { prefs } from '../../app/prefs';
@@ -55,10 +56,27 @@ function SecondaryActions({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function MiniPlayer({ onExpand }: { onExpand: () => void }) {
+export function MiniPlayer({ onExpand, compact = false }: { onExpand: () => void; compact?: boolean }) {
   const v = readTimer();
   const anime = prefs.value.skin === 'anime';
   const progress = v.kind === 'pomodoro' ? 1 - v.frac : v.frac;
+  if (compact) {
+    return (
+      <div class="mini is-compact" data-phase={PHASE_ATTR[v.phase]} title={`${v.phaseLabel}${v.paused ? ' · pausiert' : ''} · ${targetTitle(timerState.value)}`}>
+        <div class="mini-row">
+          <span class="mini-phase" aria-label={v.phaseLabel}><i /></span>
+          <div class="mini-clock mono" role="timer">{v.clock}</div>
+          <button type="button" class="icon-btn sm mini-toggle" aria-label={v.running ? 'Pause' : v.active ? 'Weiter' : 'Start'} onClick={() => void app().timer.toggle()}>
+            <Icon name={v.running ? 'pause' : 'play'} />
+          </button>
+          <button type="button" class="icon-btn sm" title="Grosse Ansicht (Esc)" aria-label="Grosse Ansicht" onClick={onExpand}>
+            <Icon name="expand" />
+          </button>
+        </div>
+        <div class="mini-bar"><i style={{ width: `${(progress * 100).toFixed(1)}%` }} /></div>
+      </div>
+    );
+  }
   return (
     <div class="mini" data-phase={PHASE_ATTR[v.phase]}>
       <div class="mini-head">
