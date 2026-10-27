@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allowed, countSolutions, findHint, generate, LEVELS, scoreFor } from './sudoku';
+import { allowed, countSolutions, findHint, generate, LEVELS, scoreFor } from './sudokuLogic';
 import { seeded } from './types';
 
 describe('Sudoku', () => {

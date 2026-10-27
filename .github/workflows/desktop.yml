@@ -59,7 +59,10 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://xlbddpaxwjgseqxaicuf.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_HawYMwgitp0Jo9CmA31oIA_tA3Hd-ik' }}
         run: |
-          npx vite build --mode single
+          # Fehler als Meldung (Annotation) ausgeben, damit sie ohne Protokoll-Download lesbar sind
+          trap 'echo "::error title=Einzeldatei::$(tail -n 40 single-build.log 2>/dev/null | tr -d "\r" | sed "s/%/%25/g" | sed ":a;N;\$!ba;s/\n/%0A/g")"' ERR
+          set -o pipefail
+          npx vite build --mode single 2>&1 | tee single-build.log
           mkdir -p desktop/dist-desktop
           cp desktop/loader/index.html desktop/dist-desktop/index.html
           cp dist/single/index.html desktop/dist-desktop/offline.html
