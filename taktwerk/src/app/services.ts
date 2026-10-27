@@ -13,7 +13,7 @@ import type { RemoteStore } from '../sync/remote';
 import { loadBackendConfig, prefs, setPrefs, type BackendConfig } from './prefs';
 import { settings, startClock, syncStatus, timerState, watchDatabase } from './store';
 import { TimerController, type PhaseCompleteInfo } from './timer/controller';
-import { requestNotifyPermission } from './timer/signals';
+import { armAudio, requestNotifyPermission } from './timer/signals';
 
 /**
  * Beim ersten Timer-Start einmalig nach Benachrichtigungen fragen: Ohne sie meldet sich die App
@@ -99,6 +99,7 @@ export async function bootstrap(): Promise<AppServices> {
   void sync.start();
   void timerSync.start();
   timer.start();
+  armAudio();
 
   current = { db, repo, sync, timerSync, timer, backend, supabase, remote, migration };
   return current;

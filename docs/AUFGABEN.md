@@ -1,0 +1,74 @@
+# Aufgaben und Entscheidungen (Übergabe zwischen Chats)
+
+Startsatz für einen neuen Chat:
+«Lies README.md, taktwerk/docs/STATUS.md und docs/AUFGABEN.md und mach Aufgabe N.»
+
+## Arbeitsweise
+
+- Deutsch, kein scharfes S, keine Gedankenstriche. Kurz und verständlich erklären (Elektrotechnik-Student,
+  kennt Python und LaTeX, wenig Webentwicklung).
+- Erst gezielte Fragen zu Unklarem, dann ein kurzer Plan, dann umsetzen.
+- Eigener Branch und PR, CI grün machen. Mergen erst nach OK (erst dann baut GitHub Pages neu).
+- Ein Chat pro Aufgabe. Sparsam mit Tokens: lokal nur die betroffenen Tests, die volle Prüfung macht die CI.
+  Am Ende `taktwerk/docs/STATUS.md` und diese Datei nachführen.
+
+## Geräte und Antworten (Oktober 2026)
+
+- Laptop mit Windows, Browser Firefox und Chrome. Am Laptop vor allem die **Desktop-App** (Tauri).
+- Handy: Android, daneben auch iPhone.
+- Die Desktop-App soll lokal ohne Internet laufen, Sync, sobald Netz da ist.
+- Anmeldung: Supabase schickt nur einen Link (Vorlage noch ohne `{{ .Token }}`), der Link endet auf einer
+  Seite mit Fehler 404 (Site-URL). Eigenes Supabase-Projekt ist eingerichtet.
+- Widget heute (Desktop-App): normales Fenster mit Rahmen, oben und unten zu viel Platz, viel zu gross,
+  lässt sich nur begrenzt verkleinern, muss jedes Mal von Hand angepasst werden.
+- Kochbuch: ein Teil liegt lokal als LaTeX und PDF. Overleaf Premium über die Hochschule (GitHub-Sync geht).
+- Kochbuch-App: nach Kategorien, aber auch nach Jahreszeit, Verträglichkeit usw. ausrichten. Zutaten an den
+  Einkauf der Haushaltsapp schicken, wenn umsetzbar.
+- Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
+  aber darauf auslegen.
+
+## Aufgaben
+
+1. **Ton am Laptop zuverlässig** (erledigt, siehe STATUS.md). Offen: auf dem Laptop prüfen, Desktop-App neu
+   installieren (Version 1.0.2).
+2. **Desktop-App als Hauptapp am Laptop** (frühere Aufgaben «Widget» und «richtige App»):
+   - App fest in die Desktop-App einbauen statt die Online-Version zu laden: läuft offline, eine Datenquelle.
+     Updates über den Tauri-Updater (Signierschlüssel als GitHub-Secret).
+   - Widget als eigenes Tauri-Fenster: ohne Rahmen, immer im Vordergrund, Grösse passt sich dem Inhalt an,
+     frei verkleinerbar, merkt sich Ort und Grösse, alle Stile, Steuerung und Ton, auch nach dem Neuladen.
+   - Ton und Benachrichtigung nativ über Tauri (unabhängig vom Webfenster).
+   - Browser: Bild-im-Bild in Chrome passend machen (`src/app/pip.tsx`, `src/ui/components/Mini.tsx`).
+     Firefox kennt kein Bild-im-Bild, dort bleibt die Mini-Ansicht.
+   - Installer und Code-Signing gegen die SmartScreen-Warnung prüfen. Android (TWA oder Capacitor) und
+     iPhone (PWA über Safari, Grenzen im Hintergrund) vergleichen und eine Lösung empfehlen.
+3. **Kochbuch nach LaTeX** (Repo `simonbruder-hub/Kochbuch_Altstetten`, privat):
+   - Feste Rezeptvorlage (Umgebung `rezept` mit Kategorie, Jahreszeit, Verträglichkeit, Zutaten, Schritten,
+     Geschichte, Geheimtipp), ein Gericht pro Datei, Overleaf über GitHub-Sync.
+   - Lokale LaTeX- und PDF-Teile ins Repo übernehmen.
+   - Python-Skript liest die Vorlage und erzeugt die Daten (JSON) für die App. Das Kochbuch bleibt die
+     einzige Quelle.
+4. **Website als App-Sammlung** (dieses Repo): Haushaltsapp (Repo `simonbruder-hub/haushaltskasse-app`,
+   nur Finanzen und Einkauf) einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen.
+   Einheitliches Design, später gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
+5. **Kochbuch-App**: liest die Daten aus Aufgabe 3, Filter nach Kategorie, Jahreszeit, Verträglichkeit,
+   Zutaten in den Einkauf der Haushaltsapp. Achtung: Die Website ist öffentlich, das Kochbuch-Repo privat.
+   Vor dem Veröffentlichen klären, was sichtbar sein darf.
+
+## Später
+
+- Kochbuch als Buch überarbeiten: mehr Charakter, eigene Geschichten, Geheimtipps, weniger KI-Ton.
+  Veröffentlichung, sobald es passt.
+- Pausenspiele ans Laptop-Format anpassen, alte Spiele verbessern, neue dazu.
+- Lernlabor ausbauen (`taktwerk/docs/LERNAPP.md`), Name und Domain (`taktwerk/docs/STATUS.md`, Punkt «Offen»).
+
+## Technische Hinweise
+
+- In `taktwerk/` und `lernlabor/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run build:single`,
+  `npm run test:e2e`.
+- Playwright in der Cloud: Chromium unter `/opt/pw-browsers/chromium`. Lokale Config mit
+  `launchOptions.executablePath`, nicht committen. Der Testbrowser ohne Bildschirm erlaubt Ton immer,
+  `tests/e2e/sound.spec.ts` bildet die Ton-Sperre darum nach.
+- 3D-Spiele laufen ohne Grafikkarte sehr langsam. E2E-Tests mit 3D unter Last einzeln wiederholen.
+- Der E2E-Test «läuft nach dem Neuladen an der richtigen Stelle weiter» (mobile) schlägt lokal fehl, in der CI
+  läuft er durch.
+- `pkill` immer in einem eigenen Bash-Aufruf.

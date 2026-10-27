@@ -11,6 +11,7 @@ import { GameLayer } from './ui/game/GameLayer';
 import { SpectacleLayer } from './ui/components/Spectacle';
 import { DialogHost } from './ui/dialog';
 import { InstallButton } from './ui/components/InstallDialog';
+import { SoundHint } from './ui/components/SoundHint';
 import { Icon, Logo } from './ui/Icon';
 import { isDark, toggleDayNight } from './ui/theme';
 import { ToastHost } from './ui/toast';
@@ -116,6 +117,7 @@ export function App() {
       <SpectacleLayer />
       <GameLayer />
       <DialogHost />
+      <SoundHint />
       <ToastHost />
     </>
   );

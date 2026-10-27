@@ -1,6 +1,6 @@
 [package]
 name = "taktwerk"
-version = "1.0.1"
+version = "1.0.2"
 description = "Taktwerk: Pomodoro-Timer und Stechuhr"
 edition = "2021"
 

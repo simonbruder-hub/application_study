@@ -7,6 +7,7 @@ import { effect, signal } from '@preact/signals';
 import { render } from 'preact';
 import { MiniPlayer } from '../ui/components/Mini';
 import { applyThemeTo } from '../ui/theme';
+import { armAudio } from './timer/signals';
 import { prefs, setPrefs } from './prefs';
 
 interface DocumentPictureInPicture {
@@ -64,6 +65,7 @@ export async function openPip(): Promise<boolean> {
     const disposeTheme = effect(() => applyThemeTo(doc));
     const onKey = (e: KeyboardEvent) => keyHandler?.(e);
     doc.addEventListener('keydown', onKey);
+    armAudio(w);
     render(<MiniPlayer onExpand={() => { closePip(); window.focus(); }} />, root);
     pipWin = w;
     pipOpen.value = true;

@@ -1,6 +1,7 @@
 # Stand & Übergabe
 
-Für die Weiterarbeit in einem neuen Chat: Dieses Dokument, [`ARCHITEKTUR.md`](ARCHITEKTUR.md) und [`../README.md`](../README.md) lesen.
+Für die Weiterarbeit in einem neuen Chat: Dieses Dokument, [`ARCHITEKTUR.md`](ARCHITEKTUR.md), [`../README.md`](../README.md)
+und die Aufgabenliste [`../../docs/AUFGABEN.md`](../../docs/AUFGABEN.md) lesen.
 Taktwerk (früher Pomodoro-Planer) liegt auf `main`. GitHub Pages veröffentlicht
 die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/`.
 
@@ -51,6 +52,13 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   Fläche, Bild wird in die Spielfläche kopiert; ohne WebGL zeichnen die Spiele eine 2D-Ansicht. Ohne Grafikkarte
   (Software-Renderer) kleinere Auflösung, keine Schatten und nur alle 0,4 s ein neues Bild.
 - Gemeinsame Startseite (`/index.html`) für Taktwerk und Lernlabor mit Vorschaubildern.
+- **Ton am Laptop zuverlässig** (`src/app/timer/signals.ts`, `alarm.ts`, `controller.ts`): Jeder Klick oder Tastendruck
+  in der App (auch im schwebenden Fenster) schaltet den Ton frei und plant ihn für die laufende Phase nach; solange er
+  gesperrt ist, zeigt `SoundHint` «Ton aktivieren». Ein Wecker im Web Worker löst das Phasenende auch in gedrosselten
+  Hintergrund-Tabs pünktlich aus. Benachrichtigung auch, wenn das Fenster hinter einem anderen Programm liegt. Desktop-App
+  1.0.2: WebView2 darf Ton ohne Klick abspielen und wird im Hintergrund nicht gebremst (`additionalBrowserArgs`).
+  Tests: `signals.test.ts`, `alarm.test.ts`, `tests/e2e/sound.spec.ts`.
+- Anmeldung: Hinweis im Code-Schritt, falls die Mail nur einen Link enthält (Supabase-Vorlage umstellen).
 - Baustelle: Turm unter der Uhr wächst mit jedem Pomodoro des aktuellen Bereichs (Lernen oder Arbeit) bis ins
   Weltall, Abschnitte in `src/ui/components/tower.ts` (Wolken 6, Flughöhe 12, Weltall 18, Mond 24, Mars 30,
   Meteoriten 36, Jupiter 42, Saturn 48, UFO 54); nach 60 Stockwerken beginnt ein neuer Turm.
