@@ -69,6 +69,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   Bild-im-Bild in Chrome öffnet in der Grösse des Inhalts und merkt sich die Breite. Die ältere Desktop-App zeigt
   einmal einen Hinweis auf die neue Version. Empfehlungen zu Code-Signing, Android und iPhone in
   [`PLATTFORMEN.md`](PLATTFORMEN.md). Tests: `src/app/desktop.test.ts`, `tests/e2e/desktop.spec.ts` (Projekt `desktop-app`).
+  Am Laptop getestet und am 27.10.2026 als Release 1.1.0 veröffentlicht; die Secrets für die Update-Signatur sind eingetragen.
 - Baustelle: Turm unter der Uhr wächst mit jedem Pomodoro des aktuellen Bereichs (Lernen oder Arbeit) bis ins
   Weltall, Abschnitte in `src/ui/components/tower.ts` (Wolken 6, Flughöhe 12, Weltall 18, Mond 24, Mars 30,
   Meteoriten 36, Jupiter 42, Saturn 48, UFO 54); nach 60 Stockwerken beginnt ein neuer Turm.
@@ -89,7 +90,7 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 6. Bekannt: der E2E-Test «läuft nach dem Neuladen an der richtigen Stelle weiter» schlägt lokal im Profil «mobile» fehl
    (auch ohne die neuen Änderungen), in CI prüfen.
 7. Dschungelschlange optional ebenfalls in 3D.
-8. Desktop-App 1.1 veröffentlichen: Secrets `TAURI_SIGNING_PRIVATE_KEY` und `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` eintragen,
-   Installer aus dem PR (Artefakt `taktwerk-windows`) am Laptop testen, nach dem Merge Release `1.1.0` starten.
+8. Updater beim nächsten Desktop-Release prüfen (z. B. 1.1.1): In der installierten 1.1.0 erscheint «Update» in der
+   Kopfzeile, die Installation startet die App neu.
 9. Android als App mit Tauri 2 (geplante Benachrichtigung zum Phasenende), iPhone: Web Push über Supabase
    (siehe [`PLATTFORMEN.md`](PLATTFORMEN.md)).

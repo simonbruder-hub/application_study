@@ -34,8 +34,8 @@ Startsatz für einen neuen Chat:
 
 1. **Ton am Laptop zuverlässig** (erledigt, siehe STATUS.md). Offen: auf dem Laptop prüfen, Desktop-App neu
    installieren (Version 1.0.2).
-2. **Desktop-App als Hauptapp am Laptop** (umgesetzt in Desktop-App 1.1, siehe STATUS.md und
-   `taktwerk/desktop/README.md`). Offen: Secrets eintragen, Installer aus dem PR testen, nach dem Merge Release 1.1.0.
+2. **Desktop-App als Hauptapp am Laptop** (erledigt: Desktop-App 1.1.0, am Laptop getestet und veröffentlicht, siehe
+   STATUS.md und `taktwerk/desktop/README.md`). Offen: Updater beim nächsten Release prüfen.
    Ursprünglicher Auftrag (frühere Aufgaben «Widget» und «richtige App»):
    - App fest in die Desktop-App einbauen statt die Online-Version zu laden: läuft offline, eine Datenquelle.
      Updates über den Tauri-Updater (Signierschlüssel als GitHub-Secret).
