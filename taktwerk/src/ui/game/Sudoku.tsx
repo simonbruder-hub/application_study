@@ -4,7 +4,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { BoardProps } from './games';
-import { allowed, box, col, findHint, generate, type Hint, type Level, LEVELS, PEERS, row, scoreFor } from './sudoku';
+import { allowed, box, col, findHint, generate, type Hint, type Level, LEVELS, PEERS, row, scoreFor } from './sudokuLogic';
 
 interface Saved {
   level: Level;
