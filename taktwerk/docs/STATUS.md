@@ -73,6 +73,10 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
 - Baustelle: Turm unter der Uhr wächst mit jedem Pomodoro des aktuellen Bereichs (Lernen oder Arbeit) bis ins
   Weltall, Abschnitte in `src/ui/components/tower.ts` (Wolken 6, Flughöhe 12, Weltall 18, Mond 24, Mars 30,
   Meteoriten 36, Jupiter 42, Saturn 48, UFO 54); nach 60 Stockwerken beginnt ein neuer Turm.
+- **Kochbuch nach LaTeX** (Aufgabe 3, eigenes Repo `simonbruder-hub/Kochbuch_Altstetten`, Details im README dort):
+  Overleaf-Projekt im Repo, ein Rezept pro Datei (`rezepte/<kapitel>/`), Vorlage mit Art, Ernährung, Geschichte und
+  Geheimtipp. `skripte/rezepte_json.py` prüft die Rezepte und erzeugt `daten/rezepte.json` für die Kochbuch-App
+  (Aufgabe 5); die CI baut PDF und JSON bei jedem PR.
 
 ## Offen
 

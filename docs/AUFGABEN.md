@@ -24,7 +24,11 @@ Startsatz für einen neuen Chat:
   Mit 1.1 gelöst (eigenes Widget-Fenster, siehe Aufgabe 2).
 - Entscheide zu Aufgabe 2: Daten der alten Desktop-App automatisch übernehmen; Signierschlüssel hat Claude erzeugt
   (geheimer Teil nur als GitHub-Secret); Hauptfenster wird beim Widget ausgeblendet; Widget kompakt.
-- Kochbuch: ein Teil liegt lokal als LaTeX und PDF. Overleaf Premium über die Hochschule (GitHub-Sync geht).
+- Kochbuch: Das Overleaf-Projekt liegt seit Aufgabe 3 im Repo `Kochbuch_Altstetten`. Overleaf Premium über die
+  Hochschule (GitHub-Sync geht).
+- Entscheide zu Aufgabe 3: Kategorie als zwei Felder, `art` (Frühstück, Salat, Suppe, Hauptgericht, Beilage, Dessert,
+  Gebäck, Getränk, Snack) und `ernaehrung` (vegetarisch, Fisch, Fleisch). Verträglichkeit ist die Magen-Ampel
+  (`gut`, `anpassung`, `meiden`). Zutaten bleiben Freitext, das Skript zerlegt sie für den Einkauf.
 - Kochbuch-App: nach Kategorien, aber auch nach Jahreszeit, Verträglichkeit usw. ausrichten. Zutaten an den
   Einkauf der Haushaltsapp schicken, wenn umsetzbar.
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
@@ -46,7 +50,10 @@ Startsatz für einen neuen Chat:
      Firefox kennt kein Bild-im-Bild, dort bleibt die Mini-Ansicht.
    - Installer und Code-Signing gegen die SmartScreen-Warnung prüfen. Android (TWA oder Capacitor) und
      iPhone (PWA über Safari, Grenzen im Hintergrund) vergleichen und eine Lösung empfehlen.
-3. **Kochbuch nach LaTeX** (Repo `simonbruder-hub/Kochbuch_Altstetten`, privat):
+3. **Kochbuch nach LaTeX** (erledigt: PR `simonbruder-hub/Kochbuch_Altstetten#1`, Aufbau und JSON-Format im README
+   dort). Offen: Overleaf mit dem Repo abgleichen (das bisherige Overleaf-Projekt nicht mehr nach GitHub pushen),
+   Einteilung nach Art und Ernährung durchsehen.
+   Ursprünglicher Auftrag (Repo `simonbruder-hub/Kochbuch_Altstetten`, privat):
    - Feste Rezeptvorlage (Umgebung `rezept` mit Kategorie, Jahreszeit, Verträglichkeit, Zutaten, Schritten,
      Geschichte, Geheimtipp), ein Gericht pro Datei, Overleaf über GitHub-Sync.
    - Lokale LaTeX- und PDF-Teile ins Repo übernehmen.
@@ -58,6 +65,9 @@ Startsatz für einen neuen Chat:
 5. **Kochbuch-App**: liest die Daten aus Aufgabe 3, Filter nach Kategorie, Jahreszeit, Verträglichkeit,
    Zutaten in den Einkauf der Haushaltsapp. Achtung: Die Website ist öffentlich, das Kochbuch-Repo privat.
    Vor dem Veröffentlichen klären, was sichtbar sein darf.
+   Daten: `python skripte/rezepte_json.py` im Kochbuch-Repo erzeugt `daten/rezepte.json` (nicht im Repo, die CI
+   lädt sie als Artefakt hoch). Filter über `art`, `ernaehrung`, `saison.jahreszeiten` und `magen.stufe`, für den
+   Einkauf `zutaten[].einkauf` (Menge, Einheit, Name).
 
 ## Später
 
@@ -66,7 +76,7 @@ Startsatz für einen neuen Chat:
   Open-Source-Lizenz für das Repository).
 
 - Kochbuch als Buch überarbeiten: mehr Charakter, eigene Geschichten, Geheimtipps, weniger KI-Ton.
-  Veröffentlichung, sobald es passt.
+  Veröffentlichung, sobald es passt. Die Vorlage hat dafür `\geschichte{}` und `\geheimtipp{}` (noch leer).
 - Pausenspiele ans Laptop-Format anpassen, alte Spiele verbessern, neue dazu.
 - Lernlabor ausbauen (`taktwerk/docs/LERNAPP.md`), Name und Domain (`taktwerk/docs/STATUS.md`, Punkt «Offen»).
 
@@ -85,3 +95,7 @@ Startsatz für einen neuen Chat:
   `taktwerk/desktop/src-tauri` mit `cargo check` (Linux braucht `libwebkit2gtk-4.1-dev libasound2-dev`). Die echte App
   läuft in der Cloud unter `Xvfb` (Steuerung mit `xdotool`, Bilder mit `import`), sehr langsam ohne Grafikkarte.
   Windows baut der Workflow «Desktop-App» bei jedem PR, der die Desktop-App betrifft.
+- Kochbuch-Repo: `python -m unittest discover -s skripte` und `python skripte/rezepte_json.py`. PDF lokal mit
+  `latexmk -pdf main.tex`; in der Cloud vorher TeX Live per apt installieren (`texlive-latex-extra texlive-pictures
+  texlive-fonts-recommended texlive-lang-german tex-gyre lmodern latexmk`). `gh pr create` geht in der Cloud nicht
+  (GraphQL gesperrt), PRs über `gh api repos/<owner>/<repo>/pulls`.
