@@ -31,6 +31,9 @@ Startsatz für einen neuen Chat:
   (`gut`, `anpassung`, `meiden`). Zutaten bleiben Freitext, das Skript zerlegt sie für den Einkauf.
 - Kochbuch-App: nach Kategorien, aber auch nach Jahreszeit, Verträglichkeit usw. ausrichten. Zutaten an den
   Einkauf der Haushaltsapp schicken, wenn umsetzbar.
+- Entscheide zu Aufgabe 5: Die Rezepte kommen nicht auf die öffentliche Website. Die App lädt `rezepte.json` oder das
+  ZIP aus der Kochbuch-CI einmal pro Gerät. Die neue Haushalt-App hat noch keine Einkaufsliste (M6), darum gehen die
+  Zutaten direkt in die Liste der alten «Kasse unterwegs» (gleiche Website, gleicher Speicher; vorher schliessen).
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
   aber darauf auslegen.
 
@@ -62,7 +65,12 @@ Startsatz für einen neuen Chat:
 4. **Website als App-Sammlung** (dieses Repo): Haushaltsapp (Repo `simonbruder-hub/haushaltskasse-app`,
    nur Finanzen und Einkauf) einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen.
    Einheitliches Design, später gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
-5. **Kochbuch-App**: liest die Daten aus Aufgabe 3, Filter nach Kategorie, Jahreszeit, Verträglichkeit,
+   Das Kochbuch steht seit Aufgabe 5 auf der Startseite (Abschnitt «Für den Alltag»).
+5. **Kochbuch-App** (erledigt: PR `simonbruder-hub/application_study#8`, App `kochbuch/`, siehe STATUS.md und
+   `kochbuch/README.md`). Offen: auf dem Handy
+   prüfen (ZIP aus der Kochbuch-CI laden, an Kasse unterwegs senden), Grundvorrat-Liste in `src/logic/einkauf.ts`
+   nach Bedarf anpassen.
+   Ursprünglicher Auftrag: Liest die Daten aus Aufgabe 3, Filter nach Kategorie, Jahreszeit, Verträglichkeit,
    Zutaten in den Einkauf der Haushaltsapp. Achtung: Die Website ist öffentlich, das Kochbuch-Repo privat.
    Vor dem Veröffentlichen klären, was sichtbar sein darf.
    Daten: `python skripte/rezepte_json.py` im Kochbuch-Repo erzeugt `daten/rezepte.json` (nicht im Repo, die CI
@@ -79,11 +87,13 @@ Startsatz für einen neuen Chat:
   Veröffentlichung, sobald es passt. Die Vorlage hat dafür `\geschichte{}` und `\geheimtipp{}` (noch leer).
 - Pausenspiele ans Laptop-Format anpassen, alte Spiele verbessern, neue dazu.
 - Lernlabor ausbauen (`taktwerk/docs/LERNAPP.md`), Name und Domain (`taktwerk/docs/STATUS.md`, Punkt «Offen»).
+- Kochbuch: Rezepte über gemeinsame Konten synchronisieren statt Import pro Gerät; Einkaufszettel an die neue
+  Haushalt-App, sobald sie eine Einkaufsliste hat (M6).
 
 ## Technische Hinweise
 
-- In `taktwerk/` und `lernlabor/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run build:single`,
-  `npm run test:e2e`.
+- In `taktwerk/`, `lernlabor/` und `kochbuch/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`;
+  in `taktwerk/` dazu `npm run build:single`.
 - Playwright in der Cloud: Chromium unter `/opt/pw-browsers/chromium`. Lokale Config mit
   `launchOptions.executablePath`, nicht committen. Der Testbrowser ohne Bildschirm erlaubt Ton immer,
   `tests/e2e/sound.spec.ts` bildet die Ton-Sperre darum nach.
