@@ -66,7 +66,8 @@ Startsatz für einen neuen Chat:
    nur Finanzen und Einkauf) einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen.
    Einheitliches Design, später gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
    Das Kochbuch steht seit Aufgabe 5 auf der Startseite (Abschnitt «Für den Alltag»).
-5. **Kochbuch-App** (erledigt: App `kochbuch/`, siehe STATUS.md und `kochbuch/README.md`). Offen: auf dem Handy
+5. **Kochbuch-App** (erledigt: PR `simonbruder-hub/application_study#8`, App `kochbuch/`, siehe STATUS.md und
+   `kochbuch/README.md`). Offen: auf dem Handy
    prüfen (ZIP aus der Kochbuch-CI laden, an Kasse unterwegs senden), Grundvorrat-Liste in `src/logic/einkauf.ts`
    nach Bedarf anpassen.
    Ursprünglicher Auftrag: Liest die Daten aus Aufgabe 3, Filter nach Kategorie, Jahreszeit, Verträglichkeit,
