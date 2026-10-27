@@ -19,8 +19,11 @@ Startsatz für einen neuen Chat:
 - Die Desktop-App soll lokal ohne Internet laufen, Sync, sobald Netz da ist.
 - Anmeldung: Supabase schickt nur einen Link (Vorlage noch ohne `{{ .Token }}`), der Link endet auf einer
   Seite mit Fehler 404 (Site-URL). Eigenes Supabase-Projekt ist eingerichtet.
-- Widget heute (Desktop-App): normales Fenster mit Rahmen, oben und unten zu viel Platz, viel zu gross,
-  lässt sich nur begrenzt verkleinern, muss jedes Mal von Hand angepasst werden.
+- Widget bis Desktop-App 1.0.3: normales Fenster mit Rahmen, oben und unten zu viel Platz, viel zu gross,
+  lässt sich nur begrenzt verkleinern (Mindestgrösse 360 × 560), muss jedes Mal von Hand angepasst werden.
+  Mit 1.1 gelöst (eigenes Widget-Fenster, siehe Aufgabe 2).
+- Entscheide zu Aufgabe 2: Daten der alten Desktop-App automatisch übernehmen; Signierschlüssel hat Claude erzeugt
+  (geheimer Teil nur als GitHub-Secret); Hauptfenster wird beim Widget ausgeblendet; Widget kompakt.
 - Kochbuch: ein Teil liegt lokal als LaTeX und PDF. Overleaf Premium über die Hochschule (GitHub-Sync geht).
 - Kochbuch-App: nach Kategorien, aber auch nach Jahreszeit, Verträglichkeit usw. ausrichten. Zutaten an den
   Einkauf der Haushaltsapp schicken, wenn umsetzbar.
@@ -31,7 +34,9 @@ Startsatz für einen neuen Chat:
 
 1. **Ton am Laptop zuverlässig** (erledigt, siehe STATUS.md). Offen: auf dem Laptop prüfen, Desktop-App neu
    installieren (Version 1.0.2).
-2. **Desktop-App als Hauptapp am Laptop** (frühere Aufgaben «Widget» und «richtige App»):
+2. **Desktop-App als Hauptapp am Laptop** (umgesetzt in Desktop-App 1.1, siehe STATUS.md und
+   `taktwerk/desktop/README.md`). Offen: Secrets eintragen, Installer aus dem PR testen, nach dem Merge Release 1.1.0.
+   Ursprünglicher Auftrag (frühere Aufgaben «Widget» und «richtige App»):
    - App fest in die Desktop-App einbauen statt die Online-Version zu laden: läuft offline, eine Datenquelle.
      Updates über den Tauri-Updater (Signierschlüssel als GitHub-Secret).
    - Widget als eigenes Tauri-Fenster: ohne Rahmen, immer im Vordergrund, Grösse passt sich dem Inhalt an,
@@ -56,6 +61,10 @@ Startsatz für einen neuen Chat:
 
 ## Später
 
+- Android-App mit Tauri 2 und iPhone mit Web Push über Supabase (Empfehlung in `taktwerk/docs/PLATTFORMEN.md`).
+- Code-Signing gegen die SmartScreen-Warnung, sobald die App weitergegeben wird (SignPath Foundation, braucht eine
+  Open-Source-Lizenz für das Repository).
+
 - Kochbuch als Buch überarbeiten: mehr Charakter, eigene Geschichten, Geheimtipps, weniger KI-Ton.
   Veröffentlichung, sobald es passt.
 - Pausenspiele ans Laptop-Format anpassen, alte Spiele verbessern, neue dazu.
@@ -72,3 +81,7 @@ Startsatz für einen neuen Chat:
 - Der E2E-Test «läuft nach dem Neuladen an der richtigen Stelle weiter» (mobile) schlägt lokal fehl, in der CI
   läuft er durch.
 - `pkill` immer in einem eigenen Bash-Aufruf.
+- Desktop-App: `npm run build:desktop` baut die eingebaute App nach `dist/desktop`. Rust prüfen im Ordner
+  `taktwerk/desktop/src-tauri` mit `cargo check` (Linux braucht `libwebkit2gtk-4.1-dev libasound2-dev`). Die echte App
+  läuft in der Cloud unter `Xvfb` (Steuerung mit `xdotool`, Bilder mit `import`), sehr langsam ohne Grafikkarte.
+  Windows baut der Workflow «Desktop-App» bei jedem PR, der die Desktop-App betrifft.

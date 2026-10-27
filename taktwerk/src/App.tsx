@@ -3,6 +3,7 @@ import { useEffect } from 'preact/hooks';
 import { prefs } from './app/prefs';
 import { go, view, VIEWS, type ViewName } from './app/router';
 import { loaded } from './app/store';
+import { isDesktop } from './app/desktop';
 import { expand, minimize, pipOpen } from './app/pip';
 import { ModeSwitch, SideTimer, SyncIndicator } from './ui/components/Chrome';
 import { Dock, dockVisible, MiniPlayer } from './ui/components/Mini';
@@ -11,6 +12,7 @@ import { GameLayer } from './ui/game/GameLayer';
 import { SpectacleLayer } from './ui/components/Spectacle';
 import { DialogHost } from './ui/dialog';
 import { InstallButton } from './ui/components/InstallDialog';
+import { UpdateButton } from './ui/components/DesktopUpdate';
 import { SoundHint } from './ui/components/SoundHint';
 import { Icon, Logo } from './ui/Icon';
 import { isDark, toggleDayNight } from './ui/theme';
@@ -49,7 +51,8 @@ function HomeLink() {
 
 export function App() {
   const v = view.value;
-  const mini = prefs.value.mini;
+  // Desktop-App: minimiert heisst eigenes Widget-Fenster, das Hauptfenster ist dann ausgeblendet
+  const mini = prefs.value.mini && !isDesktop();
   const View = VIEW_COMPONENTS[v];
 
   useEffect(() => {
@@ -81,9 +84,10 @@ export function App() {
             <span class="grow" />
             <SyncIndicator />
             <InstallButton />
+            <UpdateButton />
             <ThemeButton />
             <button
-              type="button" class="icon-btn" title={pipOpen.value ? 'Schwebendes Fenster schliessen (M)' : 'Minimieren (M)'}
+              type="button" class="icon-btn" title={pipOpen.value ? 'Schwebendes Fenster schliessen (M)' : isDesktop() ? 'Widget (M)' : 'Minimieren (M)'}
               aria-label="Minimieren" onClick={() => void minimize()}
             >
               <Icon name="minimize" />

@@ -10,6 +10,7 @@ import {
 import { app } from '../app/services';
 import { settings, timerState, workspaceData } from '../app/store';
 import { minimize } from '../app/pip';
+import { isDesktop } from '../app/desktop';
 import { PHASE_LABEL } from '../app/timer/controller';
 import { flashMood, PHASE_ATTR, readTimer } from '../app/timer/view';
 import { DIAL_STYLE, GameButton, LabButton, PhaseCutIn, SkinBackdrop, SkinBadge, SkinCompanion, SkinDialFx } from '../ui/components/SkinDecor';
@@ -40,8 +41,8 @@ export function Fokus() {
         </div>
         <div class="head-actions">
           <span class="mode-badge"><Icon name={WORKSPACE_ICON[prefs.value.workspace]} />{WORKSPACE_LABEL[prefs.value.workspace]}</span>
-          <button type="button" class="btn btn-ghost" title="Minimieren (M)" onClick={() => void minimize()}>
-            <Icon name="minimize" /><span>Minimieren</span>
+          <button type="button" class="btn btn-ghost" title={isDesktop() ? 'Widget öffnen (M)' : 'Minimieren (M)'} onClick={() => void minimize()}>
+            <Icon name="minimize" /><span>{isDesktop() ? 'Widget' : 'Minimieren'}</span>
           </button>
         </div>
       </div>

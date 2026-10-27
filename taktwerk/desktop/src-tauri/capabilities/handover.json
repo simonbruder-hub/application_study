@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "handover",
+  "description": "Unsichtbares Fenster der Datenübernahme: darf nur das Ereignis mit den alten Daten senden",
+  "windows": ["handover"],
+  "remote": { "urls": ["https://simonbruder-hub.github.io/*"] },
+  "permissions": ["core:event:allow-emit"]
+}

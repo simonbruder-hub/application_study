@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Hauptfenster: nur die Grundfunktionen, keine Datei- oder Shell-Zugriffe",
-  "windows": ["main"],
-  "permissions": ["core:default"]
+  "description": "Hauptfenster und Widget: Grundfunktionen und Fenster ziehen, keine Datei- oder Shell-Zugriffe",
+  "windows": ["main", "widget"],
+  "permissions": ["core:default", "core:window:allow-start-dragging"]
 }

@@ -8,6 +8,7 @@ import { openTaskDialog } from '../ui/components/TaskDialog';
 import { switchWorkspace } from '../ui/components/Chrome';
 import { toggleDayNight } from '../ui/theme';
 import { todayKey } from '../ui/format';
+import { isWidget } from './desktop';
 import { expand, minimize, setPipKeyHandler } from './pip';
 import { prefs } from './prefs';
 import { go, VIEWS } from './router';
@@ -34,7 +35,7 @@ export function onKey(e: KeyboardEvent): void {
   if (e.repeat) return;
   const k = e.key.toLowerCase();
   const s = timerState.value;
-  const mini = prefs.value.mini;
+  const mini = prefs.value.mini || isWidget();
   if (k === 'f' && s.status !== 'idle' && (s.kind === 'stopwatch' || s.phase === 'focus')) void finishSession();
   else if (k === 's' && s.kind === 'pomodoro' && s.phase !== 'focus') void timer.skip();
   else if (k === 'm') void minimize();

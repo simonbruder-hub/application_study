@@ -10,6 +10,7 @@ import {
   adjustPlannedSeconds, elapsedMs, finishesAt, isFinished, pauseTimer, remainingMs, resumeTimer,
   sessionToTimeLog, startTimer, stopTimer,
 } from '../../domain/timerMath';
+import { isDesktop, setDesktopAlarm } from '../desktop';
 import { onAlarm, setAlarm } from './alarm';
 import { audioReady, cancelChime, chimeNow, chimeWasScheduledFor, ensureAudio, holdWakeLock, notify, onAudioReady, scheduleChime, type ChimeKind } from './signals';
 import type { DevicePrefs } from '../prefs';
@@ -18,6 +19,7 @@ import type { DevicePrefs } from '../prefs';
 const MIN_REST_S = 5;
 
 const chimeFor = (phase: TimerPhase): ChimeKind => (phase === 'focus' ? 'focusEnd' : phase === 'short_break' ? 'shortEnd' : 'longEnd');
+const soundSlot = (phase: TimerPhase): keyof DevicePrefs['sounds'] => (phase === 'focus' ? 'focus' : phase === 'short_break' ? 'short' : 'long');
 
 export const PHASE_LABEL: Record<TimerPhase, string> = {
   focus: 'Fokus',
@@ -269,7 +271,9 @@ export class TimerController {
     this.completing = true;
     try {
       const end = finishesAt(s) ?? now;
-      const rang = chimeWasScheduledFor(end);
+      // Desktop-App: Ton und Benachrichtigung kommen aus Rust (setDesktopAlarm)
+      const desktop = isDesktop();
+      const rang = desktop || chimeWasScheduledFor(end);
       const p = this.o.getPrefs();
       // gesperrter Ton würde sonst erst beim nächsten Klick verspätet nachklingen
       if (!rang && p.sound && audioReady.value) chimeNow(chimeFor(s.phase), p.volume);
@@ -279,7 +283,7 @@ export class TimerController {
         ? `${seconds ? 'Pomodoro geschafft' : 'Fokus beendet'} – ${PHASE_LABEL[next]} (${Math.round(this.phaseSeconds(next) / 60)} min)`
         : 'Pause vorbei – weiter geht’s mit Fokus';
       // auch wenn das Fenster offen, aber hinter einem anderen Programm liegt
-      if (p.notify && (document.hidden || !document.hasFocus())) notify(s.phase === 'focus' ? 'Fokus beendet' : 'Pause vorbei', message);
+      if (!desktop && p.notify && (document.hidden || !document.hasFocus())) notify(s.phase === 'focus' ? 'Fokus beendet' : 'Pause vorbei', message);
       this.o.onPhaseComplete?.({ phase: s.phase, next, loggedSeconds: seconds, message });
     } finally {
       this.completing = false;
@@ -287,14 +291,23 @@ export class TimerController {
   }
 
   /** Nach einer Fokus- oder Pausenphase in die nächste Phase wechseln (ggf. automatisch starten) */
+  /** Phase nach s und der Zähler der Fokus-Phasen danach */
+  private nextAfter(s: ActiveTimerState): { next: TimerPhase; cycle: number } {
+    if (s.phase !== 'focus') return { next: 'focus', cycle: s.cycle };
+    const cycle = s.cycle + 1;
+    return { next: cycle % Math.max(1, this.o.getSettings().long_break_every) === 0 ? 'long_break' : 'short_break', cycle };
+  }
+
+  /** Text der Benachrichtigung am Ende der laufenden Phase */
+  private endNote(s: ActiveTimerState): { title: string; body: string } {
+    if (s.phase !== 'focus') return { title: 'Pause vorbei', body: 'Weiter geht es mit Fokus' };
+    const { next } = this.nextAfter(s);
+    return { title: 'Fokus beendet', body: `Pomodoro geschafft, jetzt ${PHASE_LABEL[next]} (${Math.round(this.phaseSeconds(next) / 60)} min)` };
+  }
+
   private async advance(s: ActiveTimerState, end: number, natural: boolean): Promise<TimerPhase> {
     const set = this.o.getSettings();
-    let next: TimerPhase;
-    let cycle = s.cycle;
-    if (s.phase === 'focus') {
-      cycle += 1;
-      next = cycle % Math.max(1, set.long_break_every) === 0 ? 'long_break' : 'short_break';
-    } else next = 'focus';
+    const { next, cycle } = this.nextAfter(s);
     const auto = next === 'focus' ? set.auto_start_focus : set.auto_start_breaks;
     const startAt = natural ? end : this.now();
     const stillInWindow = this.now() - startAt < this.phaseSeconds(next) * 1000;
@@ -337,7 +350,15 @@ export class TimerController {
     const running = s.status === 'running';
     const end = running && s.kind === 'pomodoro' ? finishesAt(s) : null;
     setAlarm(end === null ? null : end - this.now() + 50);
-    if (end !== null && p.sound) {
+    if (isDesktop()) {
+      // Desktop-App: Rust plant Ton und Benachrichtigung, sie kommen auch bei ausgeblendetem Fenster
+      setDesktopAlarm(end === null || !(p.sound || p.notify) ? null : {
+        end,
+        delayMs: end - this.now(),
+        sound: p.sound ? { id: p.sounds[soundSlot(s.phase)], volume: p.volume } : null,
+        note: p.notify ? this.endNote(s) : null,
+      });
+    } else if (end !== null && p.sound) {
       scheduleChime(end, chimeFor(s.phase), p.volume);
     } else cancelChime();
     void holdWakeLock(running && p.wakeLock);

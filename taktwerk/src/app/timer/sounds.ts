@@ -26,7 +26,7 @@ const NOTES: Record<SoundId, readonly Note[]> = {
   digital: [0, 0.18, 0.36].map((t) => ({ f: 1760, t, dur: 0.1, type: 'square' as const, gain: 0.08 })),
 };
 
-export function playSound(ctx: AudioContext, id: SoundId, at: number, volume: number): OscillatorNode[] {
+export function playSound(ctx: BaseAudioContext, id: SoundId, at: number, volume: number): OscillatorNode[] {
   const nodes: OscillatorNode[] = [];
   for (const n of NOTES[id] ?? NOTES.glocke) {
     const t0 = at + n.t;

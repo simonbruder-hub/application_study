@@ -1,12 +1,21 @@
 name: Desktop-App
 
 # Baut Taktwerk als Desktop-App (Tauri) für Windows und Linux und legt ein GitHub-Release an.
-# Auslöser: Tag desktop-v* (z. B. desktop-v1.0.1) oder von Hand mit Versionsnummer (legt Tag und Release an).
-# Von Hand ohne Version wird nur gebaut.
+# Auslöser: Tag desktop-v* (z. B. desktop-v1.1.0) oder von Hand mit Versionsnummer (legt Tag und Release an).
+# Von Hand ohne Version wird nur gebaut (zum Ausprobieren unter Windows, ohne Release).
+#
+# Updates: Mit den Secrets TAURI_SIGNING_PRIVATE_KEY und TAURI_SIGNING_PRIVATE_KEY_PASSWORD werden die
+# Installer signiert und das Release bekommt latest.json. Die installierte App findet darüber neue Versionen.
 
 on:
   push:
     tags: ['desktop-v*']
+  # Pull Requests, die die Desktop-App betreffen: nur bauen (prüft Windows), Installer als Artefakt zum Testen
+  pull_request:
+    paths:
+      - 'taktwerk/desktop/**'
+      - 'taktwerk/src/app/desktop.ts'
+      - '.github/workflows/desktop.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -48,28 +57,39 @@ jobs:
         if: matrix.name == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: taktwerk/desktop/src-tauri -> target
       - name: Abhängigkeiten installieren
         run: npm ci
-      - name: Einzeldatei der App bauen
+      - name: App für die Desktop-App bauen (fest eingebaut, läuft offline)
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://xlbddpaxwjgseqxaicuf.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_HawYMwgitp0Jo9CmA31oIA_tA3Hd-ik' }}
         run: |
           # Fehler als Meldung (Annotation) ausgeben, damit sie ohne Protokoll-Download lesbar sind
-          trap 'echo "::error title=Einzeldatei::$(tail -n 40 single-build.log 2>/dev/null | tr -d "\r" | sed "s/%/%25/g" | sed ":a;N;\$!ba;s/\n/%0A/g")"' ERR
+          trap 'echo "::error title=App-Build::$(tail -n 40 app-build.log 2>/dev/null | tr -d "\r" | sed "s/%/%25/g" | sed ":a;N;\$!ba;s/\n/%0A/g")"' ERR
           set -o pipefail
-          npx vite build --mode single 2>&1 | tee single-build.log
-          mkdir -p desktop/dist-desktop
-          cp desktop/loader/index.html desktop/dist-desktop/index.html
-          cp dist/single/index.html desktop/dist-desktop/offline.html
+          npm run build:desktop 2>&1 | tee app-build.log
       - name: Symbole erzeugen
         run: npx tauri icon web/public/icon-512.png -o desktop/src-tauri/icons
       - name: Desktop-App bauen
-        run: npx tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          ARGS=()
+          if [ -n "${{ inputs.version }}" ]; then VERSION="${{ inputs.version }}"
+          elif [[ "$GITHUB_REF" == refs/tags/desktop-v* ]]; then VERSION="${GITHUB_REF_NAME#desktop-v}"
+          else VERSION=""; fi
+          # Versionsnummer der App = Release, sonst erkennt der Updater neue Versionen nicht
+          if [ -n "$VERSION" ]; then ARGS+=(--config "{\"version\":\"$VERSION\"}"); fi
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "::warning title=Updater::Secret TAURI_SIGNING_PRIVATE_KEY fehlt, Installer ohne Update-Signatur (keine automatischen Updates)"
+            ARGS+=(--config '{"bundle":{"createUpdaterArtifacts":false}}')
+          fi
+          npx tauri build "${ARGS[@]}"
       - name: Installer mit festen Namen einsammeln
         run: |
           mkdir -p out
@@ -77,9 +97,12 @@ jobs:
           if [ "${{ matrix.name }}" = windows ]; then
             cp "$B"/nsis/*-setup.exe out/Taktwerk-Setup.exe
             cp "$B"/msi/*.msi out/Taktwerk.msi
+            # Signatur für den Updater (nur mit Signierschlüssel)
+            for f in "$B"/nsis/*-setup.exe.sig; do [ -f "$f" ] && cp "$f" out/Taktwerk-Setup.exe.sig; done
           else
             cp "$B"/appimage/*.AppImage out/Taktwerk.AppImage
             cp "$B"/deb/*.deb out/Taktwerk.deb
+            for f in "$B"/appimage/*.AppImage.sig; do [ -f "$f" ] && cp "$f" out/Taktwerk.AppImage.sig; done
           fi
           ls -la out
       - uses: actions/upload-artifact@v4
@@ -103,14 +126,27 @@ jobs:
         run: |
           if [ -n "${{ inputs.version }}" ]; then TAG="desktop-v${{ inputs.version }}"; else TAG="$GITHUB_REF_NAME"; fi
           VERSION="${TAG#desktop-v}"
+          # latest.json für den Updater: Version, Download-Adressen und Signaturen der Installer
+          if [ -f dist/Taktwerk-Setup.exe.sig ]; then
+            BASE="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
+            jq -n --arg v "$VERSION" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg base "$BASE" \
+              --arg win "$(cat dist/Taktwerk-Setup.exe.sig)" --arg lin "$(cat dist/Taktwerk.AppImage.sig 2>/dev/null)" \
+              '{version: $v, notes: "Taktwerk Desktop \($v)", pub_date: $date,
+                platforms: ({"windows-x86_64": {signature: $win, url: ($base + "/Taktwerk-Setup.exe")}}
+                  + (if $lin == "" then {} else {"linux-x86_64": {signature: $lin, url: ($base + "/Taktwerk.AppImage")}} end))}' \
+              > dist/latest.json
+            rm -f dist/*.sig
+          else
+            echo "::warning title=Updater::Keine Signaturen, Release ohne latest.json"
+          fi
           gh release create "$TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Taktwerk Desktop $VERSION" \
             --latest \
-            --notes "Taktwerk als Desktop-App für Windows und Linux, ideal für Firefox-Nutzer.
+            --notes "Taktwerk als Desktop-App für Windows und Linux: läuft offline, mit Widget-Fenster (Taste M) und automatischen Updates.
 
           - **Windows:** Taktwerk-Setup.exe (oder Taktwerk.msi). Bei der SmartScreen-Warnung «Weitere Informationen» → «Trotzdem ausführen».
-          - **Linux:** Taktwerk.AppImage (ausführbar machen und starten) oder Taktwerk.deb (Debian, Ubuntu, Mint).
+          - **Linux:** Taktwerk.AppImage (ausführbar machen und starten, aktualisiert sich selbst) oder Taktwerk.deb (Debian, Ubuntu, Mint).
 
-          Die Desktop-App hat einen eigenen Speicher. Mit Sync (Einstellungen → Sync & Konto) erscheinen dieselben Daten wie im Browser und auf dem Handy."
+          Die Desktop-App hat einen eigenen Speicher; Daten einer älteren Desktop-App übernimmt sie beim ersten Start. Mit Sync (Einstellungen → Sync & Konto) erscheinen dieselben Daten wie im Browser und auf dem Handy."
