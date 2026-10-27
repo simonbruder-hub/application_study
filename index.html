@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Taktwerk und Lernlabor</title>
-<meta name="description" content="Zwei Apps fürs Studium: Taktwerk für Fokus mit Pomodoro und Stechuhr, Lernlabor für Elektrotechnik mit Schaltungsbaukasten und Oszilloskop.">
+<title>Taktwerk, Lernlabor und Kochbuch</title>
+<meta name="description" content="Zwei Apps fürs Studium: Taktwerk für Fokus mit Pomodoro und Stechuhr, Lernlabor für Elektrotechnik mit Schaltungsbaukasten und Oszilloskop. Dazu das Kochbuch für den Alltag.">
 <link rel="icon" href="taktwerk/app/icon.svg">
 <style>
   :root {
     color-scheme: light dark;
     --bg: #edf1f0; --fg: #132024; --muted: #5f7076; --card: #fbfcfc; --line: #d7dfdd;
-    --tw: #c63a29; --ll: #2456c9; --soft: #e2e9e7;
+    --tw: #c63a29; --ll: #2456c9; --kb: #b9581b; --soft: #e2e9e7;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --tw: #f0644e; --ll: #6b9bff; --soft: #1b2427; }
+    :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --tw: #f0644e; --ll: #6b9bff; --kb: #f08a45; --soft: #1b2427; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
@@ -34,12 +34,13 @@
   .app { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
   .shot { height: 260px; background: var(--soft); display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
   .shot img { display: block; }
-  .tw .shot img { width: 220px; height: auto; margin-top: 24px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
+  .tw .shot img, .kb .shot img { width: 220px; height: auto; margin-top: 24px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
   .ll .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 96%; }
   .body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
   .tag { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; color: #fff; }
   .tw .tag { background: var(--tw); }
   .ll .tag { background: var(--ll); }
+  .kb .tag { background: var(--kb); }
   .app h2 { margin: 12px 0 6px; font-size: 26px; letter-spacing: -0.01em; }
   .app p { margin: 0; color: var(--muted); }
   .app ul { margin: 14px 0 20px; padding-left: 20px; }
@@ -48,10 +49,14 @@
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 12px; font-weight: 700; text-decoration: none; border: 1px solid transparent; }
   .tw .btn-main { background: var(--tw); color: #fff; }
   .ll .btn-main { background: var(--ll); color: #fff; }
+  .kb .btn-main { background: var(--kb); color: #fff; }
   .btn-alt { border-color: var(--line); color: var(--fg); }
   .btn:hover { filter: brightness(1.08); }
   .btn-alt:hover { border-color: var(--muted); }
   .flow { padding: 40px 0; }
+  .alltag { padding: 0 0 40px; }
+  .alltag h2 { margin: 0 0 16px; font-size: 24px; }
+  .alltag .apps { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); padding: 0; }
   .flow h2 { margin: 0 0 16px; font-size: 24px; }
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; counter-reset: s; }
   .step { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
@@ -70,6 +75,7 @@
     <nav aria-label="Apps">
       <a href="taktwerk/app/">Taktwerk</a>
       <a href="lernlabor/app/">Lernlabor</a>
+      <a href="kochbuch/app/">Kochbuch</a>
     </nav>
   </div>
 </header>
@@ -128,6 +134,30 @@
       <div class="step"><b>Im Labor lernen</b><span>Über den Link im Fokus-Bildschirm direkt ins Lernlabor: Theorie lesen, Schaltung bauen, Aufgaben lösen.</span></div>
       <div class="step"><b>Pause machen</b><span>Klingelt der Timer, wartet das Pausenspiel deines Stils. Danach geht es weiter.</span></div>
       <div class="step"><b>Fortschritt sehen</b><span>Die Auswertung zeigt, wie viel Zeit in welches Fach geflossen ist.</span></div>
+    </div>
+  </section>
+
+  <section class="alltag">
+    <h2>Für den Alltag</h2>
+    <div class="apps">
+      <article class="app kb">
+        <div class="shot"><img src="kochbuch/img/kochbuch.jpg" width="585" height="1170" alt="Kochbuch auf dem Handy: Rezepte für den Herbst mit Magen-Ampel"></div>
+        <div class="body">
+          <span class="tag">Küche</span>
+          <h2>Kochbuch</h2>
+          <p>Rezepte finden, Portionen umrechnen, einkaufen.</p>
+          <ul>
+            <li>Filter nach Art, Ernährung, Jahreszeit und Verträglichkeit</li>
+            <li>Mengen für jede Anzahl Personen</li>
+            <li>Einkaufszettel, der gleiche Zutaten zusammenzählt</li>
+            <li>Die Rezepte bleiben privat auf deinem Gerät</li>
+          </ul>
+          <div class="actions">
+            <a class="btn btn-main" href="kochbuch/app/">Kochbuch öffnen</a>
+            <a class="btn btn-alt" href="kochbuch/app/#/einkauf">Einkaufszettel</a>
+          </div>
+        </div>
+      </article>
     </div>
   </section>
 </main>

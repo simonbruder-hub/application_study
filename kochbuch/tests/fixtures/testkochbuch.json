@@ -1,0 +1,673 @@
+{
+  "titel": "Testkochbuch",
+  "hinweis": "Erzeugt mit skripte/rezepte_json.py aus den LaTeX-Dateien. Nicht von Hand ändern.",
+  "personen": 2,
+  "werte": {
+    "art": [
+      "Frühstück",
+      "Salat",
+      "Suppe",
+      "Hauptgericht",
+      "Beilage",
+      "Dessert",
+      "Gebäck",
+      "Getränk",
+      "Snack"
+    ],
+    "ernaehrung": [
+      "vegetarisch",
+      "Fisch",
+      "Fleisch"
+    ],
+    "magen": [
+      "gut",
+      "anpassung",
+      "meiden"
+    ],
+    "jahreszeiten": [
+      "fruehling",
+      "sommer",
+      "herbst",
+      "winter"
+    ]
+  },
+  "rezepte": [
+    {
+      "id": "kuerbissuppe_mit_ingwer",
+      "titel": "Kürbissuppe mit Ingwer",
+      "kapitel": "Suppen & Eintöpfe",
+      "datei": "rezepte/suppen/kuerbissuppe_mit_ingwer.tex",
+      "art": "Suppe",
+      "ernaehrung": "vegetarisch",
+      "saison": {
+        "text": "Herbst bis Winter",
+        "jahreszeiten": [
+          "herbst",
+          "winter"
+        ],
+        "ganzjaehrig": false
+      },
+      "quelle": null,
+      "magen": {
+        "stufe": "gut",
+        "text": "Mild gewürzt und gut verträglich, Ingwer nur sparsam."
+      },
+      "meal_prep": {
+        "stichwort": "ideal",
+        "text": "hält 3 Tage im Kühlschrank, lässt sich gut einfrieren."
+      },
+      "hinweis": null,
+      "geschichte": null,
+      "geheimtipp": "Ein paar geröstete Kürbiskerne darüber streuen.",
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "1 Butternusskürbis (ca. 600 g)",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Butternusskürbis"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 Zwiebel",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Zwiebel"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 Stück Ingwer",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": "Stück",
+              "name": "Ingwer"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "5 dl Gemüsebouillon",
+          "einkauf": [
+            {
+              "menge": 5,
+              "menge_bis": null,
+              "einheit": "dl",
+              "name": "Gemüsebouillon"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 dl Rahm",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": "dl",
+              "name": "Rahm"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Salz, Pfeffer",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Salz"
+            },
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Pfeffer"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Kürbis schälen und würfeln, Zwiebel und Ingwer hacken.",
+        "Alles in wenig Öl andünsten, mit Bouillon ablöschen und 20 Minuten köcheln.",
+        "Rahm dazugeben, fein pürieren und abschmecken."
+      ]
+    },
+    {
+      "id": "gurken_kaltschale",
+      "titel": "Gurken-Kaltschale",
+      "kapitel": "Suppen & Eintöpfe",
+      "datei": "rezepte/suppen/gurken_kaltschale.tex",
+      "art": "Suppe",
+      "ernaehrung": "vegetarisch",
+      "saison": {
+        "text": "Sommer",
+        "jahreszeiten": [
+          "sommer"
+        ],
+        "ganzjaehrig": false
+      },
+      "quelle": null,
+      "magen": {
+        "stufe": "gut",
+        "text": "Kühl und leicht, Knoblauch nach Verträglichkeit weglassen."
+      },
+      "meal_prep": {
+        "stichwort": "nur frisch",
+        "text": "am selben Tag essen."
+      },
+      "hinweis": null,
+      "geschichte": null,
+      "geheimtipp": null,
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "1 Gurke",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Gurke"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "3 dl Joghurt nature",
+          "einkauf": [
+            {
+              "menge": 3,
+              "menge_bis": null,
+              "einheit": "dl",
+              "name": "Joghurt nature"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1/2 Knoblauchzehe",
+          "einkauf": [
+            {
+              "menge": 0.5,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Knoblauchzehe"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Dill",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Dill"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Salz",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Salz"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Gurke schälen und mit Joghurt und Knoblauch fein pürieren.",
+        "Mit Dill und Salz abschmecken und kalt servieren."
+      ]
+    },
+    {
+      "id": "randensalat_mit_feta",
+      "titel": "Randensalat mit Feta",
+      "kapitel": "Salate",
+      "datei": "rezepte/salate/randensalat_mit_feta.tex",
+      "art": "Salat",
+      "ernaehrung": "vegetarisch",
+      "saison": {
+        "text": "Herbst bis Winter",
+        "jahreszeiten": [
+          "herbst",
+          "winter"
+        ],
+        "ganzjaehrig": false
+      },
+      "quelle": "Saisonkalender",
+      "magen": {
+        "stufe": "anpassung",
+        "text": "Essig sparsam, Feta in kleinen Stücken."
+      },
+      "meal_prep": {
+        "stichwort": "gut",
+        "text": "Randen am Vortag kochen, Salat frisch anmachen."
+      },
+      "hinweis": null,
+      "geschichte": null,
+      "geheimtipp": null,
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "2 gekochte Randen",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "gekochte Randen"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "100 g Feta",
+          "einkauf": [
+            {
+              "menge": 100,
+              "menge_bis": null,
+              "einheit": "g",
+              "name": "Feta"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 EL Baumnüsse",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Baumnüsse"
+            }
+          ]
+        },
+        {
+          "gruppe": "Dressing",
+          "text": "2 EL Olivenöl",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Olivenöl"
+            }
+          ]
+        },
+        {
+          "gruppe": "Dressing",
+          "text": "1 EL Apfelessig",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Apfelessig"
+            }
+          ]
+        },
+        {
+          "gruppe": "Dressing",
+          "text": "Salz",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Salz"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Randen in Scheiben schneiden, Feta darüber bröckeln.",
+        "Dressing verrühren, darüber geben und mit Baumnüssen bestreuen."
+      ]
+    },
+    {
+      "id": "zitronenpoulet_mit_ofenkartoffeln",
+      "titel": "Zitronenpoulet mit Ofenkartoffeln",
+      "kapitel": "Hauptgerichte",
+      "datei": "rezepte/haupt/zitronenpoulet_mit_ofenkartoffeln.tex",
+      "art": "Hauptgericht",
+      "ernaehrung": "Fleisch",
+      "saison": {
+        "text": "ganzjährig",
+        "jahreszeiten": [
+          "fruehling",
+          "sommer",
+          "herbst",
+          "winter"
+        ],
+        "ganzjaehrig": true
+      },
+      "quelle": null,
+      "magen": {
+        "stufe": "anpassung",
+        "text": "Ohne Haut und mit wenig Öl gut bekömmlich."
+      },
+      "meal_prep": {
+        "stichwort": "gut",
+        "text": "hält 2 Tage, Kartoffeln im Ofen aufwärmen."
+      },
+      "hinweis": null,
+      "geschichte": null,
+      "geheimtipp": null,
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "2 Pouletbrüstli (ca. 300 g)",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Pouletbrüstli"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "600 g Kartoffeln",
+          "einkauf": [
+            {
+              "menge": 600,
+              "menge_bis": null,
+              "einheit": "g",
+              "name": "Kartoffeln"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 Zitrone",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Zitrone"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 Zwiebel",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Zwiebel"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "2 EL Olivenöl",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Olivenöl"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Rosmarin",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Rosmarin"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Salz, Pfeffer",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Salz"
+            },
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Pfeffer"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Kartoffeln vierteln, mit Öl, Rosmarin und Salz mischen und 20 Minuten bei 200 °C backen.",
+        "Poulet mit Zitronensaft marinieren, mit der Zwiebel dazulegen und 20 Minuten mitbacken."
+      ]
+    },
+    {
+      "id": "lachs_mit_gruenen_spargeln",
+      "titel": "Lachs mit grünen Spargeln",
+      "kapitel": "Hauptgerichte",
+      "datei": "rezepte/haupt/lachs_mit_gruenen_spargeln.tex",
+      "art": "Hauptgericht",
+      "ernaehrung": "Fisch",
+      "saison": {
+        "text": "Frühling",
+        "jahreszeiten": [
+          "fruehling"
+        ],
+        "ganzjaehrig": false
+      },
+      "quelle": null,
+      "magen": {
+        "stufe": "gut",
+        "text": "Gedämpft oder im Ofen gegart sehr gut verträglich."
+      },
+      "meal_prep": {
+        "stichwort": "nur frisch",
+        "text": "frisch zubereitet am besten."
+      },
+      "hinweis": null,
+      "geschichte": null,
+      "geheimtipp": null,
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "2 Lachsfilets (ca. 250 g)",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Lachsfilets"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "500 g grüne Spargeln",
+          "einkauf": [
+            {
+              "menge": 500,
+              "menge_bis": null,
+              "einheit": "g",
+              "name": "grüne Spargeln"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1 EL Butter",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Butter"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1/2 Zitrone",
+          "einkauf": [
+            {
+              "menge": 0.5,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Zitrone"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "Salz",
+          "einkauf": [
+            {
+              "menge": null,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Salz"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Spargeln rüsten und 8 Minuten dämpfen.",
+        "Lachs in Butter sanft braten, mit Zitrone und Salz abschmecken."
+      ]
+    },
+    {
+      "id": "apfelwaehe",
+      "titel": "Apfelwähe",
+      "kapitel": "Gebäck",
+      "datei": "rezepte/gebaeck/apfelwaehe.tex",
+      "art": "Gebäck",
+      "ernaehrung": "vegetarisch",
+      "saison": {
+        "text": "Sommer bis Herbst",
+        "jahreszeiten": [
+          "sommer",
+          "herbst"
+        ],
+        "ganzjaehrig": false
+      },
+      "quelle": null,
+      "magen": {
+        "stufe": "meiden",
+        "text": "Reichhaltiger Guss, lieber ein kleines Stück."
+      },
+      "meal_prep": {
+        "stichwort": "teilweise",
+        "text": "am Backtag am besten, hält 1 Tag."
+      },
+      "hinweis": "Ergibt 1 Blech.",
+      "geschichte": null,
+      "geheimtipp": null,
+      "zutaten": [
+        {
+          "gruppe": null,
+          "text": "1 Kuchenteig, rund ausgewallt",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Kuchenteig"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "4 Äpfel",
+          "einkauf": [
+            {
+              "menge": 4,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Äpfel"
+            }
+          ]
+        },
+        {
+          "gruppe": null,
+          "text": "1–2 TL Zimt",
+          "einkauf": [
+            {
+              "menge": 1,
+              "menge_bis": 2,
+              "einheit": "TL",
+              "name": "Zimt"
+            }
+          ]
+        },
+        {
+          "gruppe": "Guss",
+          "text": "2 dl Milch",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": "dl",
+              "name": "Milch"
+            }
+          ]
+        },
+        {
+          "gruppe": "Guss",
+          "text": "2 Eier",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": null,
+              "name": "Eier"
+            }
+          ]
+        },
+        {
+          "gruppe": "Guss",
+          "text": "2 EL Zucker",
+          "einkauf": [
+            {
+              "menge": 2,
+              "menge_bis": null,
+              "einheit": "EL",
+              "name": "Zucker"
+            }
+          ]
+        }
+      ],
+      "schritte": [
+        "Teig ins Blech legen, Äpfel in Schnitzen darauf verteilen und mit Zimt bestreuen.",
+        "Guss verrühren, darüber giessen und 35 Minuten bei 200 °C backen."
+      ]
+    }
+  ]
+}

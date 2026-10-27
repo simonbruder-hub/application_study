@@ -77,6 +77,14 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
   Overleaf-Projekt im Repo, ein Rezept pro Datei (`rezepte/<kapitel>/`), Vorlage mit Art, Ernährung, Geschichte und
   Geheimtipp. `skripte/rezepte_json.py` prüft die Rezepte und erzeugt `daten/rezepte.json` für die Kochbuch-App
   (Aufgabe 5); die CI baut PDF und JSON bei jedem PR.
+- **Kochbuch-App** (Aufgabe 5, eigene App `../../kochbuch/`, Details in [`../../kochbuch/README.md`](../../kochbuch/README.md)):
+  liest `rezepte.json` oder das ZIP «rezepte-json» aus der Kochbuch-CI; die Rezepte bleiben nur auf dem Gerät
+  (IndexedDB), auf der Website steht keines. Filter nach Art, Ernährung, Jahreszeit und Magen-Ampel, Suche ohne
+  Rücksicht auf Umlaute, Portionen umrechnen (`src/logic/mengen.ts`, alle Zahlen einer Zutatenzeile, passend gerundet).
+  Einkaufszettel zählt gleiche Zutaten zusammen, wählt Grundvorrat ab und schreibt die Zutaten direkt in die Liste von
+  «Kasse unterwegs» (gleiche Website, IndexedDB `kasse-unterwegs`, Schlüssel `listeNeu`, ohne Doppelte) oder teilt sie
+  als Text. Startseite mit Abschnitt «Für den Alltag». Tests: Vitest und Playwright mit erfundenen Rezepten, die das
+  echte Skript erzeugt hat; CI-Job `kochbuch`, Pages baut `/kochbuch/app/`.
 
 ## Offen
 
@@ -98,3 +106,5 @@ die App unter `https://simonbruder-hub.github.io/application_study/taktwerk/app/
    Kopfzeile, die Installation startet die App neu.
 9. Android als App mit Tauri 2 (geplante Benachrichtigung zum Phasenende), iPhone: Web Push über Supabase
    (siehe [`PLATTFORMEN.md`](PLATTFORMEN.md)).
+10. Kochbuch: Rezepte über die gemeinsamen Konten synchronisieren statt Import pro Gerät; Einkaufszettel auch an die
+    neue Haushalt-App, sobald sie eine Einkaufsliste hat (dort Modul M6).
