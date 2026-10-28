@@ -36,6 +36,8 @@ Startsatz für einen neuen Chat:
   Zutaten direkt in die Liste der alten «Kasse unterwegs» (gleiche Website, gleicher Speicher; vorher schliessen).
 - Repo-Name: `apps` (bis 27.10.2026 `application_study`), damit der Name zum Inhalt passt. Website jetzt unter
   `https://simonbruder-hub.github.io/apps/`; die alte Adresse leitet GitHub nicht weiter.
+- Study Hub (28.10.2026): vernetztes Formelbuch mit Simulationen und Lernhilfen als eigenes, öffentliches Projekt im
+  Repo `simonbruder-hub/study-hub` (Briefing, Entscheide und Aufgaben dort). Das Lernlabor zieht dorthin um.
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
   aber darauf auslegen.
 
@@ -79,6 +81,9 @@ Startsatz für einen neuen Chat:
    lädt sie als Artefakt hoch). Filter über `art`, `ernaehrung`, `saison.jahreszeiten` und `magen.stufe`, für den
    Einkauf `zutaten[].einkauf` (Menge, Einheit, Name).
 
+6. **Study Hub** (eigenes Repo `simonbruder-hub/study-hub`, Startsatz dort). Hier betrifft es nur den Umzug des
+   Lernlabors: Startseite, Links in Taktwerk und eine Weiterleitung auf die neue Adresse, sobald es dort läuft.
+
 ## Später
 
 - Android-App mit Tauri 2 und iPhone mit Web Push über Supabase (Empfehlung in `taktwerk/docs/PLATTFORMEN.md`).
@@ -88,7 +93,7 @@ Startsatz für einen neuen Chat:
 - Kochbuch als Buch überarbeiten: mehr Charakter, eigene Geschichten, Geheimtipps, weniger KI-Ton.
   Veröffentlichung, sobald es passt. Die Vorlage hat dafür `\geschichte{}` und `\geheimtipp{}` (noch leer).
 - Pausenspiele ans Laptop-Format anpassen, alte Spiele verbessern, neue dazu.
-- Lernlabor ausbauen (`taktwerk/docs/LERNAPP.md`), Name und Domain (`taktwerk/docs/STATUS.md`, Punkt «Offen»).
+- Lernlabor: Der Ausbau geht im Study Hub weiter (Aufgabe 6). Name und Domain: `taktwerk/docs/STATUS.md`, Punkt «Offen».
 - Kochbuch: Rezepte über gemeinsame Konten synchronisieren statt Import pro Gerät; Einkaufszettel an die neue
   Haushalt-App, sobald sie eine Einkaufsliste hat (M6).
 

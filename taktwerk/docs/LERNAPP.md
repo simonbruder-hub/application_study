@@ -2,6 +2,9 @@
 
 Eigenständige Lern-App neben der Pomodoro-App, Arbeitsname **Lernlabor**, Code in [`../../lernlabor/`](../../lernlabor/).
 Adresse: `https://simonbruder-hub.github.io/apps/lernlabor/app/`.
+
+**Umzug (Entscheid 28.10.2026):** Das Lernlabor zieht in den Study Hub um (eigenes Repo `simonbruder-hub/study-hub`).
+Simulator, Theorie und Aufgaben gehen dorthin, der Ausbau geht dort weiter.
 Taktwerk verlinkt sie in den Einstellungen (Karte «App») und im Stil Technik mit einem Knopf in den Pausen.
 
 ## Geklärt (Oktober 2026)

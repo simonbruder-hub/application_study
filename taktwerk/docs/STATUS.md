@@ -100,7 +100,7 @@ die App unter `https://simonbruder-hub.github.io/apps/taktwerk/app/`.
    Browser-Speicher, Daten kommen über Sync zurück.
 2. Technik ausbauen: Cursor auch in Y-Richtung (Umschalter X/Y, Anzeige ΔU), Frequenz, Amplitude und Offset der
    Kurve einstellbar, Freeze-Taste zum Ablesen.
-3. **Lernlabor ausbauen** (nächste Schritte in `docs/LERNAPP.md`): Diode, Transistor, OP; mehr Aufgaben;
+3. **Lernlabor ausbauen** (zieht in den Study Hub um, Repo `simonbruder-hub/study-hub`; nächste Schritte in `docs/LERNAPP.md`): Diode, Transistor, OP; mehr Aufgaben;
    Fächer Elektromagnetismus, Physik, Chemie, Mathematik in Stufen.
 4. Optional: eigener Superhelden-Stil (eigene Figur).
 5. Ziel danach: eigene Accounts für die Website mit beiden Apps, online und offline auf allen Geräten.
