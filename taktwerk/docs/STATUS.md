@@ -90,6 +90,11 @@ die App unter `https://simonbruder-hub.github.io/apps/taktwerk/app/`.
   `simonbruder-hub.github.io`), installierte Web-Apps einmal von der neuen Adresse neu installieren. In Supabase
   Site URL und Redirect URLs auf `/apps/` umstellen (`../supabase/README.md`, Abschnitt 4). Die Desktop-App 1.1.0 findet
   Updates weiter, weil GitHub Repo- und Release-Adressen umleitet; die neue Adresse steckt ab dem nächsten Release drin.
+- **Haushalt auf der Startseite** (Aufgabe 4, erster Schritt): Karte im Abschnitt «Für den Alltag» und Link in der
+  Kopfzeile. Die App bleibt im eigenen Repo `simonbruder-hub/haushaltskasse-app` (Build in `neu/`, Adresse
+  `/haushaltskasse-app/neu/`); der zweite Knopf führt zur älteren App «Kasse unterwegs» mit der Einkaufsliste.
+  Vorschaubild `img/haushalt.jpg` nur mit erfundenen Daten (Haushalt von Anna und Luca, mit Playwright aufgenommen),
+  Pages kopiert `img/` mit. Auf schmalen Handys bricht die Kopfzeile in zwei Zeilen um, statt seitlich zu überlaufen.
 
 ## Offen
 
