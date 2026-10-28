@@ -39,6 +39,9 @@ Startsatz für einen neuen Chat:
 - Entscheid zu Aufgabe 4 (28.10.2026): zuerst nur verlinken, eine Karte auf der Startseite. Die Finanzapp bleibt im
   eigenen Repo `haushaltskasse-app`. Dort laufen zwei Apps: die neue «Haushalt» (`/haushaltskasse-app/neu/`, Belege,
   Ausgleich, Budget) und die ältere «Kasse unterwegs» (`/haushaltskasse-app/`, Einkaufsliste, an die das Kochbuch sendet).
+- Lohnrechner (28.10.2026): aus der Excel-Vorlage «Berechnung ML auf Std.» eine eigene kleine App mit Karte unter
+  «Für den Alltag». Gewünscht: freie Werte, rückwärts rechnen, Verdienst aus Stunden. Der echte Lohn aus der Vorlage
+  kommt nicht auf die Website, nicht ins Repo und nicht in die Tests.
 - Study Hub (28.10.2026): vernetztes Formelbuch mit Simulationen und Lernhilfen als eigenes, öffentliches Projekt im
   Repo `simonbruder-hub/study-hub` (Briefing, Entscheide und Aufgaben dort). Das Lernlabor zieht dorthin um.
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
@@ -71,7 +74,8 @@ Startsatz für einen neuen Chat:
      einzige Quelle.
 4. **Website als App-Sammlung** (dieses Repo). Erster Schritt erledigt (PR `simonbruder-hub/apps#11`, siehe
    STATUS.md): Karte «Haushalt» auf der Startseite (Abschnitt «Für den Alltag», neben dem Kochbuch) und Link in der
-   Kopfzeile, die App bleibt im eigenen Repo. Offen: einheitliches Design, gemeinsame Konten, Struktur für weitere
+   Kopfzeile, die App bleibt im eigenen Repo. Dazu der Lohnrechner als eigene App `lohn/` (PR
+   `simonbruder-hub/apps#12`, siehe STATUS.md). Offen: einheitliches Design, gemeinsame Konten, Struktur für weitere
    Apps (auch die Bachelorarbeit); danach entscheiden, ob die Haushalt-App doch hierher kommt. Den Knopf
    «Kasse unterwegs» auf der Karte entfernen, sobald die neue App eine Einkaufsliste hat (dort M6).
    Ursprünglicher Auftrag: Haushaltsapp (Repo `simonbruder-hub/haushaltskasse-app`, nur Finanzen und Einkauf)
@@ -106,7 +110,7 @@ Startsatz für einen neuen Chat:
 
 ## Technische Hinweise
 
-- In `taktwerk/`, `lernlabor/` und `kochbuch/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`;
+- In `taktwerk/`, `lernlabor/`, `kochbuch/` und `lohn/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run test:e2e`;
   in `taktwerk/` dazu `npm run build:single`.
 - Playwright in der Cloud: Chromium unter `/opt/pw-browsers/chromium`. Lokale Config mit
   `launchOptions.executablePath`, nicht committen. Der Testbrowser ohne Bildschirm erlaubt Ton immer,
