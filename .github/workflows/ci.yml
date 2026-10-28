@@ -88,3 +88,27 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: End-to-End-Tests
         run: npm run test:e2e
+
+  lohn:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: lohn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lohn/package-lock.json
+      - run: npm ci
+      - name: Typprüfung
+        run: npm run typecheck
+      - name: Unit-Tests (Zahlen, Umrechnen, Formular)
+        run: npm test
+      - name: Build (PWA)
+        run: npm run build
+      - name: Browser installieren
+        run: npx playwright install --with-deps chromium
+      - name: End-to-End-Tests
+        run: npm run test:e2e
