@@ -58,6 +58,8 @@ jobs:
         run: |
           mkdir -p _site/taktwerk _site/lernlabor _site/kochbuch
           cp index.html _site/
+          # Bilder der Startseite für Apps aus anderen Repos (z. B. Haushalt aus haushaltskasse-app)
+          cp -r img _site/
           cp -r taktwerk/site/. _site/taktwerk/
           cp -r taktwerk/dist/app _site/taktwerk/app
           cp taktwerk/dist/single/index.html _site/taktwerk/taktwerk.html

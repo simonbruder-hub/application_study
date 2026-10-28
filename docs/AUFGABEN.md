@@ -36,6 +36,9 @@ Startsatz für einen neuen Chat:
   Zutaten direkt in die Liste der alten «Kasse unterwegs» (gleiche Website, gleicher Speicher; vorher schliessen).
 - Repo-Name: `apps` (bis 27.10.2026 `application_study`), damit der Name zum Inhalt passt. Website jetzt unter
   `https://simonbruder-hub.github.io/apps/`; die alte Adresse leitet GitHub nicht weiter.
+- Entscheid zu Aufgabe 4 (28.10.2026): zuerst nur verlinken, eine Karte auf der Startseite. Die Finanzapp bleibt im
+  eigenen Repo `haushaltskasse-app`. Dort laufen zwei Apps: die neue «Haushalt» (`/haushaltskasse-app/neu/`, Belege,
+  Ausgleich, Budget) und die ältere «Kasse unterwegs» (`/haushaltskasse-app/`, Einkaufsliste, an die das Kochbuch sendet).
 - Study Hub (28.10.2026): vernetztes Formelbuch mit Simulationen und Lernhilfen als eigenes, öffentliches Projekt im
   Repo `simonbruder-hub/study-hub` (Briefing, Entscheide und Aufgaben dort). Das Lernlabor zieht dorthin um.
 - Bachelorarbeit: eigenes Repo und eigene Chats. Später App und Website dazu, jetzt nichts veröffentlichen,
@@ -66,10 +69,14 @@ Startsatz für einen neuen Chat:
    - Lokale LaTeX- und PDF-Teile ins Repo übernehmen.
    - Python-Skript liest die Vorlage und erzeugt die Daten (JSON) für die App. Das Kochbuch bleibt die
      einzige Quelle.
-4. **Website als App-Sammlung** (dieses Repo): Haushaltsapp (Repo `simonbruder-hub/haushaltskasse-app`,
-   nur Finanzen und Einkauf) einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen.
-   Einheitliches Design, später gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
-   Das Kochbuch steht seit Aufgabe 5 auf der Startseite (Abschnitt «Für den Alltag»).
+4. **Website als App-Sammlung** (dieses Repo). Erster Schritt erledigt (PR `simonbruder-hub/apps#11`, siehe
+   STATUS.md): Karte «Haushalt» auf der Startseite (Abschnitt «Für den Alltag», neben dem Kochbuch) und Link in der
+   Kopfzeile, die App bleibt im eigenen Repo. Offen: einheitliches Design, gemeinsame Konten, Struktur für weitere
+   Apps (auch die Bachelorarbeit); danach entscheiden, ob die Haushalt-App doch hierher kommt. Den Knopf
+   «Kasse unterwegs» auf der Karte entfernen, sobald die neue App eine Einkaufsliste hat (dort M6).
+   Ursprünglicher Auftrag: Haushaltsapp (Repo `simonbruder-hub/haushaltskasse-app`, nur Finanzen und Einkauf)
+   einbinden. Vorschlag: ins Repo übernehmen oder aus dem eigenen Repo bauen. Einheitliches Design, später
+   gemeinsame Konten, Struktur für weitere Apps (auch die Bachelorarbeit).
 5. **Kochbuch-App** (erledigt: PR `simonbruder-hub/apps#8`, App `kochbuch/`, siehe STATUS.md und
    `kochbuch/README.md`). Offen: auf dem Handy
    prüfen (ZIP aus der Kochbuch-CI laden, an Kasse unterwegs senden), Grundvorrat-Liste in `src/logic/einkauf.ts`
