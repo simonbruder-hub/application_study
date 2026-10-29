@@ -10,7 +10,10 @@ Diese Datei lädt in jedem Chat automatisch. Kurz halten, nur Orientierung.
 |---|---|---|
 | `taktwerk/` | Pomodoro-Timer und Stechuhr, Sync über Supabase, Desktop-App (Tauri) | `taktwerk/docs/STATUS.md` |
 | `kochbuch/` | Rezepte filtern, Portionen, Einkauf; die Rezepte kommen aus dem privaten Repo `Kochbuch_Altstetten` | `kochbuch/README.md` |
+| `lohn/` | Lohnrechner: Monatslohn und Stundenlohn umrechnen, nach der Excel-Vorlage «Berechnung ML auf Std.» | `lohn/README.md` |
 | `lernlabor/` | Elektrotechnik-Lernapp; vorerst stillgelegt, soll in den Study Hub (Repo `study-hub`) umziehen | `lernlabor/README.md` |
+
+Die Haushalt-App ist nur auf der Startseite verlinkt, sie liegt im eigenen Repo `haushaltskasse-app`.
 
 **Neuer Chat:** «Mach Aufgabe N aus docs/AUFGABEN.md.» Dort stehen Entscheide, Aufgaben und technische Hinweise.
 `taktwerk/docs/STATUS.md` nur für Aufgaben zu Taktwerk lesen.
