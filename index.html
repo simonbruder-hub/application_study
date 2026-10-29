@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Taktwerk, Lernlabor und Kochbuch</title>
-<meta name="description" content="Zwei Apps fürs Studium: Taktwerk für Fokus mit Pomodoro und Stechuhr, Lernlabor für Elektrotechnik mit Schaltungsbaukasten und Oszilloskop. Dazu das Kochbuch für den Alltag.">
+<title>Taktwerk, Lernlabor, Kochbuch, Haushalt und Lohnrechner</title>
+<meta name="description" content="Zwei Apps fürs Studium: Taktwerk für Fokus mit Pomodoro und Stechuhr, Lernlabor für Elektrotechnik mit Schaltungsbaukasten und Oszilloskop. Dazu Kochbuch, Haushalt und Lohnrechner für den Alltag.">
 <link rel="icon" href="taktwerk/app/icon.svg">
 <style>
   :root {
     color-scheme: light dark;
     --bg: #edf1f0; --fg: #132024; --muted: #5f7076; --card: #fbfcfc; --line: #d7dfdd;
-    --tw: #c63a29; --ll: #2456c9; --kb: #b9581b; --soft: #e2e9e7;
+    --tw: #c63a29; --ll: #2456c9; --kb: #b9581b; --hh: #1c6a4f; --lr: #6a46c9; --soft: #e2e9e7;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --tw: #f0644e; --ll: #6b9bff; --kb: #f08a45; --soft: #1b2427; }
+    :root { --bg: #0d1214; --fg: #e3ebeb; --muted: #8b9b9e; --card: #151b1e; --line: #263135; --tw: #f0644e; --ll: #6b9bff; --kb: #f08a45; --hh: #2f9a6f; --lr: #8a6cf0; --soft: #1b2427; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
   header { padding: 20px 0; }
-  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
   .brand { font-weight: 800; letter-spacing: -0.01em; }
-  header nav { display: flex; gap: 16px; font-size: 15px; }
+  header nav { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; }
   header nav a { color: var(--muted); text-decoration: none; }
   header nav a:hover { color: var(--fg); }
   .hero { padding: 40px 0 24px; }
@@ -34,13 +34,15 @@
   .app { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
   .shot { height: 260px; background: var(--soft); display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
   .shot img { display: block; }
-  .tw .shot img, .kb .shot img { width: 220px; height: auto; margin-top: 24px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
+  .tw .shot img, .kb .shot img, .hh .shot img, .lr .shot img { width: 220px; height: auto; margin-top: 24px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); }
   .ll .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 96%; }
   .body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
   .tag { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; color: #fff; }
   .tw .tag { background: var(--tw); }
   .ll .tag { background: var(--ll); }
   .kb .tag { background: var(--kb); }
+  .hh .tag { background: var(--hh); }
+  .lr .tag { background: var(--lr); }
   .app h2 { margin: 12px 0 6px; font-size: 26px; letter-spacing: -0.01em; }
   .app p { margin: 0; color: var(--muted); }
   .app ul { margin: 14px 0 20px; padding-left: 20px; }
@@ -50,6 +52,8 @@
   .tw .btn-main { background: var(--tw); color: #fff; }
   .ll .btn-main { background: var(--ll); color: #fff; }
   .kb .btn-main { background: var(--kb); color: #fff; }
+  .hh .btn-main { background: var(--hh); color: #fff; }
+  .lr .btn-main { background: var(--lr); color: #fff; }
   .btn-alt { border-color: var(--line); color: var(--fg); }
   .btn:hover { filter: brightness(1.08); }
   .btn-alt:hover { border-color: var(--muted); }
@@ -76,6 +80,8 @@
       <a href="taktwerk/app/">Taktwerk</a>
       <a href="lernlabor/app/">Lernlabor</a>
       <a href="kochbuch/app/">Kochbuch</a>
+      <a href="https://simonbruder-hub.github.io/haushaltskasse-app/neu/">Haushalt</a>
+      <a href="lohn/app/">Lohnrechner</a>
     </nav>
   </div>
 </header>
@@ -155,6 +161,43 @@
           <div class="actions">
             <a class="btn btn-main" href="kochbuch/app/">Kochbuch öffnen</a>
             <a class="btn btn-alt" href="kochbuch/app/#/einkauf">Einkaufszettel</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="app hh">
+        <div class="shot"><img src="img/haushalt.jpg" width="585" height="1170" alt="Haushalt auf dem Handy: Ausgleich, Ausgaben des Monats und Budget, mit erfundenen Beispieldaten"></div>
+        <div class="body">
+          <span class="tag">Finanzen</span>
+          <h2>Haushalt</h2>
+          <p>Einkäufe, Konten, Budget und Ausgleich für zwei.</p>
+          <ul>
+            <li>Belege erfassen oder mit der Kamera scannen</li>
+            <li>Gemeinsame und eigene Töpfe, die App rechnet den Ausgleich aus</li>
+            <li>Budgets, Fixkosten, Verträge und Sparziele</li>
+            <li>Einkaufsliste vorerst in der älteren App «Kasse unterwegs»</li>
+          </ul>
+          <div class="actions">
+            <a class="btn btn-main" href="https://simonbruder-hub.github.io/haushaltskasse-app/neu/">Haushalt öffnen</a>
+            <a class="btn btn-alt" href="https://simonbruder-hub.github.io/haushaltskasse-app/">Kasse unterwegs</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="app lr">
+        <div class="shot"><img src="lohn/img/lohn.jpg" width="585" height="1170" alt="Lohnrechner auf dem Handy: Stundenlohn aus einem Beispiel-Monatslohn mit 13. Monatslohn, Ferien- und Feiertagszuschlag"></div>
+        <div class="body">
+          <span class="tag">Lohn</span>
+          <h2>Lohnrechner</h2>
+          <p>Monatslohn und Stundenlohn umrechnen.</p>
+          <ul>
+            <li>Mit 13. Monatslohn, Ferien- und Feiertagszuschlag</li>
+            <li>Pensum, Wochenstunden, Ferien und Feiertage frei wählbar</li>
+            <li>Auch rückwärts vom Stundenlohn auf den Monatslohn</li>
+            <li>Bruttolohn für die gearbeiteten Stunden eines Monats</li>
+          </ul>
+          <div class="actions">
+            <a class="btn btn-main" href="lohn/app/">Lohnrechner öffnen</a>
           </div>
         </div>
       </article>

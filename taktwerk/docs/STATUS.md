@@ -90,6 +90,18 @@ die App unter `https://simonbruder-hub.github.io/apps/taktwerk/app/`.
   `simonbruder-hub.github.io`), installierte Web-Apps einmal von der neuen Adresse neu installieren. In Supabase
   Site URL und Redirect URLs auf `/apps/` umstellen (`../supabase/README.md`, Abschnitt 4). Die Desktop-App 1.1.0 findet
   Updates weiter, weil GitHub Repo- und Release-Adressen umleitet; die neue Adresse steckt ab dem nächsten Release drin.
+- **Haushalt auf der Startseite** (Aufgabe 4, erster Schritt): Karte im Abschnitt «Für den Alltag» und Link in der
+  Kopfzeile. Die App bleibt im eigenen Repo `simonbruder-hub/haushaltskasse-app` (Build in `neu/`, Adresse
+  `/haushaltskasse-app/neu/`); der zweite Knopf führt zur älteren App «Kasse unterwegs» mit der Einkaufsliste.
+  Vorschaubild `img/haushalt.jpg` nur mit erfundenen Daten (Haushalt von Anna und Luca, mit Playwright aufgenommen),
+  Pages kopiert `img/` mit. Auf schmalen Handys bricht die Kopfzeile in zwei Zeilen um, statt seitlich zu überlaufen.
+- **Lohnrechner** (eigene App `../../lohn/`, Details in [`../../lohn/README.md`](../../lohn/README.md)): aus der
+  Excel-Vorlage «Berechnung ML auf Std.» gebaut und erweitert. Monatslohn in Brutto-Stundenlohn mit 13. Monatslohn,
+  Ferien- und Feiertagszuschlag (Tage / (260 - Tage)), auch rückwärts vom Stundenlohn auf den Monatslohn, Pensum,
+  Wochenstunden, Ferien und Feiertage frei wählbar, Verdienst für gearbeitete Stunden. Rechnet wie die Excel-Tabelle
+  ungerundet und kommt bei 40 und 42 Wochenstunden auf dieselben Beträge. Eingaben nur im Browser (`lohn.formular.v1`), Startwerte
+  sind ein Beispiel, kein echter Lohn. Karte unter «Für den Alltag». Tests: Vitest und Playwright, CI-Job `lohn`,
+  Pages baut `/lohn/app/`.
 
 ## Offen
 
