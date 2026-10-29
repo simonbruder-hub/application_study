@@ -1,0 +1,11 @@
+# Gilt für alle Apps; jede App hat zusätzlich ihre eigene .gitignore
+
+# Zugangsdaten und lokale Einstellungen (nie ins Repo)
+.env
+.env.*
+!.env.example
+
+# Logs und Systemdateien
+*.log
+.DS_Store
+Thumbs.db
