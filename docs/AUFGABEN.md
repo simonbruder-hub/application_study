@@ -1,7 +1,7 @@
 # Aufgaben und Entscheidungen (Übergabe zwischen Chats)
 
-Startsatz für einen neuen Chat:
-«Lies README.md, taktwerk/docs/STATUS.md und docs/AUFGABEN.md und mach Aufgabe N.»
+Neuer Chat: «Mach Aufgabe N aus docs/AUFGABEN.md.» Ein Chat pro Aufgabe. Arbeitsweise, Befehle und Stolpersteine
+in Kürze stehen in `CLAUDE.md` (lädt automatisch); `taktwerk/docs/STATUS.md` nur für Aufgaben zu Taktwerk.
 
 ## Arbeitsweise
 
@@ -10,7 +10,7 @@ Startsatz für einen neuen Chat:
 - Erst gezielte Fragen zu Unklarem, dann ein kurzer Plan, dann umsetzen.
 - Eigener Branch und PR, CI grün machen. Mergen erst nach OK (erst dann baut GitHub Pages neu).
 - Ein Chat pro Aufgabe. Sparsam mit Tokens: lokal nur die betroffenen Tests, die volle Prüfung macht die CI.
-  Am Ende `taktwerk/docs/STATUS.md` und diese Datei nachführen.
+  Am Ende diese Datei nachführen (erledigte Aufgaben auf eine Zeile mit PR) und bei Taktwerk `taktwerk/docs/STATUS.md`.
 
 ## Geräte und Antworten (Oktober 2026)
 
